@@ -1,6 +1,6 @@
 ![Zunder](assets/zunder.svg)
 
-A high-performance [FHIR](https://hl7.org/fhir/) server implementation in Rust.
+A spec compliant and performant FHIR server implementation.
 
 Developed by [ThalamiQ](https://thalamiq.io).
 
