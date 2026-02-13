@@ -40,6 +40,7 @@ services:
       RUST_LOG: ${RUST_LOG:-info}
     volumes:
       - ./config.yaml:/app/config.yaml:ro
+      - fhir_packages:/home/fhir/.fhir/packages
     depends_on:
       db:
         condition: service_healthy
@@ -96,5 +97,6 @@ networks:
     driver: bridge
 
 volumes:
+  fhir_packages:
   caddy_data:
   caddy_config:
