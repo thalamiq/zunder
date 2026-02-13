@@ -21,8 +21,8 @@ resolver = "2"
 [workspace.package]
 version = "0.1.10"
 edition = "2021"
-license = "MIT"
-authors = ["Till Rostalski <till.rostalski@thalamiq.io>"]
+license = "Apache-2.0"
+authors = ["Thalamiq GmbH <till@thalamiq.io>"]
 repository = "https://github.com/thalamiq/zunder"
 homepage = "https://thalamiq.io"
 documentation = "https://docs.thalamiq.io"
