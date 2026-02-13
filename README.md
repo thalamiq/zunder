@@ -12,7 +12,7 @@ Developed by [ThalamiQ](https://thalamiq.io).
 curl -fsSL https://get.yourfhir.dev | sh
 ```
 
-This starts the FHIR server, database, background worker, and admin UI. Access the API at [http://localhost:8080/fhir](http://localhost:8080/fhir) and the Admin UI at [http://localhost:3000](http://localhost:3000).
+This starts the FHIR server, database, and admin UI. Access the API at [http://localhost:8080/fhir](http://localhost:8080/fhir) and the Admin UI at [http://localhost:3000](http://localhost:3000).
 
 ## Features
 
