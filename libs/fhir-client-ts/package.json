@@ -1,5 +1,5 @@
 {
-  "name": "@zunder/fhir-client",
+  "name": "@thalamiq/fhir-client",
   "version": "0.1.0",
   "description": "A modern TypeScript FHIR client for Zunder",
   "type": "module",

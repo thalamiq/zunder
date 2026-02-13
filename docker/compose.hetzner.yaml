@@ -40,7 +40,6 @@ services:
       RUST_LOG: ${RUST_LOG:-info}
     volumes:
       - ./config.yaml:/app/config.yaml:ro
-      - /mnt/fhir-packages:/home/fhir/.fhir/packages
     depends_on:
       db:
         condition: service_healthy
@@ -59,7 +58,6 @@ services:
   #
   # fhir-worker:
   #   image: ${FHIR_SERVER_IMAGE:-ghcr.io/thalamiq/zunder:latest}
-  #   container_name: zunder-worker
   #   restart: unless-stopped
   #   command: ["fhir-worker"]
   #   env_file:
@@ -69,7 +67,6 @@ services:
   #     RUST_LOG: ${RUST_LOG:-info}
   #   volumes:
   #     - ./config.yaml:/app/config.yaml:ro
-  #     - /mnt/fhir-packages:/home/fhir/.fhir/packages
   #   depends_on:
   #     db:
   #       condition: service_healthy

@@ -22,9 +22,9 @@ libs/
   fhir-registry-client  # simplifier.net / packages.fhir.org client
   fhir-codegen     # Strongly-typed Rust codegen from FHIR definitions
   ucum             # UCUM units of measure
-  fhir-client-ts   # TypeScript FHIR client (@zunder/fhir-client)
+  fhir-client-ts   # TypeScript FHIR client (@thalamiq/fhir-client)
 docs/              # Mintlify documentation site
-dist/              # Release bundle (compose.yaml, config.yaml, install.sh)
+quickstart/        # Quickstart bundle (compose.yaml, config.yaml, install.sh)
 docker/            # Docker compose files for local/hetzner deployments
 ```
 

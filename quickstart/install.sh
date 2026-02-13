@@ -26,10 +26,10 @@ if ! curl -fsSL "${BASE_URL}/zunder.tar.gz" | tar xz; then
 fi
 
 # Check if extraction created a subdirectory
-if [ -d "dist" ]; then
+if [ -d "quickstart" ]; then
   # Move contents up one level
-  mv dist/* dist/.* . 2>/dev/null || true
-  rmdir dist
+  mv quickstart/* quickstart/.* . 2>/dev/null || true
+  rmdir quickstart
 fi
 
 echo "Distribution extracted successfully"

@@ -1,17 +1,17 @@
-# @zunder/fhir-client
+# @thalamiq/fhir-client
 
 A modern TypeScript FHIR client for Zunder.
 
 ## Installation
 
 ```bash
-npm install @zunder/fhir-client
+npm install @thalamiq/fhir-client
 ```
 
 ## Basic Setup
 
 ```typescript
-import { FhirClient } from "@zunder/fhir-client";
+import { FhirClient } from "@thalamiq/fhir-client";
 
 const client = new FhirClient({
   baseUrl: "https://fhir.example.com",
@@ -52,7 +52,7 @@ const client = new FhirClient({
 ### Client Credentials (Machine-to-Machine)
 
 ```typescript
-import { FhirClient, ClientCredentialsAuth } from "@zunder/fhir-client";
+import { FhirClient, ClientCredentialsAuth } from "@thalamiq/fhir-client";
 
 const auth = new ClientCredentialsAuth({
   clientId: "your-client-id",
@@ -76,7 +76,7 @@ SMART on FHIR provides secure user authentication with automatic token refresh.
 #### Browser Example
 
 ```typescript
-import { FhirClient, SmartAuth } from "@zunder/fhir-client";
+import { FhirClient, SmartAuth } from "@thalamiq/fhir-client";
 
 // Initialize SMART auth
 const smartAuth = new SmartAuth({
@@ -129,7 +129,7 @@ console.log("User scopes:", scopes);
 
 ```typescript
 import { useEffect, useState } from "react";
-import { FhirClient, SmartAuth } from "@zunder/fhir-client";
+import { FhirClient, SmartAuth } from "@thalamiq/fhir-client";
 
 function App() {
   const [client, setClient] = useState<FhirClient | null>(null);
@@ -192,7 +192,7 @@ function App() {
 #### Custom Storage (for Node.js or custom storage)
 
 ```typescript
-import { SmartAuth, type SmartAuthStorage } from "@zunder/fhir-client";
+import { SmartAuth, type SmartAuthStorage } from "@thalamiq/fhir-client";
 
 // Custom storage implementation
 const customStorage: SmartAuthStorage = {
@@ -272,7 +272,7 @@ const result = await client.update(patient);
 ### Patch
 
 ```typescript
-import type { JsonPatchOperation } from "@zunder/fhir-client";
+import type { JsonPatchOperation } from "@thalamiq/fhir-client";
 
 const operations: JsonPatchOperation[] = [
   {
@@ -427,7 +427,7 @@ const result = await client.conditionalDelete("Patient", "identifier=12345");
 ### Batch
 
 ```typescript
-import { BundleBuilder } from "@zunder/fhir-client";
+import { BundleBuilder } from "@thalamiq/fhir-client";
 
 const bundle = client
   .batch()
@@ -537,7 +537,7 @@ import {
   ValidationError,
   NetworkError,
   TimeoutError,
-} from "@zunder/fhir-client";
+} from "@thalamiq/fhir-client";
 
 try {
   const result = await client.read<Patient>("Patient", "123");
@@ -577,7 +577,7 @@ const result = await client.read<Patient>("Patient", "123");
 ### Complete Example
 
 ```typescript
-import { FhirClient } from "@zunder/fhir-client";
+import { FhirClient } from "@thalamiq/fhir-client";
 import type { Patient, Observation } from "fhir/r4";
 
 const client = new FhirClient({
@@ -632,7 +632,7 @@ console.log("Observations:", observations.resources);
 ### SMART on FHIR Example
 
 ```typescript
-import { FhirClient, SmartAuth } from "@zunder/fhir-client";
+import { FhirClient, SmartAuth } from "@thalamiq/fhir-client";
 import type { Patient, Observation } from "fhir/r4";
 
 // Initialize SMART auth

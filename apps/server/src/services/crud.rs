@@ -792,9 +792,17 @@ impl CrudService {
                     "versionId".to_string(),
                     serde_json::json!(version_id.to_string()),
                 );
+                // Truncate to microsecond precision to match PostgreSQL timestamptz storage.
+                // Without this, nanosecond-precision timestamps (common on Linux) cause
+                // cursor-based pagination mismatches: SQLx truncates nanos when writing
+                // the last_updated column, but PostgreSQL rounds them when casting the
+                // cursor string back to timestamptz.
+                let us = (last_updated.timestamp_subsec_nanos() / 1_000) * 1_000;
+                let last_updated_us = chrono::DateTime::from_timestamp(last_updated.timestamp(), us)
+                    .unwrap_or(last_updated);
                 meta_obj.insert(
                     "lastUpdated".to_string(),
-                    serde_json::json!(last_updated.to_rfc3339()),
+                    serde_json::json!(last_updated_us.to_rfc3339()),
                 );
             }
         }

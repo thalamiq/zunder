@@ -42,7 +42,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-fhir}:${POSTGRES_PASSWORD:-fhir}@db:5432/${POSTGRES_DB:-fhir}
       RUST_LOG: ${RUST_LOG:-info}
     volumes:
-      - ../dist/config.yaml:/app/config.yaml:ro
+      - ../quickstart/config.yaml:/app/config.yaml:ro
     ports:
       - "${BIND_ADDRESS:-127.0.0.1}:8080:8080"
     depends_on:
