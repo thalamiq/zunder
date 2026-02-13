@@ -212,7 +212,7 @@ impl AppState {
             Arc::new(TerminologyHook::new(db_pool.clone())),
             Arc::new(CompartmentDefinitionHook::new(db_pool.clone())),
         ];
-        let crud_service = Arc::new(CrudService::with_hooks_and_indexing_and_runtime_config(
+        let mut crud_service_inner = CrudService::with_hooks_and_indexing_and_runtime_config(
             store.clone(),
             resource_hooks.clone(),
             job_queue.clone(),
@@ -220,7 +220,11 @@ impl AppState {
             config_arc.fhir.allow_update_create,
             config_arc.fhir.hard_delete,
             runtime_config_cache.clone(),
-        ));
+        );
+        crud_service_inner.set_referential_integrity_mode(
+            config_arc.fhir.referential_integrity.mode.clone(),
+        );
+        let crud_service = Arc::new(crud_service_inner);
 
         let conditional_service = Arc::new(crate::services::conditional::ConditionalService::new(
             search_engine.clone(),
@@ -233,7 +237,7 @@ impl AppState {
             config_arc.logging.service_name.clone(),
             db_pool.clone(),
         ));
-        let batch_service = Arc::new(crate::services::BatchService::new_with_runtime_config(
+        let mut batch_service_inner = crate::services::BatchService::new_with_runtime_config(
             store.clone(),
             resource_hooks.clone(),
             job_queue.clone(),
@@ -241,8 +245,12 @@ impl AppState {
             config_arc.fhir.allow_update_create,
             config_arc.fhir.hard_delete,
             runtime_config_cache.clone(),
-        ));
-        let transaction_service = Arc::new(
+        );
+        batch_service_inner.set_referential_integrity_mode(
+            config_arc.fhir.referential_integrity.mode.clone(),
+        );
+        let batch_service = Arc::new(batch_service_inner);
+        let mut transaction_service_inner =
             crate::services::TransactionService::new_with_runtime_config(
                 store.clone(),
                 resource_hooks.clone(),
@@ -252,8 +260,11 @@ impl AppState {
                 config_arc.fhir.allow_update_create,
                 config_arc.fhir.hard_delete,
                 runtime_config_cache.clone(),
-            ),
+            );
+        transaction_service_inner.set_referential_integrity_mode(
+            config_arc.fhir.referential_integrity.mode.clone(),
         );
+        let transaction_service = Arc::new(transaction_service_inner);
         let history_service = Arc::new(crate::services::HistoryService::new_with_runtime_config(
             store.clone(),
             resource_hooks.clone(),

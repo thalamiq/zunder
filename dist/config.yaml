@@ -136,6 +136,9 @@ fhir:
 
 workers:
   enabled: true
+  # Run workers inside the server process (simpler, single container).
+  # Set to false and run the separate fhir-worker binary for independent scaling.
+  embedded: true
   poll_interval_seconds: 5
   max_concurrent_jobs: 1
   reconnect_initial_seconds: 1

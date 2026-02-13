@@ -826,17 +826,14 @@ impl TypePass {
             33 => {
                 // ofType() narrows the collection to elements of the specified type
                 // Returns 0..max(base) with the specified type
-                if let Some(type_arg) = args.first() {
-                    // Extract the type from the argument (should be a string literal like "String")
-                    if let HirNode::Literal { value, .. } = type_arg {
-                        if let crate::value::ValueData::String(type_name) = value.data() {
-                            let spec_ty = self.parse_type_specifier(type_name.as_ref());
-                            let max = base.as_ref().map(|b| b.cardinality.max).unwrap_or(None);
-                            return ExprType {
-                                types: spec_ty,
-                                cardinality: Cardinality { min: 0, max },
-                            };
-                        }
+                if let Some(HirNode::Literal { value, .. }) = args.first() {
+                    if let crate::value::ValueData::String(type_name) = value.data() {
+                        let spec_ty = self.parse_type_specifier(type_name.as_ref());
+                        let max = base.as_ref().map(|b| b.cardinality.max).unwrap_or(None);
+                        return ExprType {
+                            types: spec_ty,
+                            cardinality: Cardinality { min: 0, max },
+                        };
                     }
                 }
                 // Fallback if we can't determine the type

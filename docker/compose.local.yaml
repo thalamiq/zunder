@@ -57,29 +57,33 @@ services:
       retries: 3
       start_period: 40s
 
-  fhir-worker:
-    build:
-      context: ..
-      dockerfile: apps/server/Dockerfile
-      args:
-        BUILD_DATE: ${BUILD_DATE}
-        VCS_REF: ${VCS_REF:-local}
-        VERSION: ${VERSION:-0.1.0-local}
-    image: zunder:local
-    restart: unless-stopped
-    command: ["fhir-worker"]
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-fhir}:${POSTGRES_PASSWORD:-fhir}@db:5432/${POSTGRES_DB:-fhir}
-      RUST_LOG: ${RUST_LOG:-info}
-    volumes:
-      - ../dist/config.yaml:/app/config.yaml:ro
-    depends_on:
-      db:
-        condition: service_healthy
-      fhir-server:
-        condition: service_started
-    networks:
-      - fhir-network
+  # Workers run inside fhir-server by default (workers.embedded: true).
+  # To use separate workers, set workers.embedded: false in config.yaml
+  # and uncomment the service below.
+  #
+  # fhir-worker:
+  #   build:
+  #     context: ..
+  #     dockerfile: apps/server/Dockerfile
+  #     args:
+  #       BUILD_DATE: ${BUILD_DATE}
+  #       VCS_REF: ${VCS_REF:-local}
+  #       VERSION: ${VERSION:-0.1.0-local}
+  #   image: zunder:local
+  #   restart: unless-stopped
+  #   command: ["fhir-worker"]
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER:-fhir}:${POSTGRES_PASSWORD:-fhir}@db:5432/${POSTGRES_DB:-fhir}
+  #     RUST_LOG: ${RUST_LOG:-info}
+  #   volumes:
+  #     - ../dist/config.yaml:/app/config.yaml:ro
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     fhir-server:
+  #       condition: service_started
+  #   networks:
+  #     - fhir-network
 
   ui:
     build:

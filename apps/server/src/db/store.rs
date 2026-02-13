@@ -35,12 +35,10 @@ impl PostgresResourceStore {
             let limit = count.unwrap_or(100);
             let order = if sort_ascending { "ASC" } else { "DESC" };
 
-            let sql = format!(
-                "SELECT DISTINCT ON (id) id, resource_type, version_id, resource, last_updated, deleted
+            let sql = "SELECT DISTINCT ON (id) id, resource_type, version_id, resource, last_updated, deleted
                  FROM resources
                  WHERE resource_type = $1 AND last_updated <= $2
-                 ORDER BY id, version_id DESC"
-            );
+                 ORDER BY id, version_id DESC".to_string();
             // Wrap in an outer query for ordering and LIMIT
             let sql = format!(
                 "SELECT * FROM ({sql}) sub ORDER BY last_updated {order}, id ASC LIMIT $3"
@@ -113,12 +111,10 @@ impl PostgresResourceStore {
             let limit = count.unwrap_or(100);
             let order = if sort_ascending { "ASC" } else { "DESC" };
 
-            let sql = format!(
-                "SELECT DISTINCT ON (resource_type, id) id, resource_type, version_id, resource, last_updated, deleted
+            let sql = "SELECT DISTINCT ON (resource_type, id) id, resource_type, version_id, resource, last_updated, deleted
                  FROM resources
                  WHERE last_updated <= $1
-                 ORDER BY resource_type, id, version_id DESC"
-            );
+                 ORDER BY resource_type, id, version_id DESC".to_string();
             let sql = format!(
                 "SELECT * FROM ({sql}) sub ORDER BY last_updated {order}, resource_type ASC, id ASC LIMIT $2"
             );
@@ -328,6 +324,80 @@ impl PostgresResourceStore {
             .collect();
 
         Ok(resources)
+    }
+
+    /// Check which of the given `(resource_type, id)` pairs exist as current, non-deleted resources.
+    ///
+    /// Returns a set of `(resource_type, id)` pairs that exist.
+    pub async fn check_resources_exist(
+        &self,
+        refs: &[(String, String)],
+    ) -> Result<std::collections::HashSet<(String, String)>> {
+        if refs.is_empty() {
+            return Ok(std::collections::HashSet::new());
+        }
+
+        let types: Vec<&str> = refs.iter().map(|(t, _)| t.as_str()).collect();
+        let ids: Vec<&str> = refs.iter().map(|(_, id)| id.as_str()).collect();
+
+        let rows = sqlx::query(
+            "SELECT r.resource_type, r.id
+             FROM UNNEST($1::text[], $2::text[]) AS input(resource_type, id)
+             JOIN resources r ON r.resource_type = input.resource_type
+                             AND r.id = input.id
+                             AND r.is_current = true
+                             AND r.deleted = false",
+        )
+        .bind(&types)
+        .bind(&ids)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(Error::Database)?;
+
+        let mut existing = std::collections::HashSet::new();
+        for row in rows {
+            let rt: String = row.get("resource_type");
+            let id: String = row.get("id");
+            existing.insert((rt, id));
+        }
+        Ok(existing)
+    }
+
+    /// Find resources that reference a given target via the `search_reference` index.
+    ///
+    /// Returns `Vec<(resource_type, resource_id)>` of referencing resources, limited to `limit`.
+    pub async fn find_referencing_resources(
+        &self,
+        target_type: &str,
+        target_id: &str,
+        limit: i64,
+    ) -> Result<Vec<(String, String)>> {
+        let rows = sqlx::query(
+            "SELECT DISTINCT sr.resource_type, sr.resource_id
+             FROM search_reference sr
+             JOIN resources r ON r.resource_type = sr.resource_type
+                             AND r.id = sr.resource_id
+                             AND r.is_current = true
+                             AND r.deleted = false
+             WHERE sr.target_type = $1
+               AND sr.target_id = $2
+             LIMIT $3",
+        )
+        .bind(target_type)
+        .bind(target_id)
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(Error::Database)?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| {
+                let rt: String = row.get("resource_type");
+                let id: String = row.get("resource_id");
+                (rt, id)
+            })
+            .collect())
     }
 
     /// Physically delete a resource and its full version history.

@@ -1,3 +1,4 @@
+#![allow(unused)]
 //! FHIR Search Tests
 //!
 //! Comprehensive tests for FHIR search functionality organized by the spec:

@@ -479,7 +479,7 @@ pub async fn audit_middleware(State(state): State<AppState>, req: Request, next:
         .capture_operation_outcome()
         .await
         .then_some(())
-        .and_then(|_| response_json.as_ref())
+        .and(response_json.as_ref())
         .and_then(|json| {
             json.get("resourceType")
                 .and_then(|v| v.as_str())

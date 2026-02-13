@@ -121,13 +121,12 @@ impl<C: PackageCache + 'static> RegistryClient<C> {
             None
         };
 
-        // If resolution failed and we have Simplifier, fetch all available versions
-        if cached_resolution.is_none() {
-            if let Some(simplifier) = &self.simplifier {
-                available_versions = simplifier.get_versions(name).await?;
-            }
-        } else {
-            return Ok(cached_resolution.unwrap());
+        // If resolution succeeded, return it; otherwise fetch all available versions
+        if let Some(resolved) = cached_resolution {
+            return Ok(resolved);
+        }
+        if let Some(simplifier) = &self.simplifier {
+            available_versions = simplifier.get_versions(name).await?;
         }
 
         if available_versions.is_empty() {
@@ -193,7 +192,7 @@ impl<C: PackageCache + 'static> RegistryClient<C> {
             Enter,
             Exit {
                 package_key: String,
-                package: FhirPackage,
+                package: Box<FhirPackage>,
             },
         }
 
@@ -231,7 +230,7 @@ impl<C: PackageCache + 'static> RegistryClient<C> {
                         version: frame.version,
                         stage: Stage::Exit {
                             package_key: package_key.clone(),
-                            package: package.clone(),
+                            package: Box::new(package.clone()),
                         },
                     });
 
@@ -254,7 +253,7 @@ impl<C: PackageCache + 'static> RegistryClient<C> {
                     package,
                 } => {
                     loading.remove(&package_key);
-                    loaded_packages.insert(package_key, package);
+                    loaded_packages.insert(package_key, *package);
                 }
             }
         }

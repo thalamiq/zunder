@@ -39,6 +39,13 @@ async fn main() -> anyhow::Result<()> {
         return Ok(());
     }
 
+    if config.workers.embedded {
+        tracing::warn!(
+            "workers.embedded is true — workers are running inside the fhir-server process. \
+             Set workers.embedded=false to use this separate worker binary instead."
+        );
+    }
+
     tracing::info!(
         max_concurrent = config.workers.max_concurrent_jobs,
         poll_interval_seconds = config.workers.poll_interval_seconds,

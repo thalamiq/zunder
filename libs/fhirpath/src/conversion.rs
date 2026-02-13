@@ -88,7 +88,7 @@ pub fn zunder_fhirpath_value_to_json(value: &Value) -> Option<JsonValue> {
                 // Convert collection to JSON array
                 let json_values: Vec<JsonValue> = collection
                     .iter()
-                    .filter_map(|v| zunder_fhirpath_value_to_json(v))
+                    .filter_map(zunder_fhirpath_value_to_json)
                     .collect();
                 if !json_values.is_empty() {
                     json_map.insert(key.to_string(), JsonValue::Array(json_values));

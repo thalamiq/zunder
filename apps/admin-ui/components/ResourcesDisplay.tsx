@@ -149,11 +149,11 @@ export const ResourcesDisplay = ({ report }: ResourcesDisplayProps) => {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
                   interval={0}
                   className="text-xs"
+                  tickFormatter={(value: string) =>
+                    value.length > 12 ? value.slice(0, 11) + "\u2026" : value
+                  }
                 />
                 <YAxis
                   tickLine={false}

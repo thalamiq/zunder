@@ -1,5 +1,5 @@
 import { Bundle, Resource } from "fhir/r4";
-import { getFetcher, patchFetcher, putFetcher } from "./fetcher";
+import { deleteFetcher, getFetcher, patchFetcher, putFetcher } from "./fetcher";
 
 export type FhirResponse = Bundle | Resource;
 
@@ -12,6 +12,10 @@ export const putFhirResource = async <T extends FhirResponse>(
   resource: unknown,
 ) => {
   return putFetcher<T>(`/api/fhir/${path}`, resource, "application/fhir+json");
+};
+
+export const deleteFhirResource = async (resourceType: string, id: string) => {
+  return deleteFetcher(`/api/fhir/${resourceType}/${id}`);
 };
 
 export type JsonPatchOperation =

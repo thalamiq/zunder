@@ -415,8 +415,8 @@ fn resolve_unit_def(def: &crate::db::UnitDef) -> Result<Unit> {
             })
         }
         UnitValueDef::NonLinear {
-            name: _,
-            value: _,
+            _name: _,
+            _value: _,
             unit,
         } => {
             let inner = Unit::parse(unit)?;
@@ -506,8 +506,8 @@ fn decimal_mul_for_den(den: &BigInt) -> Option<(u32, BigInt)> {
     }
 
     let scale = twos.max(fives);
-    let pow_two = (scale - twos) as u32;
-    let pow_five = (scale - fives) as u32;
+    let pow_two = scale - twos;
+    let pow_five = scale - fives;
     let mul = two.pow(pow_two) * five.pow(pow_five);
     Some((scale, mul))
 }

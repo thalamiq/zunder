@@ -28,6 +28,7 @@ pub struct CrudService {
     allow_update_create: bool,
     hard_delete: bool,
     runtime_config_cache: Option<Arc<RuntimeConfigCache>>,
+    referential_integrity_mode: String,
 }
 
 impl CrudService {
@@ -48,6 +49,7 @@ impl CrudService {
             allow_update_create,
             hard_delete,
             runtime_config_cache: None,
+            referential_integrity_mode: "lenient".to_string(),
         }
     }
 
@@ -80,6 +82,7 @@ impl CrudService {
             allow_update_create,
             hard_delete,
             runtime_config_cache: None,
+            referential_integrity_mode: "lenient".to_string(),
         }
     }
 
@@ -99,6 +102,7 @@ impl CrudService {
             allow_update_create,
             hard_delete,
             runtime_config_cache: None,
+            referential_integrity_mode: "lenient".to_string(),
         }
     }
 
@@ -121,6 +125,10 @@ impl CrudService {
         );
         service.runtime_config_cache = Some(runtime_config_cache);
         service
+    }
+
+    pub fn set_referential_integrity_mode(&mut self, mode: String) {
+        self.referential_integrity_mode = mode;
     }
 
     async fn allow_update_create_effective(&self) -> bool {
@@ -175,6 +183,11 @@ impl CrudService {
 
         // Populate meta
         self.populate_meta(&mut resource, &id, 1, Utc::now());
+
+        // Referential integrity check (strict mode)
+        if self.is_strict_referential_integrity() {
+            self.validate_references(&resource).await?;
+        }
 
         // Create in store
         let created = self.store.create(resource_type, resource).await?;
@@ -345,6 +358,11 @@ impl CrudService {
             }
         };
 
+        // Referential integrity check (strict mode)
+        if self.is_strict_referential_integrity() {
+            self.validate_references(&resource).await?;
+        }
+
         // Perform update/upsert
         let updated = self.store.upsert(resource_type, id, resource).await?;
 
@@ -413,6 +431,11 @@ impl CrudService {
         let new_version = current.version_id + 1;
         self.populate_meta(&mut patched, id, new_version, Utc::now());
 
+        // Referential integrity check (strict mode)
+        if self.is_strict_referential_integrity() {
+            self.validate_references(&patched).await?;
+        }
+
         // Persist and trigger side effects like a normal update.
         let updated = self.store.upsert(resource_type, id, patched).await?;
 
@@ -446,6 +469,11 @@ impl CrudService {
         let Some(current) = current else {
             return Ok(None);
         };
+
+        // Referential integrity check on delete (strict mode)
+        if self.is_strict_referential_integrity() && !current.deleted {
+            self.validate_no_references_to(resource_type, id).await?;
+        }
 
         if self.hard_delete_effective().await {
             let _rows_deleted = self.store.hard_delete(resource_type, id).await?;
@@ -628,6 +656,78 @@ impl CrudService {
             entries,
             total: None,
         })
+    }
+
+    fn is_strict_referential_integrity(&self) -> bool {
+        self.referential_integrity_mode == "strict"
+    }
+
+    /// Validate that all relative references in the resource point to existing resources.
+    async fn validate_references(&self, resource: &JsonValue) -> Result<()> {
+        let mut relative_refs = std::collections::HashSet::new();
+        super::referential_integrity::collect_relative_refs(resource, &mut relative_refs);
+        let relative_refs: Vec<(String, String)> = relative_refs.into_iter().collect();
+
+        if relative_refs.is_empty() {
+            return Ok(());
+        }
+
+        // Allow self-references: filter out refs that point to the resource itself
+        let self_type = resource
+            .get("resourceType")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+        let self_id = resource.get("id").and_then(|v| v.as_str()).unwrap_or("");
+
+        let refs_to_check: Vec<(String, String)> = relative_refs
+            .into_iter()
+            .filter(|(rt, id)| !(rt == self_type && id == self_id))
+            .collect();
+
+        if refs_to_check.is_empty() {
+            return Ok(());
+        }
+
+        let existing = self.store.check_resources_exist(&refs_to_check).await?;
+        let missing: Vec<String> = refs_to_check
+            .iter()
+            .filter(|pair| !existing.contains(pair))
+            .map(|(rt, id)| format!("{}/{}", rt, id))
+            .collect();
+
+        if !missing.is_empty() {
+            return Err(Error::BusinessRule(format!(
+                "Referential integrity violation: the following referenced resources do not exist: {}",
+                missing.join(", ")
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// Check that no other resources reference this resource before deletion.
+    async fn validate_no_references_to(
+        &self,
+        resource_type: &str,
+        id: &str,
+    ) -> Result<()> {
+        let referencing = self
+            .store
+            .find_referencing_resources(resource_type, id, 5)
+            .await?;
+
+        if !referencing.is_empty() {
+            let refs: Vec<String> = referencing
+                .iter()
+                .map(|(rt, rid)| format!("{}/{}", rt, rid))
+                .collect();
+            return Err(Error::BusinessRule(format!(
+                "Referential integrity violation: cannot delete {}/{} because it is referenced by: {}",
+                resource_type, id, refs.join(", ")
+            )));
+        }
+
+        Ok(())
     }
 
     fn validate_resource_type_name(&self, resource_type: &str) -> Result<()> {

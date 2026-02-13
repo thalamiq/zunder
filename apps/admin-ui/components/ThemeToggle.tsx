@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@thalamiq/ui/components/button";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
+import CustomTooltip from "./CustomTooltip";
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
@@ -45,15 +46,16 @@ const ThemeToggle = () => {
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      title={getTitle()}
-      className="h-8 w-8"
-      onClick={handleThemeToggle}
-    >
-      {getIcon()}
-    </Button>
+    <CustomTooltip content={getTitle()}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={handleThemeToggle}
+      >
+        {getIcon()}
+      </Button>
+    </CustomTooltip>
   );
 };
 

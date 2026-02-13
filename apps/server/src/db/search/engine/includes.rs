@@ -114,7 +114,10 @@ impl SearchEngine {
                 let Some(id) = r.get("id").and_then(|v| v.as_str()) else {
                     continue;
                 };
-                if spec.source_type != "*" && spec.source_type != rt {
+                // For _include, source_type filters which source resources to follow refs from.
+                // For _revinclude, source_type is the type of resources TO include (not the sources),
+                // so we skip this filter — the SQL query filters sr.resource_type instead.
+                if !is_reverse && spec.source_type != "*" && spec.source_type != rt {
                     continue;
                 }
                 src_types.push(rt.to_string());
@@ -127,6 +130,8 @@ impl SearchEngine {
 
             let included: Vec<JsonValue> = if is_reverse {
                 // Find resources that reference our sources.
+                // Track bind parameter index; $1/$2 are always src_types/src_ids.
+                let mut next_bind = 3u32;
                 let mut sql = String::from(
                     r#"
                     SELECT DISTINCT r.resource
@@ -139,42 +144,37 @@ impl SearchEngine {
                     "#,
                 );
 
-                if spec.param == "*" && spec.target_type.is_none() {
-                    sqlx::query_scalar::<_, JsonValue>(&sql)
-                        .bind(&src_types)
-                        .bind(&src_ids)
-                        .fetch_all(&mut *conn)
-                        .await
-                        .map_err(crate::Error::Database)?
-                } else if spec.param == "*" {
-                    sql.push_str(" AND sr.target_type = $3");
-                    sqlx::query_scalar::<_, JsonValue>(&sql)
-                        .bind(&src_types)
-                        .bind(&src_ids)
-                        .bind(spec.target_type.clone().unwrap())
-                        .fetch_all(&mut *conn)
-                        .await
-                        .map_err(crate::Error::Database)?
-                } else if spec.target_type.is_none() {
-                    sql.push_str(" AND sr.parameter_name = $3");
-                    sqlx::query_scalar::<_, JsonValue>(&sql)
-                        .bind(&src_types)
-                        .bind(&src_ids)
-                        .bind(spec.param.clone())
-                        .fetch_all(&mut *conn)
-                        .await
-                        .map_err(crate::Error::Database)?
-                } else {
-                    sql.push_str(" AND sr.parameter_name = $3 AND sr.target_type = $4");
-                    sqlx::query_scalar::<_, JsonValue>(&sql)
-                        .bind(&src_types)
-                        .bind(&src_ids)
-                        .bind(spec.param.clone())
-                        .bind(spec.target_type.clone().unwrap())
-                        .fetch_all(&mut *conn)
-                        .await
-                        .map_err(crate::Error::Database)?
+                // Filter by the source resource type (e.g. only Condition rows, not all)
+                let filter_source_type = spec.source_type != "*";
+                if filter_source_type {
+                    sql.push_str(&format!(" AND sr.resource_type = ${next_bind}"));
+                    next_bind += 1;
                 }
+
+                if spec.param != "*" {
+                    sql.push_str(&format!(" AND sr.parameter_name = ${next_bind}"));
+                    next_bind += 1;
+                }
+                if spec.target_type.is_some() {
+                    sql.push_str(&format!(" AND sr.target_type = ${next_bind}"));
+                    // next_bind += 1; // last bind
+                }
+
+                let mut q = sqlx::query_scalar::<_, JsonValue>(&sql)
+                    .bind(&src_types)
+                    .bind(&src_ids);
+                if filter_source_type {
+                    q = q.bind(spec.source_type.clone());
+                }
+                if spec.param != "*" {
+                    q = q.bind(spec.param.clone());
+                }
+                if let Some(tt) = &spec.target_type {
+                    q = q.bind(tt.clone());
+                }
+                q.fetch_all(&mut *conn)
+                    .await
+                    .map_err(crate::Error::Database)?
             } else {
                 // Follow references from our sources.
                 let mut sql = String::from(

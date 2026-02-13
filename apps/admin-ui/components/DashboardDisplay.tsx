@@ -338,7 +338,12 @@ const DashboardDisplay = () => {
                   dataKey="resourceType"
                   tickLine={false}
                   axisLine={false}
-                  tick={false}
+                  tickMargin={8}
+                  interval={0}
+                  className="text-xs"
+                  tickFormatter={(value: string) =>
+                    value.length > 12 ? value.slice(0, 11) + "\u2026" : value
+                  }
                 />
                 <YAxis
                   tickLine={false}

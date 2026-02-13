@@ -92,8 +92,8 @@ export async function proxyRequest(
     console.log(`Proxying ${method} request to: ${targetUrl}`);
     const response = await fetch(targetUrl, requestOptions);
 
-    // Get response body
-    const responseText = await response.text();
+    // Get response body (204 No Content must have null body)
+    const responseText = response.status === 204 ? null : await response.text();
 
     // Create response with same status and headers
     const proxiedResponse = new NextResponse(responseText, {

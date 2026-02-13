@@ -403,7 +403,7 @@ impl OperationExecutor {
         // Add the patient
         if since_filter.is_none()
             || type_filter.is_none()
-            || type_filter.as_ref().map_or(false, |t| t.iter().any(|rt| rt == "Patient"))
+            || type_filter.as_ref().is_some_and(|t| t.iter().any(|rt| rt == "Patient"))
         {
             entries.push(json!({
                 "fullUrl": format!("Patient/{}", patient_id),

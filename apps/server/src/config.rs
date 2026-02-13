@@ -125,6 +125,8 @@ pub struct FhirConfig {
     pub hard_delete: bool,
     #[serde(default)]
     pub capability_statement: CapabilityStatementConfig,
+    #[serde(default)]
+    pub referential_integrity: ReferentialIntegrityConfig,
 }
 
 /// Configuration for enabling/disabling specific FHIR interactions.
@@ -560,10 +562,40 @@ pub struct CapabilityStatementConfig {
     pub supported_resources: Vec<String>,
 }
 
+/// Referential integrity enforcement configuration.
+///
+/// Controls whether the server validates that references point to existing resources
+/// and prevents deletion of resources that are referenced by others.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ReferentialIntegrityConfig {
+    /// Enforcement mode:
+    /// - "lenient" (default): no checks, current behavior
+    /// - "strict": reject writes with broken refs, reject deletes of referenced resources
+    #[serde(default = "default_referential_integrity_mode")]
+    pub mode: String,
+}
+
+impl Default for ReferentialIntegrityConfig {
+    fn default() -> Self {
+        Self {
+            mode: default_referential_integrity_mode(),
+        }
+    }
+}
+
+fn default_referential_integrity_mode() -> String {
+    "lenient".to_string()
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct WorkerConfig {
     #[serde(default = "default_true")]
     pub enabled: bool,
+    /// Run workers in the same process as the API server.
+    /// When true, the server spawns background worker tasks at startup (simpler deployment).
+    /// When false, use the separate `fhir-worker` binary (independently scalable).
+    #[serde(default = "default_true")]
+    pub embedded: bool,
     #[serde(default = "default_poll_interval")]
     pub poll_interval_seconds: u64,
     #[serde(default = "default_max_concurrent")]
@@ -1152,7 +1184,9 @@ impl Config {
             .set_default("fhir.default_prefer_return", default_prefer_return())?
             .set_default("fhir.allow_update_create", default_true())?
             .set_default("fhir.hard_delete", default_false())?
+            .set_default("fhir.referential_integrity.mode", default_referential_integrity_mode())?
             .set_default("workers.enabled", default_true())?
+            .set_default("workers.embedded", default_true())?
             .set_default("workers.poll_interval_seconds", default_poll_interval())?
             .set_default(
                 "workers.max_concurrent_jobs",

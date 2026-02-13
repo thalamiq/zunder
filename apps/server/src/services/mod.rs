@@ -16,6 +16,7 @@ pub mod metrics;
 pub mod operation_executor;
 pub mod operation_registry;
 pub mod package;
+pub(crate) mod referential_integrity;
 pub mod runtime_config;
 pub mod search;
 pub mod summary;

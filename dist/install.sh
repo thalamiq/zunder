@@ -41,6 +41,11 @@ echo "  - Database credentials: Set POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_D
 echo "  - Default credentials: fhir/fhir"
 echo ""
 
+# Ensure .env exists so compose doesn't fail (env_file)
+if [ ! -f .env ]; then
+  cp .env.example .env 2>/dev/null || touch .env
+fi
+
 echo "Starting services..."
 docker compose up -d
 

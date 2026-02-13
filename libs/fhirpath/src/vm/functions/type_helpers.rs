@@ -1101,7 +1101,7 @@ fn matches_type_specifier_internal(
     let spec_name = spec_name_raw.trim_matches('`').to_ascii_lowercase();
 
     // Infer the runtime type of the value
-    let descriptor = infer_type_descriptor(&item, path_hint);
+    let descriptor = infer_type_descriptor(item, path_hint);
     let is_fhir_value = descriptor.namespace.eq_ignore_ascii_case("FHIR");
 
     // Determine effective namespace (handling implicit System namespace for capitalized primitives)

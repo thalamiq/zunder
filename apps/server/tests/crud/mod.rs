@@ -4,5 +4,6 @@ pub mod create;
 pub mod delete;
 pub mod patch;
 pub mod read;
+pub mod referential_integrity;
 pub mod spec_compliance;
 pub mod update;

@@ -1,3 +1,4 @@
+#![allow(unused)]
 //! Integration tests for CRUD operations
 //!
 //! This module organizes tests by FHIR CRUD operations according to the spec:

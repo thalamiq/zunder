@@ -20,6 +20,7 @@ pub enum VersionAlgorithm {
 }
 
 impl VersionAlgorithm {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "semver" => Some(VersionAlgorithm::Semver),

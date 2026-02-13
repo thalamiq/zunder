@@ -1365,7 +1365,7 @@ fn items_equal(left: &Value, right: &Value) -> Option<bool> {
         (ValueData::LazyJson { .. }, _) | (_, ValueData::LazyJson { .. }) => {
             let left_mat = left.materialize();
             let right_mat = right.materialize();
-            return items_equal(&left_mat, &right_mat);
+            items_equal(&left_mat, &right_mat)
         }
         (ValueData::Boolean(l), ValueData::Boolean(r)) => Some(l == r),
         (ValueData::Integer(l), ValueData::Integer(r)) => Some(l == r),
@@ -1553,8 +1553,8 @@ fn items_equal(left: &Value, right: &Value) -> Option<bool> {
 
             match (l_cal, r_cal) {
                 (Some(lc), Some(rc)) => {
-                    return try_ucum_compare(lv, lc, rv, rc)
-                        .map(|ord| ord == std::cmp::Ordering::Equal);
+                    try_ucum_compare(lv, lc, rv, rc)
+                        .map(|ord| ord == std::cmp::Ordering::Equal)
                 }
                 (Some(lc), None) => {
                     let Ok(other) = zunder_ucum::Unit::parse(ru) else {
@@ -1564,10 +1564,11 @@ fn items_equal(left: &Value, right: &Value) -> Option<bool> {
                         return None;
                     }
                     if calendar_is_strict_equal_to_ucum(lu) {
-                        return try_ucum_compare(lv, lc, rv, ru)
-                            .map(|ord| ord == std::cmp::Ordering::Equal);
+                        try_ucum_compare(lv, lc, rv, ru)
+                            .map(|ord| ord == std::cmp::Ordering::Equal)
+                    } else {
+                        Some(false)
                     }
-                    return Some(false);
                 }
                 (None, Some(rc)) => {
                     let Ok(other) = zunder_ucum::Unit::parse(lu) else {
@@ -1577,14 +1578,15 @@ fn items_equal(left: &Value, right: &Value) -> Option<bool> {
                         return None;
                     }
                     if calendar_is_strict_equal_to_ucum(ru) {
-                        return try_ucum_compare(lv, lu, rv, rc)
-                            .map(|ord| ord == std::cmp::Ordering::Equal);
+                        try_ucum_compare(lv, lu, rv, rc)
+                            .map(|ord| ord == std::cmp::Ordering::Equal)
+                    } else {
+                        Some(false)
                     }
-                    return Some(false);
                 }
                 (None, None) => {
-                    return try_ucum_compare(lv, lu, rv, ru)
-                        .map(|ord| ord == std::cmp::Ordering::Equal);
+                    try_ucum_compare(lv, lu, rv, ru)
+                        .map(|ord| ord == std::cmp::Ordering::Equal)
                 }
             }
         }
@@ -1787,7 +1789,7 @@ fn items_equal(left: &Value, right: &Value) -> Option<bool> {
             }
         }
         // Complex types (objects) - recursive equivalence mapped to boolean
-        (ValueData::Object(_), ValueData::Object(_)) => Some(items_equivalent(&left, &right)),
+        (ValueData::Object(_), ValueData::Object(_)) => Some(items_equivalent(left, right)),
         _ => Some(false),
     }
 }
@@ -1822,7 +1824,7 @@ fn items_equivalent(left: &Value, right: &Value) -> bool {
         (ValueData::LazyJson { .. }, _) | (_, ValueData::LazyJson { .. }) => {
             let left_mat = left.materialize();
             let right_mat = right.materialize();
-            return items_equivalent(&left_mat, &right_mat);
+            items_equivalent(&left_mat, &right_mat)
         }
         (ValueData::Boolean(l), ValueData::Boolean(r)) => l == r,
         (ValueData::Integer(l), ValueData::Integer(r)) => l == r,
@@ -2460,7 +2462,7 @@ where
         (ValueData::LazyJson { .. }, _) | (_, ValueData::LazyJson { .. }) => {
             let left_mat = left.materialize();
             let right_mat = right.materialize();
-            return compare_values(&left_mat, &right_mat, op);
+            compare_values(&left_mat, &right_mat, op)
         }
         (ValueData::Integer(l), ValueData::Integer(r)) => Ok(Some(op(l.cmp(r)))),
         (ValueData::Integer(l), ValueData::Decimal(r)) => Ok(Some(op(Decimal::from(*l).cmp(r)))),

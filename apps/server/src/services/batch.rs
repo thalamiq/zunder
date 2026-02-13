@@ -59,6 +59,7 @@ pub struct BatchService {
     allow_update_create: bool,
     hard_delete: bool,
     runtime_config_cache: Option<Arc<RuntimeConfigCache>>,
+    referential_integrity_mode: String,
 }
 
 impl BatchService {
@@ -79,7 +80,12 @@ impl BatchService {
             allow_update_create,
             hard_delete,
             runtime_config_cache: None,
+            referential_integrity_mode: "lenient".to_string(),
         }
+    }
+
+    pub fn set_referential_integrity_mode(&mut self, mode: String) {
+        self.referential_integrity_mode = mode;
     }
 
     pub fn new_with_runtime_config(
@@ -191,6 +197,7 @@ impl BatchService {
                 self.hard_delete,
             )
         };
+        crud.set_referential_integrity_mode(self.referential_integrity_mode.clone());
 
         for index in ordered {
             if let Some(err) = pre_errors.get(&index) {

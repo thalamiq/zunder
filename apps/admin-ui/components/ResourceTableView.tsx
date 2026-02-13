@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Bundle, Resource } from "fhir/r4";
 import {
   useReactTable,
@@ -6,6 +6,7 @@ import {
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableHead,
@@ -19,11 +20,23 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@thalamiq/ui/components/dropdown-menu";
-import { ExternalLink, Copy, MoreVertical } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@thalamiq/ui/components/alert-dialog";
+import { ExternalLink, Copy, MoreVertical, Trash2 } from "lucide-react";
 import { highlightPrimitiveValue } from "@/lib/json";
 import { RESOURCE_COLUMNS } from "@/lib/defaultColumns";
+import { deleteFhirResource } from "@/lib/api/fhir";
 
 // Helper function to extract value from a resource using a simple path
 // Returns string, array of strings, or null
@@ -100,8 +113,89 @@ function getValueByPath(
   return String(result);
 }
 
+// Action cell component to allow hooks
+const ActionCell = ({
+  resource,
+  onDeleted,
+}: {
+  resource: Resource;
+  onDeleted: () => void;
+}) => {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const resourceUrl = `/api/fhir/${resource.resourceType}/${resource.id}`;
+
+  const deleteMutation = useMutation({
+    mutationFn: () =>
+      deleteFhirResource(resource.resourceType!, resource.id!),
+    onSuccess: onDeleted,
+  });
+
+  return (
+    <>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 px-2">
+            <MoreVertical className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => navigator.clipboard.writeText(resourceUrl)}
+          >
+            <Copy className="mr-2 h-3 w-3" />
+            Copy resource URL
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => window.open(resourceUrl, "_blank")}
+          >
+            <ExternalLink className="mr-2 h-3 w-3" />
+            Open resource
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="mr-2 h-3 w-3" />
+            Delete resource
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {resource.resourceType}/{resource.id}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete the resource. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                deleteMutation.mutate();
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
 // Get columns for a specific resource type
-function getColumnsForType(resourceType: string): ColumnDef<Resource>[] {
+function getColumnsForType(
+  resourceType: string,
+  onDeleted: () => void
+): ColumnDef<Resource>[] {
   const columnConfigs = RESOURCE_COLUMNS[resourceType] || [
     { header: "ID", path: "id" },
     { header: "Last Updated", path: "meta.lastUpdated" },
@@ -149,40 +243,9 @@ function getColumnsForType(resourceType: string): ColumnDef<Resource>[] {
   const actionColumn: ColumnDef<Resource> = {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const resource = row.original;
-      const resourceUrl = `/api/fhir/${resource.resourceType}/${resource.id}`;
-
-      return (
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 px-2">
-              <MoreVertical className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => {
-                // Copy resource URL to clipboard
-                navigator.clipboard.writeText(resourceUrl);
-              }}
-            >
-              <Copy className="mr-2 h-3 w-3" />
-              Copy resource URL
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                // Open resource in new tab
-                window.open(resourceUrl, "_blank");
-              }}
-            >
-              <ExternalLink className="mr-2 h-3 w-3" />
-              Open resource
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => (
+      <ActionCell resource={row.original} onDeleted={onDeleted} />
+    ),
   };
 
   return [...dataColumns, actionColumn];
@@ -190,19 +253,22 @@ function getColumnsForType(resourceType: string): ColumnDef<Resource>[] {
 
 interface ResourceTableViewProps {
   data: Bundle | Resource;
+  onDeleted?: () => void;
 }
 
 // Component for rendering a table for a specific resource type
 const ResourceTypeTable = ({
   resourceType,
   resources,
+  onDeleted,
 }: {
   resourceType: string;
   resources: Resource[];
+  onDeleted: () => void;
 }) => {
   const columns = useMemo(
-    () => getColumnsForType(resourceType),
-    [resourceType]
+    () => getColumnsForType(resourceType, onDeleted),
+    [resourceType, onDeleted]
   );
 
   const table = useReactTable({
@@ -260,7 +326,9 @@ const ResourceTypeTable = ({
   );
 };
 
-const ResourceTableView = ({ data }: ResourceTableViewProps) => {
+const ResourceTableView = ({ data, onDeleted }: ResourceTableViewProps) => {
+  const queryClient = useQueryClient();
+  const handleDeleted = onDeleted ?? (() => queryClient.invalidateQueries());
   // Extract all resources from Bundle or single resource
   const resources = useMemo(() => {
     if (data.resourceType === "Bundle") {
@@ -295,6 +363,7 @@ const ResourceTableView = ({ data }: ResourceTableViewProps) => {
               key={resourceType}
               resourceType={resourceType}
               resources={typeResources}
+              onDeleted={handleDeleted}
             />
           );
         })}
@@ -305,7 +374,7 @@ const ResourceTableView = ({ data }: ResourceTableViewProps) => {
   // Single resource type - show single table
   const resourceType = resourceTypes[0] || "Unknown";
   return (
-    <ResourceTypeTable resourceType={resourceType} resources={resources} />
+    <ResourceTypeTable resourceType={resourceType} resources={resources} onDeleted={handleDeleted} />
   );
 };
 

@@ -37,8 +37,8 @@ pub enum UnitValueDef {
         unit: String,
     },
     NonLinear {
-        name: String,
-        value: BigRational,
+        _name: String,
+        _value: BigRational,
         unit: String,
     },
 }
@@ -202,7 +202,7 @@ impl UcumDb {
                                     "Cel" | "degF" | "degRe" => {
                                         UnitValueDef::Function { name, value, unit }
                                     }
-                                    _ => UnitValueDef::NonLinear { name, value, unit },
+                                    _ => UnitValueDef::NonLinear { _name: name, _value: value, unit },
                                 }
                             } else if let Some(unit_expr) = u.value_unit.clone() {
                                 UnitValueDef::Linear {

@@ -53,26 +53,30 @@ services:
       retries: 3
       start_period: 40s
 
-  fhir-worker:
-    image: ${FHIR_SERVER_IMAGE:-ghcr.io/thalamiq/zunder:latest}
-    container_name: zunder-worker
-    restart: unless-stopped
-    command: ["fhir-worker"]
-    env_file:
-      - ./.env
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-fhir}:${POSTGRES_PASSWORD:-fhir}@db:5432/${POSTGRES_DB:-fhir}
-      RUST_LOG: ${RUST_LOG:-info}
-    volumes:
-      - ./config.yaml:/app/config.yaml:ro
-      - /mnt/fhir-packages:/home/fhir/.fhir/packages
-    depends_on:
-      db:
-        condition: service_healthy
-      fhir-server:
-        condition: service_started
-    networks:
-      - fhir-network
+  # Workers run inside fhir-server by default (workers.embedded: true).
+  # To use separate, scalable workers instead, set workers.embedded: false
+  # in config.yaml and uncomment the service below.
+  #
+  # fhir-worker:
+  #   image: ${FHIR_SERVER_IMAGE:-ghcr.io/thalamiq/zunder:latest}
+  #   container_name: zunder-worker
+  #   restart: unless-stopped
+  #   command: ["fhir-worker"]
+  #   env_file:
+  #     - ./.env
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER:-fhir}:${POSTGRES_PASSWORD:-fhir}@db:5432/${POSTGRES_DB:-fhir}
+  #     RUST_LOG: ${RUST_LOG:-info}
+  #   volumes:
+  #     - ./config.yaml:/app/config.yaml:ro
+  #     - /mnt/fhir-packages:/home/fhir/.fhir/packages
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     fhir-server:
+  #       condition: service_started
+  #   networks:
+  #     - fhir-network
 
   caddy:
     image: caddy:2

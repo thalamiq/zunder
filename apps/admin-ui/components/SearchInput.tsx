@@ -24,6 +24,7 @@ const SearchInput = ({
         onChange={(e) => setSearchQuery(e.target.value)}
         className={cn("pl-10", inputClassName)}
         placeholder={placeholder}
+        spellCheck={false}
       />
       {searchQuery && (
         <button

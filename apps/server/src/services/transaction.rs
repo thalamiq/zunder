@@ -83,6 +83,7 @@ pub struct TransactionService {
     allow_update_create: bool,
     hard_delete: bool,
     runtime_config_cache: Option<Arc<RuntimeConfigCache>>,
+    referential_integrity_mode: String,
 }
 
 impl TransactionService {
@@ -105,7 +106,12 @@ impl TransactionService {
             allow_update_create,
             hard_delete,
             runtime_config_cache: None,
+            referential_integrity_mode: "lenient".to_string(),
         }
+    }
+
+    pub fn set_referential_integrity_mode(&mut self, mode: String) {
+        self.referential_integrity_mode = mode;
     }
 
     pub fn new_with_runtime_config(
@@ -371,6 +377,11 @@ impl TransactionService {
         prefer_return: PreferReturn,
         base_url: Option<&str>,
     ) -> Result<BundleEntry> {
+        // Build known IDs from resources already written in this transaction
+        let known_ids: std::collections::HashSet<(String, String)> = written_resources
+            .iter()
+            .map(|w| (w.resource_type.clone(), w.id.clone()))
+            .collect();
         let request = entry.request.as_ref().ok_or_else(|| {
             crate::Error::InvalidResource(format!("Transaction entry {} missing request", index))
         })?;
@@ -455,6 +466,16 @@ impl TransactionService {
                             expected: expected_version,
                             actual: current.version_id,
                         });
+                    }
+                }
+
+                // Referential integrity check on delete (strict mode)
+                if self.is_strict_referential_integrity() {
+                    let existing_check = tx.read(&resource_type, &resource_id).await?;
+                    if let Some(ref e) = existing_check {
+                        if !e.deleted {
+                            self.validate_no_references_to(&resource_type, &resource_id).await?;
+                        }
                     }
                 }
 
@@ -647,6 +668,11 @@ impl TransactionService {
                 })?;
                 populate_meta(&mut resource, &id, 1, Utc::now());
 
+                // Referential integrity check (strict mode)
+                if self.is_strict_referential_integrity() {
+                    self.validate_references_in_transaction(&resource, &known_ids).await?;
+                }
+
                 let created = tx.create(&resource_type, resource).await?;
 
                 produced_versions.insert(
@@ -778,6 +804,11 @@ impl TransactionService {
                                     .insert(full_url.clone(), format!("{}/{}", resource_type, &id));
                             }
 
+                            // Referential integrity check (strict mode)
+                            if self.is_strict_referential_integrity() {
+                                self.validate_references_in_transaction(&resource, &known_ids).await?;
+                            }
+
                             let created = tx.create(&resource_type, resource).await?;
 
                             produced_versions.insert(
@@ -855,6 +886,11 @@ impl TransactionService {
                                 url_rewriter
                                     .mapping
                                     .insert(full_url.clone(), format!("{}/{}", resource_type, &id));
+                            }
+
+                            // Referential integrity check (strict mode)
+                            if self.is_strict_referential_integrity() {
+                                self.validate_references_in_transaction(&resource, &known_ids).await?;
                             }
 
                             let updated = tx.upsert(&resource_type, &id, resource).await?;
@@ -956,6 +992,11 @@ impl TransactionService {
                 if let Some(obj) = resource.as_object_mut() {
                     obj.insert("resourceType".to_string(), json!(resource_type));
                     obj.insert("id".to_string(), json!(resource_id));
+                }
+
+                // Referential integrity check (strict mode)
+                if self.is_strict_referential_integrity() {
+                    self.validate_references_in_transaction(&resource, &known_ids).await?;
                 }
 
                 let updated = tx.upsert(&resource_type, &resource_id, resource).await?;
@@ -1123,6 +1164,11 @@ impl TransactionService {
                     obj.remove("text");
                 }
 
+                // Referential integrity check (strict mode)
+                if self.is_strict_referential_integrity() {
+                    self.validate_references_in_transaction(&patched, &known_ids).await?;
+                }
+
                 let updated = tx.upsert(&resource_type, &resource_id, patched).await?;
 
                 produced_versions.insert(
@@ -1242,6 +1288,92 @@ impl TransactionService {
                 method
             ))),
         }
+    }
+
+    fn is_strict_referential_integrity(&self) -> bool {
+        self.referential_integrity_mode == "strict"
+    }
+
+    /// Validate references in a resource within a transaction context.
+    ///
+    /// `known_ids` contains `(resource_type, id)` pairs for resources created earlier
+    /// in this transaction, which should be treated as existing.
+    async fn validate_references_in_transaction(
+        &self,
+        resource: &JsonValue,
+        known_ids: &std::collections::HashSet<(String, String)>,
+    ) -> Result<()> {
+        let mut relative_refs_set = std::collections::HashSet::new();
+        super::referential_integrity::collect_relative_refs(resource, &mut relative_refs_set);
+        let relative_refs: Vec<(String, String)> = relative_refs_set.into_iter().collect();
+
+        if relative_refs.is_empty() {
+            return Ok(());
+        }
+
+        // Allow self-references
+        let self_type = resource
+            .get("resourceType")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+        let self_id = resource.get("id").and_then(|v| v.as_str()).unwrap_or("");
+
+        let refs_to_check: Vec<(String, String)> = relative_refs
+            .into_iter()
+            .filter(|(rt, id)| {
+                // Skip self-references
+                if rt == self_type && id == self_id {
+                    return false;
+                }
+                // Skip references to resources created earlier in this transaction
+                !known_ids.contains(&(rt.clone(), id.clone()))
+            })
+            .collect();
+
+        if refs_to_check.is_empty() {
+            return Ok(());
+        }
+
+        let existing = self.store.check_resources_exist(&refs_to_check).await?;
+        let missing: Vec<String> = refs_to_check
+            .iter()
+            .filter(|pair| !existing.contains(pair))
+            .map(|(rt, id)| format!("{}/{}", rt, id))
+            .collect();
+
+        if !missing.is_empty() {
+            return Err(crate::Error::BusinessRule(format!(
+                "Referential integrity violation: the following referenced resources do not exist: {}",
+                missing.join(", ")
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// Check that no other resources reference this resource before deletion in a transaction.
+    async fn validate_no_references_to(
+        &self,
+        resource_type: &str,
+        id: &str,
+    ) -> Result<()> {
+        let referencing = self
+            .store
+            .find_referencing_resources(resource_type, id, 5)
+            .await?;
+
+        if !referencing.is_empty() {
+            let refs: Vec<String> = referencing
+                .iter()
+                .map(|(rt, rid)| format!("{}/{}", rt, rid))
+                .collect();
+            return Err(crate::Error::BusinessRule(format!(
+                "Referential integrity violation: cannot delete {}/{} because it is referenced by: {}",
+                resource_type, id, refs.join(", ")
+            )));
+        }
+
+        Ok(())
     }
 
     async fn resolve_conditional_references_in_transaction(

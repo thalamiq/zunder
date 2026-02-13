@@ -166,7 +166,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_atom(&mut self) -> Result<Atom> {
-        let b = self.peek().ok_or_else(|| Error::Syntax {
+        let b = self.peek().ok_or(Error::Syntax {
             pos: self.pos,
             message: "unexpected end of input",
         })?;

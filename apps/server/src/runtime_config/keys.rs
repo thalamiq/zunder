@@ -31,6 +31,7 @@ impl fmt::Display for ConfigCategory {
 }
 
 impl ConfigCategory {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
             "logging" => Some(ConfigCategory::Logging),
@@ -479,6 +480,7 @@ impl ConfigKey {
     }
 
     /// Parse a string key back to ConfigKey
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<ConfigKey> {
         match s {
             "logging.level" => Some(ConfigKey::LoggingLevel),

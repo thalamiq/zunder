@@ -1,7 +1,5 @@
 import { Bundle, Resource } from "fhir/r4";
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Button } from "@thalamiq/ui/components/button";
 import {
   useReactTable,
   getCoreRowModel,

@@ -14,7 +14,7 @@ interface ResultTabsProps {
   onNavigate?: (url: string) => void;
 }
 
-type TabValue = "json" | "table" | "resources";
+type TabValue = "json" | "table" | "json-rows";
 
 const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -87,16 +87,16 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
             {isFhirResource && (
               <>
                 <CustomTabsTrigger
-                  value="resources"
-                  active={activeTab === "resources"}
-                  onClick={() => setActiveTab("resources")}
+                  value="table"
+                  active={activeTab === "table"}
+                  onClick={() => setActiveTab("table")}
                 >
                   Table
                 </CustomTabsTrigger>
                 <CustomTabsTrigger
-                  value="table"
-                  active={activeTab === "table"}
-                  onClick={() => setActiveTab("table")}
+                  value="json-rows"
+                  active={activeTab === "json-rows"}
+                  onClick={() => setActiveTab("json-rows")}
                 >
                   JSON Rows
                 </CustomTabsTrigger>
@@ -109,10 +109,10 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
       {/* Tab Content */}
       <div className="flex-1 overflow-auto">
         {activeTab === "json" && <JsonViewer data={data} />}
-        {activeTab === "table" && isFhirResource && (
+        {activeTab === "json-rows" && isFhirResource && (
           <BundleTableView bundle={data as Resource} />
         )}
-        {activeTab === "resources" && isFhirResource && (
+        {activeTab === "table" && isFhirResource && (
           <ResourceTableView data={data} />
         )}
       </div>

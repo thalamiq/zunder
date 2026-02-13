@@ -1,3 +1,5 @@
+#![allow(unused)]
+#[allow(unused)]
 mod support;
 
 use axum::http::{Method, StatusCode};

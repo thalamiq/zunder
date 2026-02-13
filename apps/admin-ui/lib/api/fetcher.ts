@@ -48,6 +48,17 @@ export const putFetcher = async <T>(
   return response.json() as Promise<T>;
 };
 
+export const deleteFetcher = async (url: string): Promise<void> => {
+  const response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete ${url}: ${response.statusText}`);
+  }
+};
+
 export const patchFetcher = async <T>(
   url: string,
   body: unknown = {},
