@@ -10,6 +10,16 @@ use axum::{
 };
 use serde::Deserialize;
 
+/// Returns 404 if runtime config is disabled in server config.
+fn require_runtime_config(state: &AppState) -> std::result::Result<(), Response> {
+    if !state.config.ui.runtime_config_enabled {
+        return Err((StatusCode::NOT_FOUND, Json(serde_json::json!({
+            "error": "Runtime configuration is disabled"
+        }))).into_response());
+    }
+    Ok(())
+}
+
 /// Query parameters for listing configuration
 #[derive(Debug, Deserialize)]
 pub struct ListConfigQuery {
@@ -37,6 +47,7 @@ pub async fn list_config(
     State(state): State<AppState>,
     Query(query): Query<ListConfigQuery>,
 ) -> Result<Response> {
+    if let Err(r) = require_runtime_config(&state) { return Ok(r); }
     let result = state
         .runtime_config_service
         .list_all(query.category.as_deref())
@@ -52,6 +63,7 @@ pub async fn get_config(
     State(state): State<AppState>,
     Path(key): Path<String>,
 ) -> Result<Response> {
+    if let Err(r) = require_runtime_config(&state) { return Ok(r); }
     let result = state.runtime_config_service.get(&key).await?;
     Ok((StatusCode::OK, Json(result)).into_response())
 }
@@ -64,6 +76,7 @@ pub async fn update_config(
     Path(key): Path<String>,
     Json(request): Json<UpdateConfigRequest>,
 ) -> Result<Response> {
+    if let Err(r) = require_runtime_config(&state) { return Ok(r); }
     let result = state.runtime_config_service.update(&key, request).await?;
     Ok((StatusCode::OK, Json(result)).into_response())
 }
@@ -75,6 +88,7 @@ pub async fn reset_config(
     State(state): State<AppState>,
     Path(key): Path<String>,
 ) -> Result<Response> {
+    if let Err(r) = require_runtime_config(&state) { return Ok(r); }
     let result = state.runtime_config_service.reset(&key).await?;
     Ok((StatusCode::OK, Json(result)).into_response())
 }
@@ -86,6 +100,7 @@ pub async fn get_audit_log(
     State(state): State<AppState>,
     Query(query): Query<AuditLogQuery>,
 ) -> Result<Response> {
+    if let Err(r) = require_runtime_config(&state) { return Ok(r); }
     let result = state
         .runtime_config_service
         .get_audit_log(query.key.as_deref(), query.limit, query.offset)

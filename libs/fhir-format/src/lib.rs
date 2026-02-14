@@ -1,10 +1,9 @@
-//! FHIR JSON ↔ XML conversion helpers.
-//! The implementation is schema‑agnostic but follows the official
-//! JSON/XML mapping rules used by HL7 FHIR:
-//! - Root element uses the `resourceType` name.
-//! - Primitive values are encoded with the `value` attribute.
-//! - Primitive metadata (`id`, `extension`) is carried through `_field` entries.
-//! - Arrays are represented by repeated elements and aligned metadata arrays.
+//! FHIR JSON ↔ XML conversion following the official HL7 mapping rules.
+//!
+//! Uses pre-computed type metadata from FHIR R4 StructureDefinitions to
+//! correctly handle array cardinality and primitive type coercion during
+//! XML → JSON conversion. Metadata is embedded at compile time from
+//! `fhir_type_metadata.json` (generated via `zunder-cli gen-format-metadata`).
 
 use quick_xml::events::{BytesEnd, BytesStart, Event};
 use quick_xml::Writer;
@@ -12,7 +11,51 @@ use roxmltree::Document;
 use serde_json::{Map, Value};
 use std::collections::HashMap;
 use std::io::Cursor;
+use std::sync::LazyLock;
 use thiserror::Error;
+
+/// Pre-computed FHIR type metadata for determining array cardinality.
+/// Structure: { type_name: { property_name: { "type": String, "multiple": bool } } }
+static FHIR_TYPE_METADATA: LazyLock<HashMap<String, HashMap<String, PropMeta>>> =
+    LazyLock::new(|| {
+        let json = include_str!("fhir_type_metadata.json");
+        let raw: HashMap<String, HashMap<String, Value>> =
+            serde_json::from_str(json).expect("failed to parse embedded fhir_type_metadata.json");
+        raw.into_iter()
+            .map(|(type_name, props)| {
+                let prop_map = props
+                    .into_iter()
+                    .map(|(prop_name, v)| {
+                        let multiple = v
+                            .get("multiple")
+                            .and_then(Value::as_bool)
+                            .unwrap_or(false);
+                        let type_name = v
+                            .get("type")
+                            .and_then(Value::as_str)
+                            .unwrap_or("string")
+                            .to_string();
+                        (prop_name, PropMeta { type_name, multiple })
+                    })
+                    .collect();
+                (type_name, prop_map)
+            })
+            .collect()
+    });
+
+#[derive(Debug)]
+struct PropMeta {
+    type_name: String,
+    multiple: bool,
+}
+
+/// Look up property metadata for a given parent type and property name.
+fn lookup_prop_meta<'a>(parent_type: Option<&str>, prop_name: &str) -> Option<&'a PropMeta> {
+    let parent = parent_type?;
+    FHIR_TYPE_METADATA
+        .get(parent)
+        .and_then(|props| props.get(prop_name))
+}
 
 const FHIR_NS: &str = "http://hl7.org/fhir";
 const XHTML_NS: &str = "http://www.w3.org/1999/xhtml";
@@ -81,15 +124,17 @@ pub fn xml_to_json(input: &str) -> Result<String, FormatError> {
     let doc = Document::parse(input)?;
     let root = doc.root_element();
 
+    let resource_type = root.tag_name().name().to_string();
+
     let mut map = Map::new();
     map.insert(
         "resourceType".to_string(),
-        Value::String(root.tag_name().name().to_string()),
+        Value::String(resource_type.clone()),
     );
 
     let mut accumulator = Map::new();
     for child in root.children().filter(|n| n.is_element()) {
-        process_xml_child(input, &mut accumulator, &child)?;
+        process_xml_child(input, &mut accumulator, &child, Some(&resource_type))?;
     }
 
     map.extend(accumulator);
@@ -206,17 +251,25 @@ fn process_xml_child(
     source: &str,
     target: &mut Map<String, Value>,
     node: &roxmltree::Node,
+    parent_type: Option<&str>,
 ) -> Result<(), FormatError> {
     let name = node.tag_name().name().to_string();
-    let (value, meta) = xml_element_to_value(source, node)?;
 
-    insert_json_property(target, &name, value, meta);
+    // Look up metadata to determine if this property is an array and what its type is.
+    let prop_meta = lookup_prop_meta(parent_type, &name);
+    let force_array = prop_meta.map(|m| m.multiple).unwrap_or(false);
+    let element_type = prop_meta.map(|m| m.type_name.as_str());
+
+    let (value, meta) = xml_element_to_value(source, node, element_type)?;
+
+    insert_json_property(target, &name, value, meta, force_array);
     Ok(())
 }
 
 fn xml_element_to_value(
     source: &str,
     node: &roxmltree::Node,
+    element_type: Option<&str>,
 ) -> Result<(Value, Option<Value>), FormatError> {
     if node.tag_name().namespace().is_some_and(|ns| ns == XHTML_NS) {
         let snippet = &source[node.range()];
@@ -232,14 +285,15 @@ fn xml_element_to_value(
         let mut extensions = Vec::new();
         for child in node.children().filter(|c| c.is_element()) {
             if child.tag_name().name() == "extension" {
-                let (ext_val, _ext_meta) = xml_element_to_value(source, &child)?;
+                let (ext_val, _ext_meta) =
+                    xml_element_to_value(source, &child, Some("Extension"))?;
                 extensions.push(ext_val);
             }
         }
         if !extensions.is_empty() {
             meta_map.insert("extension".to_string(), Value::Array(extensions));
         }
-        let prim = parse_primitive(val);
+        let prim = parse_primitive(val, element_type);
         let meta = if meta_map.is_empty() {
             None
         } else {
@@ -254,7 +308,7 @@ fn xml_element_to_value(
     }
 
     for child in node.children().filter(|c| c.is_element()) {
-        process_xml_child(source, &mut obj, &child)?;
+        process_xml_child(source, &mut obj, &child, element_type)?;
     }
 
     Ok((Value::Object(obj), None))
@@ -265,11 +319,16 @@ fn insert_json_property(
     name: &str,
     value: Value,
     meta: Option<Value>,
+    force_array: bool,
 ) {
     let entry = map.entry(name.to_string());
     match entry {
         serde_json::map::Entry::Vacant(v) => {
-            v.insert(value);
+            if force_array {
+                v.insert(Value::Array(vec![value]));
+            } else {
+                v.insert(value);
+            }
         }
         serde_json::map::Entry::Occupied(mut o) => match o.get_mut() {
             Value::Array(arr) => arr.push(value),
@@ -340,7 +399,48 @@ fn insert_json_property(
     }
 }
 
-fn parse_primitive(input: &str) -> Value {
+/// FHIR types that map to JSON numbers.
+const FHIR_NUMBER_TYPES: &[&str] = &[
+    "integer",
+    "positiveInt",
+    "unsignedInt",
+    "integer64",
+];
+
+/// FHIR types that map to JSON booleans.
+const FHIR_BOOLEAN_TYPES: &[&str] = &["boolean"];
+
+/// FHIR types that map to JSON numbers (decimal).
+const FHIR_DECIMAL_TYPES: &[&str] = &["decimal"];
+
+fn parse_primitive(input: &str, fhir_type: Option<&str>) -> Value {
+    if let Some(ft) = fhir_type {
+        if FHIR_BOOLEAN_TYPES.contains(&ft) {
+            return match input {
+                "true" => Value::Bool(true),
+                "false" => Value::Bool(false),
+                _ => Value::String(input.to_string()),
+            };
+        }
+        if FHIR_NUMBER_TYPES.contains(&ft) {
+            if let Ok(int) = input.parse::<i64>() {
+                return Value::Number(int.into());
+            }
+            return Value::String(input.to_string());
+        }
+        if FHIR_DECIMAL_TYPES.contains(&ft) {
+            // FHIR decimals must preserve precision, so keep as string in JSON
+            // unless it's a simple integer value
+            if let Ok(n) = input.parse::<serde_json::Number>() {
+                return Value::Number(n);
+            }
+            return Value::String(input.to_string());
+        }
+        // For all other known types (string, code, uri, etc.), keep as string
+        return Value::String(input.to_string());
+    }
+
+    // No type info available — use heuristic (legacy behavior)
     match input {
         "true" => Value::Bool(true),
         "false" => Value::Bool(false),
@@ -396,12 +496,61 @@ mod tests {
         assert_eq!(value["resourceType"], "Patient");
         assert_eq!(value["id"], "p1");
         assert_eq!(value["active"], true);
-        let family = if value["name"].is_array() {
-            value["name"][0]["family"].clone()
-        } else {
-            value["name"]["family"].clone()
-        };
-        assert_eq!(family, "Everyman");
+        // name is an array field — even a single element must be wrapped
+        assert!(value["name"].is_array(), "name should be an array");
+        assert_eq!(value["name"][0]["family"], "Everyman");
+        // given is also an array field
+        assert!(value["name"][0]["given"].is_array(), "given should be an array");
+        assert_eq!(value["name"][0]["given"][0], "Adam");
+    }
+
+    #[test]
+    fn xml_to_json_single_element_array() {
+        // StructureDefinition with a single differential element should produce an array
+        let xml = r#"
+        <StructureDefinition xmlns="http://hl7.org/fhir">
+            <url value="http://example.org/fhir/StructureDefinition/test"/>
+            <name value="Test"/>
+            <status value="active"/>
+            <kind value="resource"/>
+            <abstract value="false"/>
+            <type value="Patient"/>
+            <differential>
+                <element>
+                    <path value="Patient"/>
+                </element>
+            </differential>
+        </StructureDefinition>
+        "#;
+
+        let json = xml_to_json(xml).expect("xml->json failed");
+        let value: Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(value["resourceType"], "StructureDefinition");
+        // differential.element must be an array even with a single element
+        assert!(
+            value["differential"]["element"].is_array(),
+            "differential.element should be an array, got: {}",
+            value["differential"]["element"]
+        );
+        assert_eq!(value["differential"]["element"][0]["path"], "Patient");
+    }
+
+    #[test]
+    fn xml_to_json_scalar_stays_scalar() {
+        // Verify scalar fields are NOT wrapped in arrays
+        let xml = r#"
+        <Patient xmlns="http://hl7.org/fhir">
+            <id value="p1"/>
+            <active value="true"/>
+            <birthDate value="1990-01-01"/>
+        </Patient>
+        "#;
+
+        let json = xml_to_json(xml).expect("xml->json failed");
+        let value: Value = serde_json::from_str(&json).unwrap();
+        assert!(!value["active"].is_array(), "active should be scalar");
+        assert!(!value["birthDate"].is_array(), "birthDate should be scalar");
+        assert!(!value["id"].is_array(), "id should be scalar");
     }
 
     #[test]

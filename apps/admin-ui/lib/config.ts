@@ -21,6 +21,7 @@ export interface UiConfig {
   enabled: boolean;
   title: string;
   requires_auth: boolean;
+  runtime_config_enabled: boolean;
 }
 
 // Cache for UI config
@@ -48,6 +49,7 @@ export async function fetchUiConfig(): Promise<UiConfig> {
       enabled: true,
       title: "FHIR Server Admin",
       requires_auth: false,
+      runtime_config_enabled: true,
     };
     return cachedConfig;
   }

@@ -5287,6 +5287,7 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "zunder-context",
+ "zunder-format",
  "zunder-models",
  "zunder-registry-client",
 ]
@@ -5313,6 +5314,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "thiserror 1.0.69",
+ "tokio",
  "zunder-context",
  "zunder-fhirpath",
  "zunder-models",

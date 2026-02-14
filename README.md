@@ -1,6 +1,6 @@
 ![Zunder](assets/zunder.svg)
 
-**Zunder** is a [FHIR](https://hl7.org/fhir/) R4/R5 ecosystem built in Rust. At its core is a high performance REST server for healthcare interoperability: CRUD, search, batch and transaction bundles, terminology services, and more. The monorepo also includes a validator, FHIRPath engine, snapshot generator, CLI tools, and Admin UI.
+**Zunder** is a [FHIR](https://hl7.org/fhir/) R4/R5 ecosystem built in Rust. At its core is a high performance REST server for healthcare interoperability: CRUD, search, batch and transaction bundles, terminology services, and more.
 
 Developed by [ThalamiQ](https://thalamiq.io).
 

@@ -1,355 +1,406 @@
-//! Integration tests using official FHIR test cases
+//! Integration tests using the official HL7 FHIR snapshot-generation test suite.
 //!
-//! This module provides a test harness for running the official HL7 FHIR test cases
-//! from the fhir-test-cases repository. Test cases are located in:
-//! - fhir-test-cases/r5/snapshot-generation/
-//! - fhir-test-cases/rX/snapshot-generation/
+//! Test cases are loaded from `fhir-test-cases/rX/snapshot-generation/manifest.xml`.
+//! Each manifest entry becomes an individual `#[test]` function.
 //!
-//! To run these tests, ensure the fhir-test-cases submodule is initialized:
+//! To run these tests, ensure the fhir-test-cases submodule is initialised:
 //! ```bash
 //! git submodule update --init --recursive
 //! ```
 
 use serde_json::Value;
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use zunder_context::DefaultFhirContext;
+use zunder_format::xml_to_json;
 use zunder_models::StructureDefinition;
 use zunder_snapshot::generate_structure_definition_snapshot;
 
 mod test_support;
 
-/// Test case configuration
-#[derive(Debug, Clone)]
-#[allow(dead_code)]
-struct TestCase {
-    name: String,
-    version: String,
-    input_path: PathBuf,
-    expected_path: PathBuf,
-    register: Vec<String>,
-    description: Option<String>,
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const TEST_CASES_DIR: &str = "../../fhir-test-cases/rX/snapshot-generation";
+
+fn test_cases_available() -> bool {
+    Path::new(TEST_CASES_DIR).join("manifest.xml").exists()
 }
 
-/// Load a test case from the filesystem
-fn load_test_case(test_name: &str, version: &str) -> Option<TestCase> {
-    let base_path = Path::new("../../fhir-test-cases");
-    let test_dir = base_path.join(version).join("snapshot-generation");
+/// Load a FHIR resource file (JSON or XML) and return it as a JSON `Value`.
+fn load_resource_file(path: &Path) -> Value {
+    let content = fs::read_to_string(path)
+        .unwrap_or_else(|e| panic!("Failed to read {}: {}", path.display(), e));
 
-    if !test_dir.exists() {
-        eprintln!("Test directory does not exist: {:?}", test_dir);
-        return None;
+    match path.extension().and_then(|s| s.to_str()) {
+        Some("json") => serde_json::from_str(&content)
+            .unwrap_or_else(|e| panic!("Failed to parse JSON {}: {}", path.display(), e)),
+        Some("xml") => {
+            let json_str = xml_to_json(&content)
+                .unwrap_or_else(|e| panic!("Failed to convert XML→JSON {}: {}", path.display(), e));
+            serde_json::from_str(&json_str)
+                .unwrap_or_else(|e| panic!("Failed to parse converted JSON {}: {}", path.display(), e))
+        }
+        _ => panic!("Unsupported file extension: {}", path.display()),
     }
+}
 
-    // Try JSON first, then XML
-    let input_json = test_dir.join(format!("{}-input.json", test_name));
-    let input_xml = test_dir.join(format!("{}-input.xml", test_name));
-    let expected_json = test_dir.join(format!("{}-expected.json", test_name));
-    let expected_xml = test_dir.join(format!("{}-expected.xml", test_name));
+/// Resolve a test-case file by `id` and `suffix`, trying JSON first then XML.
+fn resolve_file(dir: &Path, id: &str, suffix: &str) -> PathBuf {
+    let json_path = dir.join(format!("{}{}.json", id, suffix));
+    if json_path.exists() {
+        return json_path;
+    }
+    let xml_path = dir.join(format!("{}{}.xml", id, suffix));
+    if xml_path.exists() {
+        return xml_path;
+    }
+    panic!(
+        "Cannot find file for id={}, suffix={} in {}",
+        id,
+        suffix,
+        dir.display()
+    );
+}
 
-    let (input_path, expected_path) = if input_json.exists() && expected_json.exists() {
-        (input_json, expected_json)
-    } else if input_xml.exists() && expected_xml.exists() {
-        (input_xml, expected_xml)
-    } else if input_json.exists() && expected_xml.exists() {
-        (input_json, expected_xml)
-    } else if input_xml.exists() && expected_json.exists() {
-        (input_xml, expected_json)
-    } else {
-        eprintln!(
-            "Could not find input/expected files for test: {}",
-            test_name
-        );
-        return None;
+/// Resolve a register file by name, trying JSON first then XML.
+fn resolve_register_file(dir: &Path, name: &str) -> PathBuf {
+    let json_path = dir.join(format!("{}.json", name));
+    if json_path.exists() {
+        return json_path;
+    }
+    let xml_path = dir.join(format!("{}.xml", name));
+    if xml_path.exists() {
+        return xml_path;
+    }
+    panic!(
+        "Cannot find register file {} in {}",
+        name,
+        dir.display()
+    );
+}
+
+/// Build a `DefaultFhirContext` for the given FHIR version string (e.g. "4.0.1").
+fn build_context(fhir_version: &str, register_resources: Vec<Value>) -> DefaultFhirContext {
+    let version_label = match fhir_version {
+        v if v.starts_with("4.0") => "R4",
+        v if v.starts_with("4.3") => "R4B",
+        v if v.starts_with("5.") => "R5",
+        other => panic!("Unsupported FHIR version: {}", other),
     };
 
-    Some(TestCase {
-        name: test_name.to_string(),
-        version: version.to_string(),
-        input_path,
-        expected_path,
-        register: vec![],
-        description: None,
-    })
-}
+    let mut ctx = test_support::block_on(DefaultFhirContext::from_fhir_version_async(
+        None,
+        version_label,
+    ))
+    .unwrap_or_else(|e| panic!("Failed to create {} context: {}", version_label, e));
 
-/// Parse a StructureDefinition from JSON or XML
-fn parse_structure_definition(
-    path: &Path,
-) -> Result<StructureDefinition, Box<dyn std::error::Error>> {
-    let content = fs::read_to_string(path)?;
-
-    if path.extension().and_then(|s| s.to_str()) == Some("xml") {
-        // For XML, we'd need an XML parser - for now, return error
-        return Err("XML parsing not yet implemented".into());
+    for resource in register_resources {
+        ctx.add_resource(resource);
     }
 
-    let json: Value = serde_json::from_str(&content)?;
-    let sd: StructureDefinition = serde_json::from_value(json)
-        .map_err(|e| format!("Failed to parse StructureDefinition: {}", e))?;
-
-    Ok(sd)
+    ctx
 }
 
-/// Convert StructureDefinition to JSON Value
-fn structure_definition_to_value(
-    sd: &StructureDefinition,
-) -> Result<Value, Box<dyn std::error::Error>> {
-    Ok(serde_json::to_value(sd)?)
-}
+/// Compare snapshot elements between generated and expected StructureDefinitions.
+///
+/// Returns a list of human-readable differences. An empty list means the
+/// snapshots match.
+fn compare_snapshots(generated: &StructureDefinition, expected: &StructureDefinition) -> Vec<String> {
+    let mut diffs = Vec::new();
 
-/// Normalize snapshot elements for comparison
-/// Sorts elements by path to ensure consistent ordering
-fn normalize_snapshot_elements(snapshot: &Value) -> Result<Value, Box<dyn std::error::Error>> {
-    let mut snapshot = snapshot.clone();
+    let gen_snapshot = match &generated.snapshot {
+        Some(s) => s,
+        None => {
+            diffs.push("Generated SD has no snapshot".to_string());
+            return diffs;
+        }
+    };
 
-    if let Some(elements) = snapshot.get_mut("element").and_then(|e| e.as_array_mut()) {
-        elements.sort_by(|a, b| {
-            let path_a = a.get("path").and_then(|p| p.as_str()).unwrap_or("");
-            let path_b = b.get("path").and_then(|p| p.as_str()).unwrap_or("");
-            path_a.cmp(path_b)
-        });
-    }
+    let exp_snapshot = match &expected.snapshot {
+        Some(s) => s,
+        None => {
+            diffs.push("Expected SD has no snapshot".to_string());
+            return diffs;
+        }
+    };
 
-    Ok(snapshot)
-}
+    // Serialize elements to Value for flexible comparison.
+    let gen_values: Vec<Value> = gen_snapshot
+        .element
+        .iter()
+        .map(|e| serde_json::to_value(e).expect("failed to serialise generated element"))
+        .collect();
+    let exp_values: Vec<Value> = exp_snapshot
+        .element
+        .iter()
+        .map(|e| serde_json::to_value(e).expect("failed to serialise expected element"))
+        .collect();
 
-/// Compare two snapshots, returning differences
-fn compare_snapshots(
-    generated: &Value,
-    expected: &Value,
-) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let mut differences = Vec::new();
-
-    let gen_elements = generated
-        .get("element")
-        .and_then(|e| e.as_array())
-        .map(|v| v.as_slice())
-        .unwrap_or(&[]);
-    let exp_elements = expected
-        .get("element")
-        .and_then(|e| e.as_array())
-        .map(|v| v.as_slice())
-        .unwrap_or(&[]);
-
-    if gen_elements.len() != exp_elements.len() {
-        differences.push(format!(
-            "Element count mismatch: generated {} elements, expected {} elements",
-            gen_elements.len(),
-            exp_elements.len()
+    if gen_values.len() != exp_values.len() {
+        diffs.push(format!(
+            "Element count: generated {} vs expected {}",
+            gen_values.len(),
+            exp_values.len()
         ));
     }
 
-    // Create maps by path for easier comparison
-    let mut gen_map: HashMap<String, &Value> = HashMap::new();
-    for elem in gen_elements {
-        if let Some(path) = elem.get("path").and_then(|p| p.as_str()) {
-            gen_map.insert(path.to_string(), elem);
+    // Build lookup by element id (falling back to path).
+    let gen_by_id: std::collections::HashMap<&str, &Value> = gen_values
+        .iter()
+        .filter_map(|e| {
+            let key = e
+                .get("id")
+                .and_then(|v| v.as_str())
+                .or_else(|| e.get("path").and_then(|v| v.as_str()))?;
+            Some((key, e))
+        })
+        .collect();
+
+    let exp_by_id: std::collections::HashMap<&str, &Value> = exp_values
+        .iter()
+        .filter_map(|e| {
+            let key = e
+                .get("id")
+                .and_then(|v| v.as_str())
+                .or_else(|| e.get("path").and_then(|v| v.as_str()))?;
+            Some((key, e))
+        })
+        .collect();
+
+    // Missing / extra elements.
+    for id in exp_by_id.keys() {
+        if !gen_by_id.contains_key(id) {
+            diffs.push(format!("Missing element: {}", id));
+        }
+    }
+    for id in gen_by_id.keys() {
+        if !exp_by_id.contains_key(id) {
+            diffs.push(format!("Extra element: {}", id));
         }
     }
 
-    let mut exp_map: HashMap<String, &Value> = HashMap::new();
-    for elem in exp_elements {
-        if let Some(path) = elem.get("path").and_then(|p| p.as_str()) {
-            exp_map.insert(path.to_string(), elem);
-        }
-    }
+    // Per-element deep comparison (skip keys that are intentionally variable).
+    let ignore_keys: std::collections::HashSet<&str> =
+        ["constraint", "mapping", "extension", "comment", "comments", "requirements"]
+            .iter()
+            .copied()
+            .collect();
 
-    // Check for missing elements
-    for path in exp_map.keys() {
-        if !gen_map.contains_key(path) {
-            differences.push(format!("Missing element in generated snapshot: {}", path));
-        }
-    }
-
-    // Check for extra elements
-    for path in gen_map.keys() {
-        if !exp_map.contains_key(path) {
-            differences.push(format!("Extra element in generated snapshot: {}", path));
-        }
-    }
-
-    // Compare common elements (simplified - full comparison would be more complex)
-    for (path, exp_elem) in &exp_map {
-        if let Some(gen_elem) = gen_map.get(path) {
-            // Basic comparison - could be enhanced to compare all fields
-            let gen_min = gen_elem.get("min").and_then(|m| m.as_u64());
-            let exp_min = exp_elem.get("min").and_then(|m| m.as_u64());
-            if gen_min != exp_min {
-                differences.push(format!(
-                    "Element {} min mismatch: generated {:?}, expected {:?}",
-                    path, gen_min, exp_min
-                ));
-            }
-
-            let gen_max = gen_elem.get("max").and_then(|m| m.as_str());
-            let exp_max = exp_elem.get("max").and_then(|m| m.as_str());
-            if gen_max != exp_max {
-                differences.push(format!(
-                    "Element {} max mismatch: generated {:?}, expected {:?}",
-                    path, gen_max, exp_max
-                ));
-            }
-        }
-    }
-
-    Ok(differences)
-}
-
-/// Create a FHIR context for the given version
-fn create_context(version: &str) -> Result<DefaultFhirContext, Box<dyn std::error::Error>> {
-    test_support::block_on(DefaultFhirContext::from_fhir_version_async(None, version))
-        .map_err(|e| format!("Failed to create {} context: {}", version, e).into())
-}
-
-/// Run a single test case
-fn run_test_case(test_case: &TestCase) -> Result<(), Box<dyn std::error::Error>> {
-    println!(
-        "Running test case: {} (version: {})",
-        test_case.name, test_case.version
-    );
-
-    // Load input StructureDefinition
-    let input_sd = parse_structure_definition(&test_case.input_path)?;
-
-    // Load expected StructureDefinition
-    let expected_sd = parse_structure_definition(&test_case.expected_path)?;
-    let expected_value = structure_definition_to_value(&expected_sd)?;
-
-    // Extract expected snapshot
-    let expected_snapshot = expected_value
-        .get("snapshot")
-        .ok_or("Expected StructureDefinition missing snapshot")?;
-
-    // Create context
-    let ctx = create_context(&test_case.version)?;
-
-    // Generate snapshot
-    // Note: We need to resolve the base StructureDefinition first
-    // For now, this is a placeholder - full implementation would:
-    // 1. Extract baseDefinition URL from input_sd
-    // 2. Load base StructureDefinition from context
-    // 3. Call generate_structure_definition_snapshot
-
-    // This is a simplified version - full implementation requires base SD resolution
-    let generated_snapshot = generate_structure_definition_snapshot(
-        None, // Base SD - would need to be resolved from baseDefinition URL
-        &input_sd, &ctx,
-    )?;
-
-    let generated_value = structure_definition_to_value(&generated_snapshot)?;
-    let generated_snapshot_value = generated_value
-        .get("snapshot")
-        .ok_or("Generated StructureDefinition missing snapshot")?;
-
-    // Normalize for comparison
-    let gen_normalized = normalize_snapshot_elements(generated_snapshot_value)?;
-    let exp_normalized = normalize_snapshot_elements(expected_snapshot)?;
-
-    // Compare
-    let differences = compare_snapshots(&gen_normalized, &exp_normalized)?;
-
-    if !differences.is_empty() {
-        eprintln!(
-            "Test case {} failed with {} differences:",
-            test_case.name,
-            differences.len()
-        );
-        for diff in &differences {
-            eprintln!("  - {}", diff);
-        }
-        return Err(format!("Test case {} failed", test_case.name).into());
-    }
-
-    println!("Test case {} passed!", test_case.name);
-    Ok(())
-}
-
-// Example test cases - uncomment and configure as needed
-
-#[test]
-#[ignore] // Ignore by default - requires fhir-test-cases submodule
-fn test_us_cat_snapshot_generation() {
-    let test_case = load_test_case("us-cat", "r5").expect("Could not load us-cat test case");
-
-    // This test may fail initially - it's a starting point for integration
-    run_test_case(&test_case).unwrap_or_else(|e| {
-        eprintln!("Test failed: {}", e);
-        // For now, just warn instead of failing
-        // panic!("Test failed: {}", e);
-    });
-}
-
-#[test]
-#[ignore]
-fn test_ext_profile_snapshot_generation() {
-    let test_case =
-        load_test_case("ext-profile", "r5").expect("Could not load ext-profile test case");
-
-    run_test_case(&test_case).unwrap_or_else(|e| {
-        eprintln!("Test failed: {}", e);
-    });
-}
-
-/// Helper function to discover all test cases in a directory
-fn discover_test_cases(version: &str) -> Vec<TestCase> {
-    let base_path = Path::new("../../fhir-test-cases");
-    let test_dir = base_path.join(version).join("snapshot-generation");
-
-    let mut test_cases = Vec::new();
-
-    if !test_dir.exists() {
-        eprintln!("Test directory does not exist: {:?}", test_dir);
-        return test_cases;
-    }
-
-    // Scan directory for input files
-    if let Ok(entries) = fs::read_dir(&test_dir) {
-        let mut input_files: Vec<String> = Vec::new();
-
-        for entry in entries.flatten() {
-            if let Some(file_name) = entry.file_name().to_str() {
-                if file_name.ends_with("-input.json") || file_name.ends_with("-input.xml") {
-                    let test_name = file_name
-                        .strip_suffix("-input.json")
-                        .or_else(|| file_name.strip_suffix("-input.xml"))
-                        .unwrap_or(file_name);
-                    input_files.push(test_name.to_string());
+    for (id, exp_elem) in &exp_by_id {
+        if let Some(gen_elem) = gen_by_id.get(id) {
+            let exp_obj = exp_elem.as_object();
+            let gen_obj = gen_elem.as_object();
+            if let (Some(exp_map), Some(gen_map)) = (exp_obj, gen_obj) {
+                for (key, exp_val) in exp_map {
+                    if ignore_keys.contains(key.as_str()) {
+                        continue;
+                    }
+                    match gen_map.get(key) {
+                        Some(gen_val) if gen_val == exp_val => {}
+                        Some(gen_val) => {
+                            diffs.push(format!(
+                                "Element {}.{}: generated={}, expected={}",
+                                id,
+                                key,
+                                serde_json::to_string(gen_val).unwrap_or_default(),
+                                serde_json::to_string(exp_val).unwrap_or_default(),
+                            ));
+                        }
+                        None => {
+                            diffs.push(format!(
+                                "Element {}.{}: missing in generated (expected={})",
+                                id,
+                                key,
+                                serde_json::to_string(exp_val).unwrap_or_default(),
+                            ));
+                        }
+                    }
                 }
             }
         }
-
-        // Create test cases for each input file
-        for test_name in input_files {
-            if let Some(test_case) = load_test_case(&test_name, version) {
-                test_cases.push(test_case);
-            }
-        }
     }
 
-    test_cases
+    diffs
+}
+
+/// Write diff output to test_output/ for inspection.
+fn write_diff_output(test_id: &str, diffs: &[String], generated: &StructureDefinition, expected_value: &Value) {
+    let output_dir = Path::new("tests/test_output");
+    let _ = fs::create_dir_all(output_dir);
+
+    // Write diffs
+    let diff_path = output_dir.join(format!("{}-diff.txt", test_id));
+    let diff_content = diffs.join("\n");
+    let _ = fs::write(&diff_path, &diff_content);
+
+    // Write generated snapshot
+    let gen_path = output_dir.join(format!("{}-generated.json", test_id));
+    if let Ok(json) = serde_json::to_string_pretty(&generated) {
+        let _ = fs::write(&gen_path, json);
+    }
+
+    // Write expected snapshot
+    let exp_path = output_dir.join(format!("{}-expected.json", test_id));
+    if let Ok(json) = serde_json::to_string_pretty(expected_value) {
+        let _ = fs::write(&exp_path, json);
+    }
+
+    eprintln!(
+        "  Diff output written to {}",
+        diff_path.display()
+    );
+}
+
+/// Core test runner for a single manifest entry.
+fn run_snapshot_test(
+    test_id: &str,
+    fhir_version: &str,
+    register_names: &[&str],
+) {
+    if !test_cases_available() {
+        eprintln!("Skipping {} — fhir-test-cases submodule not present", test_id);
+        return;
+    }
+
+    let dir = PathBuf::from(TEST_CASES_DIR);
+
+    // Load register resources.
+    let register_resources: Vec<Value> = register_names
+        .iter()
+        .map(|name| {
+            let path = resolve_register_file(&dir, name);
+            load_resource_file(&path)
+        })
+        .collect();
+
+    // Build context with registered SDs.
+    let ctx = build_context(fhir_version, register_resources);
+
+    // Load input SD.
+    let input_path = resolve_file(&dir, test_id, "-input");
+    let input_value = load_resource_file(&input_path);
+    let input_sd: StructureDefinition = serde_json::from_value(input_value)
+        .unwrap_or_else(|e| panic!("Failed to deserialise input SD for {}: {}", test_id, e));
+
+    // Load expected output SD.
+    let expected_path = resolve_file(&dir, test_id, "-output");
+    let expected_value = load_resource_file(&expected_path);
+    let expected_sd: StructureDefinition = serde_json::from_value(expected_value.clone())
+        .unwrap_or_else(|e| panic!("Failed to deserialise expected SD for {}: {}", test_id, e));
+
+    // Generate snapshot.
+    let generated_sd = generate_structure_definition_snapshot(None, &input_sd, &ctx)
+        .unwrap_or_else(|e| panic!("Snapshot generation failed for {}: {}", test_id, e));
+
+    // Compare.
+    let diffs = compare_snapshots(&generated_sd, &expected_sd);
+
+    if !diffs.is_empty() {
+        write_diff_output(test_id, &diffs, &generated_sd, &expected_value);
+        eprintln!("\n=== {} failed with {} differences ===", test_id, diffs.len());
+        for (i, diff) in diffs.iter().enumerate().take(30) {
+            eprintln!("  [{}] {}", i + 1, diff);
+        }
+        if diffs.len() > 30 {
+            eprintln!("  ... and {} more", diffs.len() - 30);
+        }
+        panic!(
+            "Snapshot test '{}' failed with {} differences (see tests/test_output/)",
+            test_id,
+            diffs.len()
+        );
+    }
+
+    eprintln!("  {} passed", test_id);
+}
+
+// ---------------------------------------------------------------------------
+// Individual test functions — one per manifest entry
+// ---------------------------------------------------------------------------
+
+#[test]
+fn fhir_test_case_obs_perf() {
+    run_snapshot_test("obs-perf", "4.0.1", &["reference-rest-or-logical"]);
 }
 
 #[test]
-#[ignore]
-fn test_list_available_test_cases() {
-    // This test just lists available test cases without running them
-    let r5_cases = discover_test_cases("r5");
-    let rx_cases = discover_test_cases("rX");
+fn fhir_test_case_location_qicore() {
+    run_snapshot_test("location-qicore", "4.0.1", &["location-uscore"]);
+}
 
-    println!("Found {} R5 test cases", r5_cases.len());
-    println!("Found {} rX test cases", rx_cases.len());
+#[test]
+fn fhir_test_case_ratio_measure_cqfm() {
+    run_snapshot_test(
+        "StructureDefinition-ratio-measure-cqfm",
+        "4.0.1",
+        &["StructureDefinition-measure-cqfm"],
+    );
+}
 
-    println!("\nR5 test cases:");
-    for case in &r5_cases {
-        println!("  - {} ({})", case.name, case.version);
-    }
+#[test]
+fn fhir_test_case_simple_quantity() {
+    run_snapshot_test("simple-quantity", "4.0.1", &[]);
+}
 
-    println!("\nrX test cases:");
-    for case in &rx_cases {
-        println!("  - {} ({})", case.name, case.version);
-    }
+#[test]
+fn fhir_test_case_simple_quantity_2() {
+    run_snapshot_test("simple-quantity-2", "4.0.1", &[]);
+}
 
-    // Don't fail - this is just informational
+#[test]
+fn fhir_test_case_simple_quantity_3() {
+    run_snapshot_test("simple-quantity-3", "4.0.1", &[]);
+}
+
+#[test]
+fn fhir_test_case_nl_core_nursing_intervention() {
+    run_snapshot_test(
+        "nl-core-NursingIntervention",
+        "4.0.1",
+        &[
+            "zib-NursingIntervention-input",
+            "pattern-ZibHealthProfessionalReference",
+        ],
+    );
+}
+
+#[test]
+fn fhir_test_case_zib_nursing_intervention() {
+    run_snapshot_test(
+        "zib-NursingIntervention",
+        "4.0.1",
+        &[
+            "zib-NursingIntervention-input",
+            "pattern-ZibHealthProfessionalReference",
+            "pattern-NlCoreHealthProfessionalReference",
+        ],
+    );
+}
+
+#[test]
+fn fhir_test_case_slice_cardinality_derived() {
+    run_snapshot_test(
+        "slice-cardinality-derived",
+        "4.0.1",
+        &["slice-cardinality-base"],
+    );
+}
+
+#[test]
+fn fhir_test_case_ch_location() {
+    run_snapshot_test(
+        "ch-location",
+        "4.0.1",
+        &["ch-phone", "ch-email", "ch-internet"],
+    );
+}
+
+// SKIP: bc-UterusActivity — requires FHIR 3.0.2 (R3) which is not supported
+// SKIP: encounter-legalStatus — requires cross-version targetVersion conversion
+
+#[test]
+fn fhir_test_case_prov_fi() {
+    run_snapshot_test("prov-fi", "4.0.1", &[]);
 }

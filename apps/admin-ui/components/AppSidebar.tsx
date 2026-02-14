@@ -61,8 +61,6 @@ export default function AppSidebar() {
     queryFn: fetchUiConfig,
   });
 
-  console.log(uiConfigQuery.data);
-
   // State
   const [isResourcesOpen, setIsResourcesOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(() =>
@@ -139,7 +137,13 @@ export default function AppSidebar() {
           {open && <SidebarGroupLabel>Navigation</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {Object.values(config.nav).map((route: any) => {
+              {Object.values(config.nav).filter((route: any) => {
+                // Hide settings when runtime config is disabled
+                if (route.path === config.nav.settings.path && uiConfigQuery.data?.runtime_config_enabled === false) {
+                  return false;
+                }
+                return true;
+              }).map((route: any) => {
                 // Make Resources collapsible with resource types as sub-items
                 if (
                   route.path === config.nav.resources.path &&
@@ -310,7 +314,7 @@ export default function AppSidebar() {
                   asChild
                 >
                   <Link
-                    href="https://github.com/thalamiq/fhir-browser"
+                    href="https://github.com/thalamiq/zunder"
                     target="_blank"
                   >
                     <Image

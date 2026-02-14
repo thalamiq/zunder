@@ -19,7 +19,72 @@ use zunder_context::FhirContext;
 use zunder_models::StructureDefinition;
 use zunder_models::{Differential, ElementDefinition, ElementDefinitionBase, Snapshot};
 
-/// Find base element for a differential element using FHIR's inheritance chain
+/// Find the correct insertion position for a new non-slice element in the snapshot.
+///
+/// Strategy: find the best ancestor of the new element among existing elements,
+/// then insert after that ancestor and all of its descendants. This handles both
+/// normal parent paths and choice-type expansions (e.g., `effectivePeriod` under `effective[x]`).
+fn find_insertion_position(elements: &[ElementDefinition], new_elem: &ElementDefinition) -> usize {
+    let path = &new_elem.path;
+
+    // Find the best (most specific) ancestor in the existing element list.
+    let mut best_ancestor_idx = None;
+    let mut best_ancestor_depth = 0;
+
+    for (i, elem) in elements.iter().enumerate() {
+        if is_ancestor_of(&elem.path, path) {
+            let depth = elem.path.matches('.').count();
+            if best_ancestor_idx.is_none() || depth > best_ancestor_depth {
+                best_ancestor_idx = Some(i);
+                best_ancestor_depth = depth;
+            }
+        }
+    }
+
+    let anchor = match best_ancestor_idx {
+        Some(idx) => idx,
+        None => return elements.len(),
+    };
+
+    let ancestor_path = &elements[anchor].path;
+
+    // Find the last element that is a descendant of this ancestor
+    let mut last_descendant = anchor;
+    for (i, elem) in elements.iter().enumerate().skip(anchor + 1) {
+        if is_ancestor_of(ancestor_path, &elem.path) || elem.path == *ancestor_path {
+            last_descendant = i;
+        }
+    }
+
+    last_descendant + 1
+}
+
+/// Check if `ancestor` is an ancestor of `descendant` in FHIR path terms.
+/// Handles both normal paths and choice-type expansions.
+fn is_ancestor_of(ancestor: &str, descendant: &str) -> bool {
+    // Direct parent: "Patient.name" is ancestor of "Patient.name.family"
+    if descendant.starts_with(ancestor)
+        && descendant.len() > ancestor.len()
+        && descendant.as_bytes()[ancestor.len()] == b'.'
+    {
+        return true;
+    }
+
+    // Choice-type: "Observation.effective[x]" is ancestor of "Observation.effectivePeriod"
+    // and also "Observation.effectivePeriod.start"
+    if let Some(base) = ancestor.strip_suffix("[x]") {
+        if descendant.starts_with(base)
+            && descendant.len() > base.len()
+            && descendant.as_bytes()[base.len()].is_ascii_uppercase()
+        {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Find base element for a differential element using FHIR's inheritance chain.
 ///
 /// This implements a 4-step lookup:
 /// 1. Try to find by ID in base snapshot
@@ -51,6 +116,59 @@ fn find_base_element(
 
     if let Some(elem) = base_elem {
         return Ok(Some(elem.clone()));
+    }
+
+    // Step 2.5: Look up the parent element's type and find the child in that type's SD.
+    // For example, `Location.address.postalCode` → parent is `Location.address` (type Address)
+    // → look for `Address.postalCode` in the Address StructureDefinition.
+    if let Some(dot_pos) = diff_elem.path.rfind('.') {
+        let parent_path = &diff_elem.path[..dot_pos];
+        let child_name = &diff_elem.path[dot_pos + 1..];
+
+        // Find the parent in the base snapshot
+        if let Some(parent_elem) = base_snapshot
+            .element
+            .iter()
+            .find(|e| e.path == parent_path && e.slice_name.is_none())
+        {
+            if let Some(ref types) = parent_elem.types {
+                if let Some(first_type) = types.first() {
+                    let type_url = if first_type.code.starts_with("http://") {
+                        first_type.code.clone()
+                    } else {
+                        format!(
+                            "http://hl7.org/fhir/StructureDefinition/{}",
+                            first_type.code
+                        )
+                    };
+
+                    if let Some(type_sd) = context.get_structure_definition(&type_url)? {
+                        if let Some(ref type_snapshot_def) = type_sd.snapshot {
+                            let snapshot_value =
+                                serde_json::to_value(type_snapshot_def).map_err(|e| {
+                                    Error::Expansion(format!(
+                                        "Failed to serialize snapshot: {}",
+                                        e
+                                    ))
+                                })?;
+                            if let Ok(type_snapshot) =
+                                serde_json::from_value::<Snapshot>(snapshot_value)
+                            {
+                                let target_path =
+                                    format!("{}.{}", first_type.code, child_name);
+                                if let Some(type_elem) = type_snapshot
+                                    .element
+                                    .iter()
+                                    .find(|e| e.path == target_path)
+                                {
+                                    return Ok(Some(type_elem.clone()));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Step 3: Try to find in base's base recursively
@@ -123,11 +241,75 @@ fn find_base_element(
     Ok(None)
 }
 
-/// Generate snapshot with optional base StructureDefinition for better lookups
+/// Expand a fragment contentReference (e.g. `#Observation.referenceRange`) into a fully
+/// qualified canonical form (`http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange`).
+fn expand_content_reference(cr: &str, context: &dyn FhirContext) -> String {
+    if let Some(fragment) = cr.strip_prefix('#') {
+        let resource_type = fragment.split('.').next().unwrap_or(fragment);
+        let canonical = format!(
+            "http://hl7.org/fhir/StructureDefinition/{}",
+            resource_type
+        );
+        if context
+            .get_structure_definition(&canonical)
+            .ok()
+            .flatten()
+            .is_some()
+        {
+            return format!("{}#{}", canonical, fragment);
+        }
+    }
+    cr.to_string()
+}
+
+/// Post-process snapshot elements: expand fragment contentReferences and
+/// default slicing.ordered to false.
+pub(crate) fn post_process_snapshot(snapshot: &mut Snapshot, context: &dyn FhirContext) {
+    for elem in &mut snapshot.element {
+        if let Some(ref mut slicing) = elem.slicing {
+            if slicing.ordered.is_none() {
+                slicing.ordered = Some(false);
+            }
+        }
+
+        if let Some(ref cr) = elem.content_reference {
+            if cr.starts_with('#') {
+                elem.content_reference = Some(expand_content_reference(cr, context));
+            }
+        }
+    }
+}
+
+/// Sort differential elements into canonical FHIR order: by path hierarchy,
+/// with children immediately after their parent and slices after the base element.
+fn sort_differential(differential: &Differential, base: &Snapshot) -> Differential {
+    let mut elements = differential.element.clone();
+
+    // Build a position map from the base snapshot for ordering
+    let base_positions: HashMap<&str, usize> = base
+        .element
+        .iter()
+        .enumerate()
+        .map(|(i, e)| (e.path.as_str(), i))
+        .collect();
+
+    elements.sort_by(|a, b| {
+        // Primary: order by base snapshot position of the path
+        let pos_a = base_positions.get(a.path.as_str()).copied().unwrap_or(usize::MAX);
+        let pos_b = base_positions.get(b.path.as_str()).copied().unwrap_or(usize::MAX);
+        pos_a
+            .cmp(&pos_b)
+            // Secondary: non-slices before slices on the same path
+            .then_with(|| a.is_slice().cmp(&b.is_slice()))
+    });
+
+    Differential { element: elements }
+}
+
+/// Generate snapshot with optional base StructureDefinition for better lookups.
 ///
 /// This is an advanced function that allows passing the base StructureDefinition
 /// to enable recursive lookup through the base chain and type-based resolution.
-///
 /// For most uses, prefer `generate_snapshot` which has a simpler API.
 pub(crate) fn generate_snapshot_internal(
     base: &Snapshot,
@@ -138,6 +320,11 @@ pub(crate) fn generate_snapshot_internal(
     // Validate inputs; use base as-is (shallow) to preserve original snapshot ordering/structure
     validate_snapshot(base)?;
     validate_differential(differential, base)?;
+
+    // Sort differential into canonical order before merging
+    let sorted_diff = sort_differential(differential, base);
+    let differential = &sorted_diff;
+
     let base_for_merge = base.clone();
 
     // Initialize slicing context to track slicing definitions and instances
@@ -247,16 +434,18 @@ pub(crate) fn generate_snapshot_internal(
                 }
             };
 
-            // If this is a slice, validate slicing rules
+            // If this is a slice, check slicing rules (warn only during generation —
+            // "closed" means no *further* slices in derived profiles, but the defining
+            // differential itself may introduce slices).
             if is_new_slice {
                 let can_add = slicing_ctx
                     .can_add_slice(&diff_elem.path, diff_elem.slice_name.as_ref().unwrap())?;
                 if !can_add {
-                    return Err(Error::Snapshot(format!(
-                        "Cannot add slice '{}' to path '{}' - slicing rules forbid it",
+                    eprintln!(
+                        "warn: Slice '{}' added to closed slicing on '{}' (allowed during snapshot generation)",
                         diff_elem.slice_name.as_ref().unwrap(),
                         diff_elem.path
-                    )));
+                    );
                 }
             }
 
@@ -264,7 +453,7 @@ pub(crate) fn generate_snapshot_internal(
             let position = if is_new_slice {
                 slicing_ctx.get_slice_position(&merged_elements, &merged)
             } else {
-                merged_elements.len()
+                find_insertion_position(&merged_elements, &merged)
             };
 
             merged_elements.insert(position, merged);
@@ -763,10 +952,10 @@ mod tests {
 
         let snapshot = generate_snapshot(&base, &differential, &ctx).unwrap();
 
-        // Order preserves base first, then new elements in differential order
+        // Canonical order: children are placed after their parent
         assert_eq!(snapshot.element[0].path, "Patient");
         assert_eq!(snapshot.element[1].path, "Patient.name");
-        assert_eq!(snapshot.element[2].path, "Patient.birthDate");
-        assert_eq!(snapshot.element[3].path, "Patient.name.family");
+        assert_eq!(snapshot.element[2].path, "Patient.name.family");
+        assert_eq!(snapshot.element[3].path, "Patient.birthDate");
     }
 }

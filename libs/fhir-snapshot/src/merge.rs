@@ -20,6 +20,10 @@ pub fn merge_element(
 ) -> ElementDefinition {
     let mut merged = base.clone();
 
+    // Always use the diff's path (it reflects the correct context, e.g.
+    // Location.address.city even when the base comes from Address.city)
+    merged.path = diff.path.clone();
+
     // Override simple fields from differential
     if diff.id.is_some() {
         merged.id = diff.id.clone();

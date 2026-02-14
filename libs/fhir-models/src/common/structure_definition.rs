@@ -58,6 +58,7 @@ pub struct StructureDefinition {
     pub version_algorithm_coding: Option<Coding>,
 
     /// Name for this structure definition (computer friendly)
+    #[serde(default)]
     pub name: String,
 
     /// Name for this structure definition (human friendly)

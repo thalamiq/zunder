@@ -104,6 +104,16 @@ enum Commands {
         module_prefix: Option<String>,
     },
 
+    /// Generate FHIR type metadata for the format crate (array cardinality info).
+    GenFormatMetadata {
+        /// Output file path for the generated JSON metadata.
+        #[arg(short, long, default_value = "libs/fhir-format/src/fhir_type_metadata.json")]
+        output: PathBuf,
+        /// FHIR version (R4, R4B, R5).
+        #[arg(short = 'v', long, default_value = "R4")]
+        fhir_version: String,
+    },
+
     /// Print CLI version.
     Version,
 }
@@ -250,6 +260,12 @@ async fn main() -> Result<()> {
                 },
         } => {
             run_diff_gen(&base, &snapshot, output.as_deref(), pretty)?;
+        }
+        Commands::GenFormatMetadata {
+            output,
+            fhir_version,
+        } => {
+            run_gen_format_metadata(&output, &fhir_version).await?;
         }
         Commands::Codegen {
             output,
@@ -463,6 +479,97 @@ fn run_diff_gen(base: &Path, snapshot: &Path, output: Option<&Path>, pretty: boo
 
     let result_value = serde_json::to_value(&result_sd)?;
     write_json_output(&result_value, output, pretty)?;
+    Ok(())
+}
+
+async fn run_gen_format_metadata(output: &Path, fhir_version: &str) -> Result<()> {
+    use std::collections::BTreeMap;
+
+    let ctx = create_context(fhir_version, &[]).await?;
+    let all_sds = ctx.all_structure_definitions();
+
+    // Outer map: type_name -> { property_name -> { type, multiple } }
+    let mut metadata: BTreeMap<String, BTreeMap<String, Value>> = BTreeMap::new();
+
+    for sd_value in &all_sds {
+        let sd: StructureDefinition = match serde_json::from_value(sd_value.as_ref().clone()) {
+            Ok(sd) => sd,
+            Err(_) => continue,
+        };
+
+        let snapshot = match &sd.snapshot {
+            Some(s) => s,
+            None => continue,
+        };
+
+        for element in &snapshot.element {
+            let path = &element.path;
+
+            // Split path into parent_type and property_name.
+            // E.g., "Patient.name" -> ("Patient", "name")
+            // E.g., "Patient.contact.name" -> ("Patient.contact", "name")
+            // Skip root elements like "Patient" (no dot).
+            let dot_pos = match path.rfind('.') {
+                Some(p) => p,
+                None => continue,
+            };
+
+            let parent_type = &path[..dot_pos];
+            let property_name = &path[dot_pos + 1..];
+
+            // Skip sliced elements (contain ':') — they don't define new properties.
+            if property_name.contains(':') {
+                continue;
+            }
+
+            // Determine if this is an array: max != "0" && max != "1"
+            let is_multiple = element
+                .max
+                .as_ref()
+                .map(|m| m != "0" && m != "1")
+                .unwrap_or(false);
+
+            // Determine the element type.
+            let element_type = if let Some(types) = &element.types {
+                if let Some(first) = types.first() {
+                    if first.code == "BackboneElement" || first.code == "Element" {
+                        // BackboneElement: use the full path as the synthetic type name.
+                        path.to_string()
+                    } else {
+                        first.code.clone()
+                    }
+                } else {
+                    "string".to_string()
+                }
+            } else if element.content_reference.is_some() {
+                // Content references point to another element's structure.
+                "BackboneElement".to_string()
+            } else {
+                "string".to_string()
+            };
+
+            let type_entry = metadata
+                .entry(parent_type.to_string())
+                .or_default();
+
+            let prop_value = serde_json::json!({
+                "type": element_type,
+                "multiple": is_multiple
+            });
+
+            type_entry.insert(property_name.to_string(), prop_value);
+        }
+    }
+
+    let json = serde_json::to_string_pretty(&metadata)?;
+    fs::write(output, &json)
+        .with_context(|| format!("Failed to write metadata to {:?}", output))?;
+
+    eprintln!(
+        "Generated format metadata with {} types to {:?}",
+        metadata.len(),
+        output
+    );
     Ok(())
 }
 

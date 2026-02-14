@@ -867,6 +867,11 @@ pub struct UiConfig {
     /// Admin session TTL in seconds.
     #[serde(default = "default_ui_session_ttl_seconds")]
     pub session_ttl_seconds: u64,
+
+    /// Enable runtime configuration API (settings page in admin UI).
+    /// When false, the /admin/config endpoints return 404 and the settings page is hidden.
+    #[serde(default = "default_true")]
+    pub runtime_config_enabled: bool,
 }
 
 impl Default for UiConfig {
@@ -877,6 +882,7 @@ impl Default for UiConfig {
             password: None,
             session_secret: None,
             session_ttl_seconds: default_ui_session_ttl_seconds(),
+            runtime_config_enabled: true,
         }
     }
 }
@@ -1239,6 +1245,7 @@ impl Config {
                 "ui.session_ttl_seconds",
                 default_ui_session_ttl_seconds() as i64,
             )?
+            .set_default("ui.runtime_config_enabled", default_true())?
             .set_default("auth.enabled", false)?
             .set_default("auth.required", default_true())?
             .set_default(

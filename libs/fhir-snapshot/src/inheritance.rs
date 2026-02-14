@@ -146,10 +146,14 @@ pub fn validate_cardinality_inheritance(snapshot: &Snapshot) -> Result<()> {
                     if let Some(parent) = element_map.get(parent_path) {
                         if let Some(parent_max) = &parent.max {
                             if parent_max == "0" {
-                                return Err(crate::error::Error::Snapshot(format!(
-                                    "Element '{}' has min={} but parent '{}' has max=0",
+                                // This is common in profiles: a parent is zeroed out
+                                // but child definitions inherited from the base still
+                                // carry their original min. The children are effectively
+                                // unreachable, so we just warn.
+                                eprintln!(
+                                    "warn: Element '{}' has min={} but parent '{}' has max=0 (children are unreachable)",
                                     element.path, min, parent_path
-                                )));
+                                );
                             }
                         }
                     }
@@ -326,9 +330,11 @@ mod tests {
             ],
         };
 
-        // Should fail because parent has max=0 but child has min=1
+        // This is now allowed (warning only) — parent max=0 with child min=1
+        // is common in profiles where the parent is zeroed out but inherited
+        // child definitions still carry their original cardinality.
         let result = validate_cardinality_inheritance(&snapshot);
-        assert!(result.is_err());
+        assert!(result.is_ok());
     }
 
     #[test]

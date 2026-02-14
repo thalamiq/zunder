@@ -1082,6 +1082,33 @@ impl DefaultFhirContext {
         PackageLock::from_packages(root_name, root_version, &packages)
     }
 
+    /// Insert an additional resource into this context's canonical index.
+    ///
+    /// The resource must have a `url` field. An optional `version` field is used
+    /// for version-specific lookups; when absent the resource is indexed as "0".
+    pub fn add_resource(&mut self, resource: Value) {
+        let Some(canonical_url) = resource.get("url").and_then(|v| v.as_str()).map(String::from)
+        else {
+            return;
+        };
+        let version_str = resource
+            .get("version")
+            .and_then(|v| v.as_str())
+            .unwrap_or("0")
+            .to_string();
+        let algorithm = extract_version_algorithm(&resource);
+        self.resources_by_canonical
+            .entry(canonical_url.clone())
+            .or_default()
+            .insert(VersionKey::new(&version_str, algorithm), Arc::new(resource));
+        // Invalidate the SD cache for this canonical URL so the new resource is picked up.
+        let mut cache = self
+            .structure_definition_cache
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        cache.pop(&canonical_url);
+    }
+
     fn get_from_index(&self, canonical_url: &str, version: Option<&str>) -> Option<Arc<Value>> {
         self.get_from_index_ref(canonical_url, version)
             .map(Arc::clone)

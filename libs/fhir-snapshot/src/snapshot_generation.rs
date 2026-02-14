@@ -8,6 +8,7 @@
 use crate::error::{Error, Result};
 use crate::generator::{
     generate_differential as generate_diff_elements, generate_snapshot_internal,
+    post_process_snapshot,
 };
 // Types are used directly from fhir_models
 use zunder_context::FhirContext;
@@ -41,6 +42,15 @@ pub fn generate_structure_definition_snapshot(
     // Resolve base StructureDefinition (either provided or via baseDefinition URL)
     let resolved_base_sd = resolve_base_structure_definition(base_sd, derived_sd, context)?;
 
+    // If the base SD only has a differential (is itself a profile), recursively generate its snapshot
+    let resolved_base_sd = if resolved_base_sd.snapshot.is_none()
+        && resolved_base_sd.differential.is_some()
+    {
+        generate_structure_definition_snapshot(None, &resolved_base_sd, context)?
+    } else {
+        resolved_base_sd
+    };
+
     // Extract base snapshot
     let base_snapshot_models = resolved_base_sd
         .snapshot
@@ -52,12 +62,15 @@ pub fn generate_structure_definition_snapshot(
     let derived_diff = derived_diff_models;
 
     // Generate new snapshot - pass base SD for better element lookup
-    let new_snapshot = generate_snapshot_internal(
+    let mut new_snapshot = generate_snapshot_internal(
         base_snapshot,
         derived_diff,
         Some(&resolved_base_sd),
         context,
     )?;
+
+    // Post-process: expand fragment contentReferences, default slicing.ordered
+    post_process_snapshot(&mut new_snapshot, context);
 
     // Merge StructureDefinition metadata
     let mut result_sd = merge_structure_definition_metadata(&resolved_base_sd, derived_sd);

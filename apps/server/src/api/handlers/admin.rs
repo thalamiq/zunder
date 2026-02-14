@@ -97,6 +97,7 @@ pub struct UiConfigResponse {
     pub enabled: bool,
     pub title: String,
     pub requires_auth: bool,
+    pub runtime_config_enabled: bool,
 }
 
 /// Get UI configuration (public endpoint)
@@ -107,6 +108,7 @@ pub async fn get_ui_config(State(state): State<AppState>) -> Result<Response> {
         enabled: config.enabled,
         title: config.title.clone(),
         requires_auth: config.password.is_some(),
+        runtime_config_enabled: config.runtime_config_enabled,
     };
 
     Ok((StatusCode::OK, Json(response)).into_response())
