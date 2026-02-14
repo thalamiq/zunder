@@ -9,11 +9,14 @@ use ferrum_context::{
     ConformanceResourceProvider, DefaultFhirContext, Error as ContextError,
     FallbackConformanceProvider, FhirContext, FlexibleFhirContext, Result as ContextResult,
 };
-use ferrum_package::FhirPackage;
-use ferrum_registry_client::{FileSystemCache, PackageCache, RegistryClient};
+use ferrum_registry_client::RegistryClient;
 
 use crate::db::PostgresResourceStore;
 use crate::Result;
+
+/// Global cache for core FHIR contexts, keyed by FHIR version (e.g. "R4").
+/// Populated by `load_core_fhir_context`, read by `core_fhir_context`.
+static CORE_CTX: OnceLock<std::sync::Mutex<HashMap<String, Arc<dyn FhirContext>>>> = OnceLock::new();
 
 pub struct DbConformanceProvider {
     store: PostgresResourceStore,
@@ -58,96 +61,14 @@ pub fn empty_fhir_context() -> Result<Arc<dyn FhirContext>> {
     Ok(Arc::new(ctx))
 }
 
-/// Ensure the core FHIR package is cached, downloading if necessary.
+/// Load the core FHIR package into memory via the registry client and cache it globally.
 ///
-/// This should be called during application startup to ensure the package is available
-/// before any services attempt to load it. Downloads from Simplifier registry if not
-/// already cached locally.
+/// Downloads the package from the Simplifier registry if not already cached by the
+/// `RegistryClient`. Builds a `DefaultFhirContext` in memory and stores it in a global
+/// so subsequent calls for the same version return immediately.
 ///
-/// This function is optimized to avoid loading the package into RAM - it only checks
-/// if the package directory exists and downloads if needed.
-///
-/// # Arguments
-///
-/// * `fhir_version` - FHIR version string (e.g., "R4", "R4B", "R5")
-///
-/// # Errors
-///
-/// Returns an error if:
-/// - The FHIR version is unsupported
-/// - Download from registry fails
-/// - Package storage fails
-pub async fn ensure_core_package_cached(fhir_version: &str) -> Result<()> {
-    let (core_name, core_version) = match fhir_version {
-        "R4" => ("hl7.fhir.r4.core", "4.0.1"),
-        "R4B" => ("hl7.fhir.r4b.core", "4.3.0"),
-        "R5" => ("hl7.fhir.r5.core", "5.0.0"),
-        other => {
-            return Err(crate::Error::Internal(format!(
-                "Unsupported FHIR version: {}",
-                other
-            )));
-        }
-    };
-
-    // Use spawn_blocking to avoid blocking async runtime for file system operations
-    let core_name_clone = core_name.to_string();
-    let core_version_clone = core_version.to_string();
-
-    let is_cached = tokio::task::spawn_blocking(move || {
-        let cache = FileSystemCache::new(None);
-        cache.has_package(&core_name_clone, &core_version_clone)
-    })
-    .await
-    .map_err(|e| crate::Error::Internal(format!("Cache check task failed: {}", e)))?;
-
-    if is_cached {
-        tracing::debug!(
-            package = core_name,
-            version = core_version,
-            "Core FHIR package already cached"
-        );
-        return Ok(());
-    }
-
-    tracing::info!(
-        package = core_name,
-        version = core_version,
-        "Core FHIR package not found in cache, downloading..."
-    );
-
-    // Download and store the package (RegistryClient handles storage)
-    let client = RegistryClient::new(None);
-    client
-        .load_or_download_package(core_name, core_version)
-        .await
-        .map_err(|e| {
-            crate::Error::FhirContext(format!(
-                "Failed to download core package {}#{}: {}",
-                core_name, core_version, e
-            ))
-        })?;
-
-    tracing::info!(
-        package = core_name,
-        version = core_version,
-        "Core FHIR package successfully cached"
-    );
-
-    Ok(())
-}
-
-/// Create an in-memory FhirContext for the core FHIR package (no DB access).
-///
-/// This is used by services that must avoid database lookups during execution (e.g. indexing),
-/// but still require core StructureDefinitions for FHIRPath type operations like `ofType(uri)`.
-///
-/// **Important**: Call `ensure_core_package_cached()` during startup before using this function
-/// to ensure the package is available in the cache.
-pub fn cached_core_fhir_context(fhir_version: &str) -> Result<Arc<dyn FhirContext>> {
-    static CORE_CTX: OnceLock<std::sync::Mutex<HashMap<String, Arc<dyn FhirContext>>>> =
-        OnceLock::new();
-
+/// This should be called once during application startup.
+pub async fn load_core_fhir_context(fhir_version: &str) -> Result<Arc<dyn FhirContext>> {
     let cache_map = CORE_CTX.get_or_init(|| std::sync::Mutex::new(HashMap::new()));
     if let Some(ctx) = cache_map.lock().unwrap().get(fhir_version).cloned() {
         return Ok(ctx);
@@ -165,20 +86,22 @@ pub fn cached_core_fhir_context(fhir_version: &str) -> Result<Arc<dyn FhirContex
         }
     };
 
-    let cache = FileSystemCache::new(None);
-    let package_path = cache
-        .cache_root()
-        .join(format!("{}#{}", core_name, core_version))
-        .join("package");
-    let package = FhirPackage::from_directory(&package_path).map_err(|e| {
-        crate::Error::FhirContext(format!(
-            "Failed to load core package {}#{} from cache {}: {}",
-            core_name,
-            core_version,
-            package_path.display(),
-            e
-        ))
-    })?;
+    tracing::info!(
+        package = core_name,
+        version = core_version,
+        "Loading core FHIR package via registry client..."
+    );
+
+    let client = RegistryClient::new(None);
+    let package = client
+        .load_or_download_package(core_name, core_version)
+        .await
+        .map_err(|e| {
+            crate::Error::FhirContext(format!(
+                "Failed to load core package {}#{}: {}",
+                core_name, core_version, e
+            ))
+        })?;
 
     let ctx: Arc<dyn FhirContext> = Arc::new(DefaultFhirContext::new(package));
     cache_map
@@ -186,7 +109,32 @@ pub fn cached_core_fhir_context(fhir_version: &str) -> Result<Arc<dyn FhirContex
         .unwrap()
         .insert(fhir_version.to_string(), ctx.clone());
 
+    tracing::info!(
+        package = core_name,
+        version = core_version,
+        "Core FHIR context loaded successfully"
+    );
+
     Ok(ctx)
+}
+
+/// Get the previously-loaded core FHIR context for a given version.
+///
+/// This is a synchronous getter intended for use in `spawn_blocking` contexts
+/// (e.g. indexing). Panics if `load_core_fhir_context` was not called first.
+pub fn core_fhir_context(fhir_version: &str) -> Result<Arc<dyn FhirContext>> {
+    let cache_map = CORE_CTX.get_or_init(|| std::sync::Mutex::new(HashMap::new()));
+    cache_map
+        .lock()
+        .unwrap()
+        .get(fhir_version)
+        .cloned()
+        .ok_or_else(|| {
+            crate::Error::Internal(format!(
+                "Core FHIR context for version '{}' not loaded. Call load_core_fhir_context() at startup first.",
+                fhir_version
+            ))
+        })
 }
 
 /// Empty conformance provider that returns no resources.

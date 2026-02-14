@@ -48,9 +48,9 @@ impl WorkerState {
                 other => crate::Error::Internal(format!("Migration failed: {}", other)),
             })?;
 
-        // Ensure core FHIR package is cached (needed by IndexingService)
-        tracing::info!("Ensuring core FHIR package is available...");
-        crate::conformance::ensure_core_package_cached(&config.fhir.version).await?;
+        // Load core FHIR package into memory (needed by IndexingService)
+        tracing::info!("Loading core FHIR package...");
+        crate::conformance::load_core_fhir_context(&config.fhir.version).await?;
 
         // Create job queue
         let job_queue: Arc<dyn JobQueue> = Arc::new(PostgresJobQueue::new(

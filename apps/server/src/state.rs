@@ -2,7 +2,7 @@
 
 use crate::{
     config::Config,
-    conformance::cached_core_fhir_context,
+    conformance::load_core_fhir_context,
     db::{
         admin::AdminRepository, packages::PackageRepository, search::engine::SearchEngine,
         PostgresResourceStore, RuntimeConfigRepository,
@@ -146,12 +146,9 @@ impl AppState {
             crate::startup::install_all_packages(config_arc.as_ref(), &db_pool).await?;
         }
 
-        // Ensure core FHIR package is cached (download if needed)
-        tracing::info!("Ensuring core FHIR package is available...");
-        crate::conformance::ensure_core_package_cached(&config_arc.fhir.version).await?;
-
-        // Create DB-backed FHIR context (no fallback - fail fast if resources not in DB)
-        let fhir_context = cached_core_fhir_context(&config_arc.fhir.version)?;
+        // Load core FHIR package into memory (download if needed)
+        tracing::info!("Loading core FHIR package...");
+        let fhir_context = load_core_fhir_context(&config_arc.fhir.version).await?;
 
         // Create FHIRPath engine using the already-loaded context
         let fhirpath_engine = Arc::new(FhirPathEngine::new(fhir_context.clone(), None));

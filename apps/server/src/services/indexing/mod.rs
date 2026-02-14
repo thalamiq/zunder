@@ -60,7 +60,7 @@ impl IndexingService {
         //
         // We still need core StructureDefinitions so FHIRPath type operations like
         // `ofType(canonical)` / `ofType(uri)` work, so we use an in-memory core context.
-        let core_context = crate::conformance::cached_core_fhir_context(fhir_version)?;
+        let core_context = crate::conformance::core_fhir_context(fhir_version)?;
         let fhirpath_resolver = Arc::new(resolver::IndexingResourceResolver::new_with_pool(
             pool.clone(),
             4096,
@@ -1174,7 +1174,7 @@ pub(super) fn get_or_compile_plan(
         engines_write
             .entry(fhir_version.to_string())
             .or_insert_with(|| {
-                let core_context = crate::conformance::cached_core_fhir_context(fhir_version)
+                let core_context = crate::conformance::core_fhir_context(fhir_version)
                     .unwrap_or_else(|_| {
                         panic!("Failed to load FHIR context for version: {}", fhir_version)
                     });

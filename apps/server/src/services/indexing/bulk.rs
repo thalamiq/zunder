@@ -455,7 +455,7 @@ impl BulkIndexer {
             engines_write
                 .entry(fhir_version.to_string())
                 .or_insert_with(|| {
-                    let core_context = crate::conformance::cached_core_fhir_context(fhir_version)
+                    let core_context = crate::conformance::core_fhir_context(fhir_version)
                         .unwrap_or_else(|_| {
                             panic!("Failed to load FHIR context for version: {}", fhir_version)
                         });

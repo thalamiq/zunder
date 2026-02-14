@@ -102,7 +102,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN useradd -m -u 1001 -s /usr/sbin/nologin fhir && \
     mkdir -p /app/migrations /app/data && \
-    chown -R fhir:fhir /app
+    chown -R fhir:fhir /app && \
+    mkdir -p /home/fhir/.fhir/packages && \
+    chown -R fhir:fhir /home/fhir/.fhir
 
 WORKDIR /app
 
