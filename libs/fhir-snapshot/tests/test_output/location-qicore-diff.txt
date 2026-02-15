@@ -1,25 +1,25 @@
 Element count: generated 46 vs expected 59
-Missing element: Location.address.extension
 Missing element: Location.identifier.system
-Missing element: Location.address.type
-Missing element: Location.identifier.type
-Missing element: Location.identifier.assigner
-Missing element: Location.identifier.extension
-Missing element: Location.address.use
-Missing element: Location.address.period
-Missing element: Location.address.district
-Missing element: Location.identifier.value
-Missing element: Location.address.text
-Missing element: Location.address.country
 Missing element: Location.identifier.period
-Missing element: Location.identifier.use
+Missing element: Location.identifier.type
+Missing element: Location.address.country
 Missing element: Location.identifier
+Missing element: Location.identifier.assigner
+Missing element: Location.address.text
+Missing element: Location.address.period
+Missing element: Location.address.extension
+Missing element: Location.identifier.value
+Missing element: Location.address.use
 Missing element: Location.identifier.id
 Missing element: Location.address.id
-Extra element: Location.identifier:identifier.use
+Missing element: Location.address.district
+Missing element: Location.identifier.extension
+Missing element: Location.address.type
+Missing element: Location.identifier.use
 Extra element: Location.identifier:identifier.value
 Extra element: Location.identifier:identifier
+Extra element: Location.identifier:identifier.use
 Extra element: Location.identifier:identifier.system
-Element Location.physicalType.binding: generated={"strength":"example","description":"Physical form of the location.","valueSet":"http://hl7.org/fhir/ValueSet/location-physical-type"}, expected={"strength":"example","description":"Physical form of the location.","valueSet":"http://hl7.org/fhir/ValueSet/location-physical-type|4.0.1"}
-Element Location.address.postalCode.example: generated=[{"label":"General","valueString":"9132"}], expected=[{"label":"General","valueString":9132}]
 Element Location.language.binding: generated={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages"}, expected={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"}
+Element Location.address.postalCode.example: generated=[{"label":"General","valueString":"9132"}], expected=[{"label":"General","valueString":9132}]
+Element Location.physicalType.binding: generated={"strength":"example","description":"Physical form of the location.","valueSet":"http://hl7.org/fhir/ValueSet/location-physical-type"}, expected={"strength":"example","description":"Physical form of the location.","valueSet":"http://hl7.org/fhir/ValueSet/location-physical-type|4.0.1"}

@@ -1449,13 +1449,13 @@
             "map": "N/A"
           }
         ],
-        "fixedString": "Kansaneläkelaitos",
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable",
             "valueBoolean": true
           }
-        ]
+        ],
+        "fixedString": "Kansaneläkelaitos"
       },
       {
         "id": "Provenance.agent:RecordedByPractitioner.who.reference",
@@ -3152,6 +3152,9 @@
       }
     ]
   },
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
@@ -3173,8 +3176,5 @@
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
       "valueCode": "sec"
     }
-  ],
-  "meta": {
-    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
-  }
+  ]
 }

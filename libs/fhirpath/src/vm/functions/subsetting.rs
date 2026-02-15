@@ -154,11 +154,12 @@ pub fn exclude(collection: Collection, other: Option<&Collection>) -> Result<Col
     // Build HashSet from other collection for O(1) lookups
     let other_set: HashSet<&Value> = other.iter().collect();
 
-    let mut seen = HashSet::with_capacity(collection.len());
     let mut result = Collection::empty();
 
+    // Per FHIRPath spec, exclude does NOT deduplicate — it only removes
+    // items present in other, preserving duplicates in the source collection.
     for item in collection.iter() {
-        if !other_set.contains(item) && seen.insert(item) {
+        if !other_set.contains(item) {
             result.push(item.clone());
         }
     }

@@ -1,233 +1,231 @@
 Element count: generated 53 vs expected 270
-Missing element: Provenance.agent:Custodian.onBehalfOf
-Missing element: Provenance.agent:RecordedByPatient.who
-Missing element: Provenance.agent:Custodian.who.identifier.extension
-Missing element: Provenance.agent.role
-Missing element: Provenance.agent:RecordedByPatient.role.coding.display
-Missing element: Provenance.agent:RecordedByPractitioner.role.id
-Missing element: Provenance.agent:Device.extension
-Missing element: Provenance.agent:Patient.type
-Missing element: Provenance.agent:RecordedByPatient.who.id
-Missing element: Provenance.agent:RecordedByPractitioner.who.id
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.extension
-Missing element: Provenance.agent:Patient.role.coding.extension
-Missing element: Provenance.agent:RecordedByRelatedPerson.role
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding
-Missing element: Provenance.agent:Device.role.id
-Missing element: Provenance.agent:RecordedByRelatedPerson.who.type
-Missing element: Provenance.agent:RecordedByPatient.role.coding.extension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.modifierExtension
-Missing element: Provenance.agent:Custodian.id
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.display
-Missing element: Provenance.agent:ServiceProvider.role.coding.extension
-Missing element: Provenance.agent:Patient.role.coding.version
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.system
-Missing element: Provenance.agent.type
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.reference
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding.code
-Missing element: Provenance.agent:RecordedByPatient.modifierExtension
-Missing element: Provenance.agent:ServiceProvider.who.identifier.extension
-Missing element: Provenance.agent:ServiceProvider.id
-Missing element: Provenance.target.type
-Missing element: Provenance.agent:RecordedByPatient.extension
-Missing element: Provenance.agent:Custodian.role
-Missing element: Provenance.agent:Custodian.role.coding.extension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier
-Missing element: Provenance.agent:Custodian.role.coding
-Missing element: Provenance.agent:Patient.role.extension
-Missing element: Provenance.agent:Device.type
-Missing element: Provenance.target.display
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.system
-Missing element: Provenance.agent:RecordedByPatient.who.display
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding
-Missing element: Provenance.agent:Device.onBehalfOf
-Missing element: Provenance.agent:Device.role
-Missing element: Provenance.agent:RecordedByPractitioner.who.identifier
-Missing element: Provenance.agent:ServiceProvider.who.reference
-Missing element: Provenance.agent:Patient.role.id
-Missing element: Provenance.meta.versionId
-Missing element: Provenance.agent:Device.role.coding.system
-Missing element: Provenance.agent:RecordedByPatient.role.extension
-Missing element: Provenance.agent:Device.role.coding.extension
-Missing element: Provenance.agent:ServiceProvider.role.coding.version
-Missing element: Provenance.agent:RecordedByPatient.role.id
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.code
-Missing element: Provenance.agent:RecordedByPatient.who.type
-Missing element: Provenance.agent:Device.who
-Missing element: Provenance.agent:ServiceProvider.who.identifier.assigner
-Missing element: Provenance.agent:RecordedByPractitioner.who.type
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding.userSelected
-Missing element: Provenance.agent:RecordedByPractitioner.id
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.value
-Missing element: Provenance.agent:Device.role.coding.id
-Missing element: Provenance.agent:Device.who.reference
-Missing element: Provenance.agent:Custodian.who.identifier.assigner
-Missing element: Provenance.agent:Custodian.who.display
-Missing element: Provenance.agent:RecordedByRelatedPerson.extension
-Missing element: Provenance.agent:Custodian.role.coding.id
-Missing element: Provenance.agent:Custodian.who.type
-Missing element: Provenance.agent:RecordedByRelatedPerson.who.id
-Missing element: Provenance.agent:Custodian.modifierExtension
-Missing element: Provenance.agent:ServiceProvider.role.extension
-Missing element: Provenance.agent:ServiceProvider.extension
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding.id
-Missing element: Provenance.agent:Custodian.who.identifier.type
-Missing element: Provenance.agent:RecordedByPatient.who.extension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.system
-Missing element: Provenance.agent:RecordedByPatient.type
-Missing element: Provenance.agent:Custodian.role.text
-Missing element: Provenance.agent:RecordedByRelatedPerson.type
-Missing element: Provenance.agent:Custodian.who.identifier
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.extension
-Missing element: Provenance.agent:RecordedByRelatedPerson.who
-Missing element: Provenance.agent:RecordedByPatient.who.reference
-Missing element: Provenance.agent:Patient.modifierExtension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.extension
-Missing element: Provenance.agent:Patient.role.coding.id
-Missing element: Provenance.meta.tag
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding
-Missing element: Provenance.agent:ServiceProvider.role.text
-Missing element: Provenance.agent:ServiceProvider.who.id
-Missing element: Provenance.agent:Device.who.extension
-Missing element: Provenance.agent:RecordedByRelatedPerson.who.extension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.display
-Missing element: Provenance.agent:Custodian.role.coding.system
-Missing element: Provenance.agent:Device.role.text
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.extension
-Missing element: Provenance.agent:Patient.who.display
-Missing element: Provenance.agent:RecordedByPatient.role.coding.system
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.id
-Missing element: Provenance.meta.extension
-Missing element: Provenance.agent:Patient.who.id
-Missing element: Provenance.agent:ServiceProvider.who.type
-Missing element: Provenance.agent:RecordedByPractitioner.role
-Missing element: Provenance.agent:Custodian.role.coding.code
-Missing element: Provenance.agent:Patient.onBehalfOf
-Missing element: Provenance.agent:ServiceProvider.onBehalfOf
-Missing element: Provenance.agent:RecordedByPatient.role.coding.id
-Missing element: Provenance.agent:ServiceProvider.who.identifier.type
-Missing element: Provenance.agent:Device.who.display
-Missing element: Provenance.agent:ServiceProvider.who.extension
-Missing element: Provenance.agent:Custodian.who.identifier.system
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.display
-Missing element: Provenance.agent:Device.who.id
-Missing element: Provenance.agent:RecordedByPatient.id
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.id
-Missing element: Provenance.agent:RecordedByPatient.onBehalfOf
-Missing element: Provenance.agent:RecordedByPractitioner.who.extension
-Missing element: Provenance.agent:Custodian.who.reference
-Missing element: Provenance.agent:Patient.who
-Missing element: Provenance.agent:Custodian.type
-Missing element: Provenance.agent:Custodian.who
-Missing element: Provenance.agent.extension
-Missing element: Provenance.agent:Patient.role.coding.display
-Missing element: Provenance.agent:RecordedByPatient.role.coding.code
-Missing element: Provenance.agent:ServiceProvider.modifierExtension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.userSelected
-Missing element: Provenance.target.identifier
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.use
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.id
-Missing element: Provenance.agent:ServiceProvider.who.identifier.id
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.version
-Missing element: Provenance.agent:RecordedByPractitioner.role.extension
-Missing element: Provenance.agent:Custodian.who.identifier.period
-Missing element: Provenance.agent:Device.role.coding.display
-Missing element: Provenance.agent:RecordedByPractitioner.modifierExtension
-Missing element: Provenance.agent:RecordedByPractitioner.extension
-Missing element: Provenance.agent:RecordedByPatient.role.coding.version
-Missing element: Provenance.agent:RecordedByRelatedPerson.onBehalfOf
-Missing element: Provenance.agent:Patient.who.reference
-Missing element: Provenance.agent:Custodian.who.identifier.value
-Missing element: Provenance.agent:PractitionerOrganizationUnit.type
-Missing element: Provenance.agent:Custodian.who.identifier.id
-Missing element: Provenance.agent.modifierExtension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.type
-Missing element: Provenance.agent:Device.who.identifier
-Missing element: Provenance.agent:RecordedByPatient.role.coding
-Missing element: Provenance.agent:Custodian.extension
-Missing element: Provenance.agent:RecordedByPatient.role
-Missing element: Provenance.agent:Custodian.role.coding.display
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.id
-Missing element: Provenance.meta.lastUpdated
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.code
-Missing element: Provenance.target.id
-Missing element: Provenance.meta.source
-Missing element: Provenance.agent:Custodian.who.identifier.use
-Missing element: Provenance.agent:Device.modifierExtension
-Missing element: Provenance.agent:RecordedByPatient.who.identifier
-Missing element: Provenance.agent:RecordedByPractitioner.who.display
-Missing element: Provenance.agent.onBehalfOf
-Missing element: Provenance.agent:Custodian.role.coding.version
-Missing element: Provenance.agent:Device.role.coding
-Missing element: Provenance.agent:PractitionerOrganizationUnit.extension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.onBehalfOf
-Missing element: Provenance.meta.id
 Missing element: Provenance.agent:Custodian.role.coding.userSelected
-Missing element: Provenance.agent:Device.role.extension
-Missing element: Provenance.agent:Patient.role.text
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.userSelected
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.type
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.period
-Missing element: Provenance.agent:Patient.who.identifier
-Missing element: Provenance.agent:Custodian.role.id
-Missing element: Provenance.agent:Patient.role.coding.code
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.version
-Missing element: Provenance.agent:PractitionerOrganizationUnit.id
-Missing element: Provenance.agent:ServiceProvider.who.identifier.period
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.extension
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding.system
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.extension
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.text
-Missing element: Provenance.agent:Custodian.role.extension
-Missing element: Provenance.agent:ServiceProvider.who
-Missing element: Provenance.agent:RecordedByRelatedPerson.id
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding.display
+Missing element: Provenance.agent:Device.who.reference
 Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.id
-Missing element: Provenance.agent:RecordedByPractitioner.type
-Missing element: Provenance.agent:Custodian.who.extension
-Missing element: Provenance.agent:PractitionerOrganizationUnit.role.text
-Missing element: Provenance.agent:ServiceProvider.role.id
-Missing element: Provenance.agent:ServiceProvider.role.coding.userSelected
-Missing element: Provenance.agent:RecordedByRelatedPerson.who.identifier
-Missing element: Provenance.agent:Patient.role.coding.userSelected
-Missing element: Provenance.agent:Device.id
-Missing element: Provenance.agent:RecordedByPatient.role.text
-Missing element: Provenance.agent.id
-Missing element: Provenance.agent:Patient.role
-Missing element: Provenance.agent:RecordedByRelatedPerson.who.display
-Missing element: Provenance.agent.who
-Missing element: Provenance.agent:Device.role.coding.userSelected
-Missing element: Provenance.agent:Patient.extension
+Missing element: Provenance.agent:Custodian.who.display
 Missing element: Provenance.target.extension
-Missing element: Provenance.agent:Patient.who.extension
-Missing element: Provenance.agent:RecordedByPractitioner.role.text
-Missing element: Provenance.agent:RecordedByRelatedPerson.who.reference
-Missing element: Provenance.agent:Patient.role.coding
-Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.assigner
-Missing element: Provenance.agent:Device.role.coding.code
-Missing element: Provenance.agent:RecordedByRelatedPerson.modifierExtension
-Missing element: Provenance.agent:Custodian.who.id
-Missing element: Provenance.agent:RecordedByPatient.role.coding.userSelected
-Missing element: Provenance.agent:ServiceProvider.role.coding.id
-Missing element: Provenance.agent:ServiceProvider.type
-Missing element: Provenance.agent:ServiceProvider.who.identifier.use
-Missing element: Provenance.agent:Patient.who.type
-Missing element: Provenance.agent:RecordedByPractitioner.role.coding.extension
-Missing element: Provenance.agent:RecordedByRelatedPerson.role.id
-Missing element: Provenance.agent:Patient.role.coding.system
+Missing element: Provenance.agent:ServiceProvider.role.coding.version
+Missing element: Provenance.agent:RecordedByPatient.who
+Missing element: Provenance.target.identifier
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding.code
 Missing element: Provenance.agent:RecordedByPractitioner.role.coding.version
-Missing element: Provenance.agent:Patient.id
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.code
+Missing element: Provenance.agent:RecordedByPatient.role.coding.display
+Missing element: Provenance.agent:Device.onBehalfOf
+Missing element: Provenance.agent:Custodian.role.coding.id
+Missing element: Provenance.agent.id
+Missing element: Provenance.agent:Device.role.id
+Missing element: Provenance.agent:RecordedByPractitioner.id
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding.extension
 Missing element: Provenance.meta.security
+Missing element: Provenance.agent:Custodian.who.identifier.extension
+Missing element: Provenance.agent:RecordedByPractitioner.type
+Missing element: Provenance.agent:ServiceProvider.who.id
+Missing element: Provenance.agent.extension
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding.id
+Missing element: Provenance.agent:Custodian.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.display
+Missing element: Provenance.agent:Device.type
+Missing element: Provenance.agent:Patient.role.coding.userSelected
+Missing element: Provenance.agent:Device.who.display
+Missing element: Provenance.agent:Device.role.text
+Missing element: Provenance.agent:RecordedByPatient.who.id
+Missing element: Provenance.agent:ServiceProvider.modifierExtension
+Missing element: Provenance.agent:Custodian.who.identifier
+Missing element: Provenance.agent:ServiceProvider.role.text
+Missing element: Provenance.agent:Custodian.who.reference
+Missing element: Provenance.agent:Custodian.role.coding.version
+Missing element: Provenance.agent:ServiceProvider.role.coding.userSelected
+Missing element: Provenance.agent:RecordedByPatient.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.version
+Missing element: Provenance.agent:Custodian.role.coding.code
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding.display
+Missing element: Provenance.agent:Device.who
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.extension
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.id
+Missing element: Provenance.agent:RecordedByPractitioner.who.id
+Missing element: Provenance.agent:Patient.role.coding
+Missing element: Provenance.agent:Patient.role.coding.code
+Missing element: Provenance.agent:ServiceProvider.extension
+Missing element: Provenance.agent:ServiceProvider.who.identifier.period
+Missing element: Provenance.target.id
+Missing element: Provenance.agent:RecordedByRelatedPerson.who.reference
+Missing element: Provenance.agent:Custodian.type
+Missing element: Provenance.agent:RecordedByRelatedPerson.who.type
+Missing element: Provenance.agent:ServiceProvider.who
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.version
+Missing element: Provenance.agent:ServiceProvider.who.reference
+Missing element: Provenance.agent:RecordedByRelatedPerson.who.identifier
+Missing element: Provenance.agent:ServiceProvider.role.coding.id
+Missing element: Provenance.agent:RecordedByPatient.role.coding.code
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.display
+Missing element: Provenance.agent:Patient.role
+Missing element: Provenance.agent:Custodian.modifierExtension
+Missing element: Provenance.agent:RecordedByRelatedPerson.role
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.userSelected
+Missing element: Provenance.agent:Device.who.extension
+Missing element: Provenance.agent:RecordedByPatient.modifierExtension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.extension
+Missing element: Provenance.agent:Custodian.role.coding.system
+Missing element: Provenance.agent:Device.extension
+Missing element: Provenance.agent:ServiceProvider.who.extension
+Missing element: Provenance.agent:Custodian.who.identifier.period
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.extension
+Missing element: Provenance.agent:RecordedByPractitioner.modifierExtension
+Missing element: Provenance.agent:Custodian.who.type
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.system
+Missing element: Provenance.agent:Patient.role.text
+Missing element: Provenance.agent:Custodian.role.text
+Missing element: Provenance.agent:RecordedByRelatedPerson.who.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier
+Missing element: Provenance.agent:Device.who.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.value
+Missing element: Provenance.agent:Custodian.who.identifier.assigner
+Missing element: Provenance.agent:PractitionerOrganizationUnit.type
+Missing element: Provenance.agent:RecordedByPractitioner.role.text
 Missing element: Provenance.agent:RecordedByPractitioner.onBehalfOf
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.userSelected
+Missing element: Provenance.agent:RecordedByRelatedPerson.type
+Missing element: Provenance.agent:PractitionerOrganizationUnit.modifierExtension
+Missing element: Provenance.agent:RecordedByPatient.role.id
+Missing element: Provenance.agent:Device.role.coding.userSelected
+Missing element: Provenance.agent:Device.role
+Missing element: Provenance.agent:RecordedByPatient.role.text
+Missing element: Provenance.agent:Custodian.role
+Missing element: Provenance.agent:RecordedByPractitioner.who.type
+Missing element: Provenance.agent:RecordedByRelatedPerson.who
+Missing element: Provenance.agent:RecordedByPatient.role.coding.extension
+Missing element: Provenance.agent:Device.role.coding.code
+Missing element: Provenance.agent:ServiceProvider.type
+Missing element: Provenance.agent:ServiceProvider.id
+Missing element: Provenance.meta.source
+Missing element: Provenance.agent:RecordedByPatient.role.coding.version
+Missing element: Provenance.agent:RecordedByRelatedPerson.who.display
+Missing element: Provenance.target.type
+Missing element: Provenance.agent:RecordedByPatient.who.type
+Missing element: Provenance.target.display
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.code
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding.system
+Missing element: Provenance.agent:RecordedByPatient.onBehalfOf
+Missing element: Provenance.agent:RecordedByPatient.role.coding
+Missing element: Provenance.agent:Custodian.who.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.type
+Missing element: Provenance.agent:Patient.who.reference
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding.system
+Missing element: Provenance.agent:Patient.modifierExtension
+Missing element: Provenance.agent:RecordedByPractitioner.who.extension
+Missing element: Provenance.agent:Device.role.extension
+Missing element: Provenance.agent:Patient.who.identifier
+Missing element: Provenance.agent:Device.role.coding.display
+Missing element: Provenance.agent:Custodian.who.identifier.value
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.id
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.id
+Missing element: Provenance.agent:Patient.role.coding.extension
+Missing element: Provenance.agent:RecordedByPractitioner.who.identifier
+Missing element: Provenance.agent:Device.role.coding.system
+Missing element: Provenance.agent:Patient.type
+Missing element: Provenance.agent:RecordedByPatient.extension
+Missing element: Provenance.agent:RecordedByPatient.who.display
+Missing element: Provenance.agent:Patient.role.coding.version
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.assigner
+Missing element: Provenance.agent:Custodian.onBehalfOf
+Missing element: Provenance.agent:Patient.extension
+Missing element: Provenance.agent:RecordedByPatient.who.reference
+Missing element: Provenance.agent:Device.role.coding.id
+Missing element: Provenance.agent:ServiceProvider.who.type
+Missing element: Provenance.agent:RecordedByPatient.role.coding.userSelected
+Missing element: Provenance.agent:Custodian.role.id
+Missing element: Provenance.agent:ServiceProvider.who.identifier.type
+Missing element: Provenance.agent.modifierExtension
+Missing element: Provenance.agent:RecordedByPatient.role
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.use
+Missing element: Provenance.agent:Patient.who.extension
+Missing element: Provenance.meta.tag
+Missing element: Provenance.agent:Custodian.who.identifier.system
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.text
+Missing element: Provenance.agent:RecordedByPractitioner.who.display
+Missing element: Provenance.meta.versionId
+Missing element: Provenance.agent:RecordedByRelatedPerson.onBehalfOf
+Missing element: Provenance.agent:ServiceProvider.who.identifier.id
+Missing element: Provenance.agent:RecordedByRelatedPerson.extension
+Missing element: Provenance.agent.onBehalfOf
+Missing element: Provenance.agent:RecordedByRelatedPerson.id
+Missing element: Provenance.agent:ServiceProvider.role.extension
+Missing element: Provenance.agent:Custodian.role.coding.display
+Missing element: Provenance.agent:Device.modifierExtension
+Missing element: Provenance.agent:RecordedByPatient.who.extension
+Missing element: Provenance.agent:Custodian.who.id
+Missing element: Provenance.agent:RecordedByPractitioner.role.extension
+Missing element: Provenance.agent:Custodian.role.coding
+Missing element: Provenance.agent:Custodian.who.identifier.type
+Missing element: Provenance.agent:RecordedByPractitioner.role.id
+Missing element: Provenance.agent:Patient.who.type
+Missing element: Provenance.agent:RecordedByPractitioner.role
+Missing element: Provenance.agent:Custodian.role.extension
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding.userSelected
+Missing element: Provenance.agent:Patient.role.coding.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.reference
+Missing element: Provenance.agent:ServiceProvider.who.identifier.assigner
+Missing element: Provenance.agent:Custodian.who.identifier.id
+Missing element: Provenance.agent:Device.id
+Missing element: Provenance.agent.role
+Missing element: Provenance.agent:Patient.id
+Missing element: Provenance.agent:RecordedByRelatedPerson.modifierExtension
+Missing element: Provenance.agent:Device.role.coding
+Missing element: Provenance.meta.id
+Missing element: Provenance.meta.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.text
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.extension
+Missing element: Provenance.agent:ServiceProvider.onBehalfOf
+Missing element: Provenance.agent:Patient.role.id
+Missing element: Provenance.agent:Custodian.who.identifier.use
+Missing element: Provenance.agent:RecordedByRelatedPerson.who.id
+Missing element: Provenance.agent:Custodian.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.extension
+Missing element: Provenance.agent:Patient.role.coding.display
+Missing element: Provenance.agent:Patient.onBehalfOf
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.type
+Missing element: Provenance.agent:RecordedByPatient.role.coding.id
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.system
+Missing element: Provenance.agent:RecordedByPatient.who.identifier
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding
+Missing element: Provenance.agent:RecordedByPractitioner.role.coding
+Missing element: Provenance.agent:PractitionerOrganizationUnit.onBehalfOf
+Missing element: Provenance.agent:ServiceProvider.who.identifier.use
+Missing element: Provenance.agent:Custodian.who
+Missing element: Provenance.agent:Custodian.role.coding.extension
+Missing element: Provenance.agent:RecordedByPatient.type
+Missing element: Provenance.agent:RecordedByRelatedPerson.role.coding
+Missing element: Provenance.agent.who
+Missing element: Provenance.agent:PractitionerOrganizationUnit.who.identifier.period
+Missing element: Provenance.agent.type
+Missing element: Provenance.agent:Device.role.coding.extension
+Missing element: Provenance.meta.lastUpdated
+Missing element: Provenance.agent:RecordedByPractitioner.extension
+Missing element: Provenance.agent:PractitionerOrganizationUnit.role.coding.display
+Missing element: Provenance.agent:RecordedByPatient.role.extension
+Missing element: Provenance.agent:Patient.role.extension
+Missing element: Provenance.agent:Patient.who
+Missing element: Provenance.agent:Patient.role.coding.system
+Missing element: Provenance.agent:ServiceProvider.who.identifier.extension
+Missing element: Provenance.agent:Device.who.identifier
+Missing element: Provenance.agent:Patient.who.id
+Missing element: Provenance.agent:Patient.who.display
+Missing element: Provenance.agent:ServiceProvider.role.coding.extension
+Missing element: Provenance.agent:ServiceProvider.role.id
+Missing element: Provenance.agent:RecordedByPatient.role.coding.system
 Extra element: Provenance.agent.modifierExtension:ServiceProvider
 Extra element: Provenance.agent.onBehalfOf:ServiceProvider
 Extra element: Provenance.agent.id:ServiceProvider
 Extra element: Provenance.agent.extension:ServiceProvider
 Extra element: Provenance.agent.type:ServiceProvider
-Element Provenance.agent:RecordedByRelatedPerson.min: generated=1, expected=0
-Element Provenance.agent:RecordedByPractitioner.min: generated=1, expected=0
 Element Provenance.agent:ServiceProvider.who.identifier.system.short: missing in generated (expected="The namespace for the identifier value")
 Element Provenance.agent:ServiceProvider.who.identifier.system.min: generated=1, expected=0
 Element Provenance.agent:ServiceProvider.who.identifier.system.max: missing in generated (expected="1")
@@ -236,8 +234,16 @@ Element Provenance.agent:ServiceProvider.who.identifier.system.type: missing in 
 Element Provenance.agent:ServiceProvider.who.identifier.system.example: missing in generated (expected=[{"label":"General","valueUri":"http://www.acme.com/identifiers/patient"}])
 Element Provenance.agent:ServiceProvider.who.identifier.system.isModifier: missing in generated (expected=false)
 Element Provenance.agent:ServiceProvider.who.identifier.system.isSummary: missing in generated (expected=true)
-Element Provenance.agent:PractitionerOrganizationUnit.min: generated=1, expected=0
-Element Provenance.agent:ServiceProvider.role.binding: generated={"strength":"required","description":"The role that a provenance agent played with respect to the activity.","valueSet":"http://gen.kanta.fi/ValueSet/figen-vs-provenancerolecategory"}, expected={"strength":"required","valueSet":"http://gen.kanta.fi/ValueSet/figen-vs-provenancerolecategory"}
+Element Provenance.agent.slicing: generated={"discriminator":[{"type":"value","path":"role.coding.code"}],"ordered":false,"rules":"closed"}, expected={"discriminator":[{"type":"value","path":"role.coding.code"}],"rules":"closed"}
+Element Provenance.agent:ServiceProvider.who.identifier.value.max: missing in generated (expected="1")
+Element Provenance.agent:ServiceProvider.who.identifier.value.base: generated={"path":"Provenance.agent.who.identifier.value","min":1,"max":"*"}, expected={"path":"Identifier.value","min":0,"max":"1"}
+Element Provenance.agent:ServiceProvider.who.identifier.value.type: missing in generated (expected=[{"code":"string"}])
+Element Provenance.agent:ServiceProvider.who.identifier.value.example: missing in generated (expected=[{"label":"General","valueString":"123456"}])
+Element Provenance.agent:ServiceProvider.who.identifier.value.isModifier: missing in generated (expected=false)
+Element Provenance.agent:ServiceProvider.who.identifier.value.isSummary: missing in generated (expected=true)
+Element Provenance.agent:ServiceProvider.who.display.max: generated="0", expected="1"
+Element Provenance.meta.profile.definition: generated="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](structuredefinition-definitions.html#StructureDefinition.url).", expected="A list of profiles (references to [StructureDefinition](http://hl7.org/fhir/R4/structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](http://hl7.org/fhir/R4/structuredefinition-definitions.html#StructureDefinition.url)."
+Element Provenance.agent:RecordedByRelatedPerson.min: generated=1, expected=0
 Element Provenance.agent:ServiceProvider.role.coding.system.short: missing in generated (expected="Identity of the terminology system")
 Element Provenance.agent:ServiceProvider.role.coding.system.definition: missing in generated (expected="The identification of the code system that defines the meaning of the symbol in the code.")
 Element Provenance.agent:ServiceProvider.role.coding.system.max: missing in generated (expected="1")
@@ -245,19 +251,16 @@ Element Provenance.agent:ServiceProvider.role.coding.system.base: generated={"pa
 Element Provenance.agent:ServiceProvider.role.coding.system.type: missing in generated (expected=[{"code":"uri"}])
 Element Provenance.agent:ServiceProvider.role.coding.system.isModifier: missing in generated (expected=false)
 Element Provenance.agent:ServiceProvider.role.coding.system.isSummary: missing in generated (expected=true)
+Element Provenance.agent:Device.who.type.binding: generated={"strength":"extensible","description":"Aa resource (or, for logical models, the URI of the logical model).","valueSet":"http://hl7.org/fhir/ValueSet/resource-types"}, expected={"strength":"extensible","description":"Aa resource (or, for logical models, the URI of the logical model).","valueSet":"http://hl7.org/fhir/ValueSet/resource-types|4.0.1"}
+Element Provenance.activity.binding: generated={"strength":"extensible","description":"The activity that took place.","valueSet":"http://hl7.org/fhir/ValueSet/provenance-activity-type"}, expected={"strength":"extensible","description":"The activity that took place.","valueSet":"http://hl7.org/fhir/ValueSet/provenance-activity-type|4.0.1"}
 Element Provenance.agent:ServiceProvider.role.coding.code.max: missing in generated (expected="1")
 Element Provenance.agent:ServiceProvider.role.coding.code.base: generated={"path":"Provenance.agent.role.coding.code","min":1,"max":"*"}, expected={"path":"Coding.code","min":0,"max":"1"}
 Element Provenance.agent:ServiceProvider.role.coding.code.type: missing in generated (expected=[{"code":"code"}])
 Element Provenance.agent:ServiceProvider.role.coding.code.isModifier: missing in generated (expected=false)
 Element Provenance.agent:ServiceProvider.role.coding.code.isSummary: missing in generated (expected=true)
-Element Provenance.agent:Device.who.type.binding: generated={"strength":"extensible","description":"Aa resource (or, for logical models, the URI of the logical model).","valueSet":"http://hl7.org/fhir/ValueSet/resource-types"}, expected={"strength":"extensible","description":"Aa resource (or, for logical models, the URI of the logical model).","valueSet":"http://hl7.org/fhir/ValueSet/resource-types|4.0.1"}
-Element Provenance.activity.binding: generated={"strength":"extensible","description":"The activity that took place.","valueSet":"http://hl7.org/fhir/ValueSet/provenance-activity-type"}, expected={"strength":"extensible","description":"The activity that took place.","valueSet":"http://hl7.org/fhir/ValueSet/provenance-activity-type|4.0.1"}
-Element Provenance.agent:ServiceProvider.who.identifier.value.max: missing in generated (expected="1")
-Element Provenance.agent:ServiceProvider.who.identifier.value.base: generated={"path":"Provenance.agent.who.identifier.value","min":1,"max":"*"}, expected={"path":"Identifier.value","min":0,"max":"1"}
-Element Provenance.agent:ServiceProvider.who.identifier.value.type: missing in generated (expected=[{"code":"string"}])
-Element Provenance.agent:ServiceProvider.who.identifier.value.example: missing in generated (expected=[{"label":"General","valueString":"123456"}])
-Element Provenance.agent:ServiceProvider.who.identifier.value.isModifier: missing in generated (expected=false)
-Element Provenance.agent:ServiceProvider.who.identifier.value.isSummary: missing in generated (expected=true)
+Element Provenance.agent:ServiceProvider.who.identifier.max: generated="0", expected="1"
+Element Provenance.agent:RecordedByPatient.min: generated=1, expected=0
+Element Provenance.agent:ServiceProvider.role.binding: generated={"strength":"required","description":"The role that a provenance agent played with respect to the activity.","valueSet":"http://gen.kanta.fi/ValueSet/figen-vs-provenancerolecategory"}, expected={"strength":"required","valueSet":"http://gen.kanta.fi/ValueSet/figen-vs-provenancerolecategory"}
 Element Provenance.agent:Device.role.coding.version.short: missing in generated (expected="Version of the system - if relevant")
 Element Provenance.agent:Device.role.coding.version.definition: missing in generated (expected="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.")
 Element Provenance.agent:Device.role.coding.version.min: missing in generated (expected=0)
@@ -265,11 +268,8 @@ Element Provenance.agent:Device.role.coding.version.base: generated={"path":"Pro
 Element Provenance.agent:Device.role.coding.version.type: missing in generated (expected=[{"code":"string"}])
 Element Provenance.agent:Device.role.coding.version.isModifier: missing in generated (expected=false)
 Element Provenance.agent:Device.role.coding.version.isSummary: missing in generated (expected=true)
-Element Provenance.meta.profile.definition: generated="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](structuredefinition-definitions.html#StructureDefinition.url).", expected="A list of profiles (references to [StructureDefinition](http://hl7.org/fhir/R4/structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](http://hl7.org/fhir/R4/structuredefinition-definitions.html#StructureDefinition.url)."
-Element Provenance.agent:RecordedByPatient.min: generated=1, expected=0
-Element Provenance.agent.slicing: generated={"discriminator":[{"type":"value","path":"role.coding.code"}],"ordered":false,"rules":"closed"}, expected={"discriminator":[{"type":"value","path":"role.coding.code"}],"rules":"closed"}
-Element Provenance.agent:ServiceProvider.who.identifier.max: generated="0", expected="1"
-Element Provenance.agent:ServiceProvider.who.display.max: generated="0", expected="1"
+Element Provenance.agent:PractitionerOrganizationUnit.min: generated=1, expected=0
+Element Provenance.agent:RecordedByPractitioner.min: generated=1, expected=0
 Element Provenance.agent:ServiceProvider.role.coding.display.definition: missing in generated (expected="A representation of the meaning of the code in the system, following the rules of the system.")
 Element Provenance.agent:ServiceProvider.role.coding.display.max: missing in generated (expected="1")
 Element Provenance.agent:ServiceProvider.role.coding.display.base: generated={"path":"Provenance.agent.role.coding.display","min":1,"max":"*"}, expected={"path":"Coding.display","min":0,"max":"1"}

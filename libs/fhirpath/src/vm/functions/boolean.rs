@@ -61,15 +61,17 @@ pub fn as_type(
 
     validate_type_specifier(type_spec.as_ref(), fhir_context)?;
 
-    // Filter collection to items matching the type
-    // This supports FHIR R4 search parameter expressions like:
-    // (Observation.component.value as Quantity)
-    let mut result = Collection::empty();
-    for item in collection.iter() {
-        if matches_type_specifier_exact(item, type_spec.as_ref(), path_hint, fhir_context, ctx) {
-            result.push(item.clone());
-        }
+    // Per FHIRPath spec, as() requires a singleton collection
+    if collection.len() > 1 {
+        return Err(Error::InvalidOperation(
+            "as() requires a singleton collection".into(),
+        ));
     }
 
-    Ok(result)
+    let item = collection.iter().next().unwrap();
+    if matches_type_specifier_exact(item, type_spec.as_ref(), path_hint, fhir_context, ctx) {
+        Ok(Collection::singleton(item.clone()))
+    } else {
+        Ok(Collection::empty())
+    }
 }

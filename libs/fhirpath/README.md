@@ -257,11 +257,11 @@ Type operations are implemented across:
 Important behavior:
 
 - Unqualified names can refer to **System** types (e.g. `Boolean`, `Integer`) or **FHIR** types depending on context.
-- `is(T)` supports inheritance checks for FHIR types (e.g. `Age is Quantity`).
-- `as(T)` and `ofType(T)` are implemented as **exact** type filters/casts (no inheritance), which matches HL7 suite expectations for subtype-vs-supertype edge cases.
-- Type specifiers are validated:
-  - unknown unqualified names like `string1` produce execution errors
-  - unknown `System.*` types do **not** necessarily error (some HL7 cases expect non-matching rather than failure)
+- `is(T)` supports inheritance checks for FHIR types (e.g. `Age is Quantity`). Unknown types return `false` rather than erroring.
+- `as(T)` enforces singleton input per spec and performs **exact** type matching. For multi-item type filtering, use `ofType(T)`.
+- `ofType(T)` filters collections using **exact** type matching (no inheritance), which matches HL7 suite expectations for subtype-vs-supertype edge cases.
+- The `as` **operator** (`expr as Type`) is intentionally lenient on multi-item collections for FHIR R4 search parameter compatibility.
+- Type specifiers are validated against `FhirContext`; unknown types like `string1` produce execution errors in `as()`/`ofType()`, while `is()` gracefully returns `false`.
 
 ### Temporal Strings in FHIR JSON
 
@@ -324,19 +324,20 @@ The CLI subcommand `visualize` wraps this capability.
 
 This repo includes the HL7 R5 FHIRPath suite runner:
 
-- Tests: `crates/fhir-fhirpath/tests/hl7/test_hl7_suite.rs`
+- Tests: `tests/hl7/test_hl7_suite.rs`
 - Source suite: `fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml`
+- Current status: **996/1033 passing** (0 failures, 37 skips for unimplemented features)
 
 Run the full suite:
 
 ```sh
-cargo test -p fhir-fhirpath --test test_hl7_suite -- --ignored --nocapture
+cargo test -p ferrum-fhirpath --test test_hl7_suite -- --ignored --nocapture
 ```
 
 Run a specific group:
 
 ```sh
-HL7_TEST_GROUP=testPlus cargo test -p fhir-fhirpath --test test_hl7_suite -- --ignored --nocapture
+HL7_TEST_GROUP=testPlus cargo test -p ferrum-fhirpath --test test_hl7_suite -- --ignored --nocapture
 ```
 
 ## Strengths

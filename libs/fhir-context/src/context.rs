@@ -1796,4 +1796,333 @@ mod tests {
             _ => panic!("Expected StructureDefinitionNotFound error"),
         }
     }
+
+    // --- FallbackConformanceProvider tests ---
+
+    struct StaticProvider {
+        data: HashMap<String, Vec<Arc<Value>>>,
+    }
+
+    impl StaticProvider {
+        fn empty() -> Self {
+            Self {
+                data: HashMap::new(),
+            }
+        }
+
+        fn with(url: &str, resources: Vec<Value>) -> Self {
+            let mut data = HashMap::new();
+            data.insert(
+                url.to_string(),
+                resources.into_iter().map(Arc::new).collect(),
+            );
+            Self { data }
+        }
+    }
+
+    #[async_trait]
+    impl ConformanceResourceProvider for StaticProvider {
+        async fn list_by_canonical(&self, canonical_url: &str) -> Result<Vec<Arc<Value>>> {
+            Ok(self
+                .data
+                .get(canonical_url)
+                .cloned()
+                .unwrap_or_default())
+        }
+    }
+
+    struct FailingProvider;
+
+    #[async_trait]
+    impl ConformanceResourceProvider for FailingProvider {
+        async fn list_by_canonical(&self, _: &str) -> Result<Vec<Arc<Value>>> {
+            Err(Error::ConformanceStore("primary failed".into()))
+        }
+    }
+
+    #[test]
+    fn fallback_provider_returns_primary_when_non_empty() {
+        let url = "http://example.org/SD/Foo";
+        let primary = Arc::new(StaticProvider::with(
+            url,
+            vec![json!({"url": url, "version": "1.0.0"})],
+        ));
+        let fallback = Arc::new(StaticProvider::with(
+            url,
+            vec![json!({"url": url, "version": "2.0.0"})],
+        ));
+        let provider = FallbackConformanceProvider::new(primary, fallback);
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(provider.list_by_canonical(url)).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0].get("version").and_then(|v| v.as_str()),
+            Some("1.0.0")
+        );
+    }
+
+    #[test]
+    fn fallback_provider_uses_fallback_when_primary_empty() {
+        let url = "http://example.org/SD/Bar";
+        let primary = Arc::new(StaticProvider::empty());
+        let fallback = Arc::new(StaticProvider::with(
+            url,
+            vec![json!({"url": url, "version": "2.0.0"})],
+        ));
+        let provider = FallbackConformanceProvider::new(primary, fallback);
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(provider.list_by_canonical(url)).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0].get("version").and_then(|v| v.as_str()),
+            Some("2.0.0")
+        );
+    }
+
+    #[test]
+    fn fallback_provider_uses_fallback_when_primary_errors() {
+        let url = "http://example.org/SD/Baz";
+        let primary: Arc<dyn ConformanceResourceProvider> = Arc::new(FailingProvider);
+        let fallback = Arc::new(StaticProvider::with(
+            url,
+            vec![json!({"url": url, "version": "3.0.0"})],
+        ));
+        let provider = FallbackConformanceProvider::new(primary, fallback);
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(provider.list_by_canonical(url)).unwrap();
+        assert_eq!(result.len(), 1);
+    }
+
+    #[test]
+    fn fallback_provider_returns_primary_error_when_both_fail() {
+        let primary: Arc<dyn ConformanceResourceProvider> = Arc::new(FailingProvider);
+        let fallback: Arc<dyn ConformanceResourceProvider> = Arc::new(FailingProvider);
+        let provider = FallbackConformanceProvider::new(primary, fallback);
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(provider.list_by_canonical("http://example.org/missing"));
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("primary failed"));
+    }
+
+    #[test]
+    fn fallback_provider_get_by_version_falls_back() {
+        let url = "http://example.org/SD/Versioned";
+        let primary = Arc::new(StaticProvider::empty());
+        let fallback = Arc::new(StaticProvider::with(
+            url,
+            vec![json!({"url": url, "version": "4.0.0"})],
+        ));
+        let provider = FallbackConformanceProvider::new(primary, fallback);
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt
+            .block_on(provider.get_by_canonical_and_version(url, "4.0.0"))
+            .unwrap();
+        assert!(result.is_some());
+        assert_eq!(
+            result.unwrap().get("version").and_then(|v| v.as_str()),
+            Some("4.0.0")
+        );
+    }
+
+    // --- PackageLock tests ---
+
+    #[test]
+    fn package_lock_serialization_round_trip() {
+        let lock = PackageLock {
+            lock_version: "1.0".to_string(),
+            root_package: LockedPackage {
+                name: "my.package".to_string(),
+                version: "1.0.0".to_string(),
+                canonical: None,
+            },
+            packages: vec![
+                LockedPackage {
+                    name: "dep.one".to_string(),
+                    version: "2.0.0".to_string(),
+                    canonical: Some("http://example.org/dep1".to_string()),
+                },
+                LockedPackage {
+                    name: "dep.two".to_string(),
+                    version: "3.0.0".to_string(),
+                    canonical: None,
+                },
+            ],
+            created_at: Some("2025-01-01T00:00:00Z".to_string()),
+        };
+
+        let json = serde_json::to_string(&lock).unwrap();
+        let deserialized: PackageLock = serde_json::from_str(&json).unwrap();
+        assert_eq!(lock, deserialized);
+    }
+
+    #[test]
+    fn package_lock_save_and_load() {
+        let lock = PackageLock {
+            lock_version: "1.0".to_string(),
+            root_package: LockedPackage {
+                name: "test.pkg".to_string(),
+                version: "1.0.0".to_string(),
+                canonical: None,
+            },
+            packages: vec![LockedPackage {
+                name: "dep.a".to_string(),
+                version: "1.2.3".to_string(),
+                canonical: None,
+            }],
+            created_at: None,
+        };
+
+        let dir = std::env::temp_dir().join("fhir_context_test_lock");
+        let _ = fs::create_dir_all(&dir);
+        let path = dir.join("test.lock.json");
+
+        lock.save(&path).unwrap();
+        let loaded = PackageLock::load(&path).unwrap();
+        assert_eq!(lock, loaded);
+
+        let _ = fs::remove_file(&path);
+        let _ = fs::remove_dir(&dir);
+    }
+
+    #[test]
+    fn package_lock_get_version() {
+        let lock = PackageLock {
+            lock_version: "1.0".to_string(),
+            root_package: LockedPackage {
+                name: "root".to_string(),
+                version: "1.0.0".to_string(),
+                canonical: None,
+            },
+            packages: vec![
+                LockedPackage {
+                    name: "pkg.a".to_string(),
+                    version: "2.0.0".to_string(),
+                    canonical: None,
+                },
+                LockedPackage {
+                    name: "pkg.b".to_string(),
+                    version: "3.0.0".to_string(),
+                    canonical: None,
+                },
+            ],
+            created_at: None,
+        };
+
+        assert_eq!(lock.get_version("pkg.a"), Some("2.0.0"));
+        assert_eq!(lock.get_version("pkg.b"), Some("3.0.0"));
+        assert_eq!(lock.get_version("nonexistent"), None);
+    }
+
+    #[test]
+    fn package_lock_validate_matching_packages() {
+        let lock = PackageLock {
+            lock_version: "1.0".to_string(),
+            root_package: LockedPackage {
+                name: "root".to_string(),
+                version: "1.0.0".to_string(),
+                canonical: None,
+            },
+            packages: vec![LockedPackage {
+                name: "test-package".to_string(),
+                version: "1.0.0".to_string(),
+                canonical: None,
+            }],
+            created_at: None,
+        };
+
+        let package = create_mock_package();
+        assert!(lock.validate_packages(&[package]).is_ok());
+    }
+
+    #[test]
+    fn package_lock_validate_rejects_mismatch() {
+        let lock = PackageLock {
+            lock_version: "1.0".to_string(),
+            root_package: LockedPackage {
+                name: "root".to_string(),
+                version: "1.0.0".to_string(),
+                canonical: None,
+            },
+            packages: vec![LockedPackage {
+                name: "test-package".to_string(),
+                version: "2.0.0".to_string(),
+                canonical: None,
+            }],
+            created_at: None,
+        };
+
+        let package = create_mock_package(); // version 1.0.0
+        let result = lock.validate_packages(&[package]);
+        assert!(result.is_err());
+        match result {
+            Err(Error::PackageVersionMismatch {
+                name,
+                expected,
+                actual,
+            }) => {
+                assert_eq!(name, "test-package");
+                assert_eq!(expected, "2.0.0");
+                assert_eq!(actual, "1.0.0");
+            }
+            _ => panic!("Expected PackageVersionMismatch error"),
+        }
+    }
+
+    #[test]
+    fn package_lock_load_nonexistent_file_returns_error() {
+        let result = PackageLock::load("/tmp/definitely_nonexistent_lock_file.json");
+        assert!(result.is_err());
+    }
+
+    // --- DefaultFhirContext.add_resource ---
+
+    #[test]
+    fn add_resource_is_retrievable() {
+        let package = create_mock_package();
+        let mut context = DefaultFhirContext::new(package);
+
+        let new_sd = json!({
+            "resourceType": "StructureDefinition",
+            "url": "http://example.org/fhir/StructureDefinition/Custom",
+            "version": "1.0.0",
+            "name": "Custom",
+            "type": "Custom",
+            "kind": "resource",
+            "status": "active",
+            "snapshot": {"element": []}
+        });
+
+        context.add_resource(new_sd);
+
+        let result = context
+            .get_resource_by_url(
+                "http://example.org/fhir/StructureDefinition/Custom",
+                Some("1.0.0"),
+            )
+            .unwrap();
+        assert!(result.is_some());
+    }
+
+    // --- DefaultFhirContext.all_structure_definitions ---
+
+    #[test]
+    fn all_structure_definitions_returns_latest_versions() {
+        let package = create_mock_package();
+        let context = DefaultFhirContext::new(package);
+
+        let sds = context.all_structure_definitions();
+        assert!(sds.len() >= 3); // Patient, Observation, HumanName
+        let names: Vec<_> = sds
+            .iter()
+            .filter_map(|sd| sd.get("name").and_then(|v| v.as_str()))
+            .collect();
+        assert!(names.contains(&"Patient"));
+        assert!(names.contains(&"Observation"));
+        assert!(names.contains(&"HumanName"));
+    }
 }

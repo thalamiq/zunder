@@ -2635,9 +2635,6 @@
       }
     ]
   },
-  "meta": {
-    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
-  },
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
@@ -2663,5 +2660,8 @@
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
       "valueCode": "oo"
     }
-  ]
+  ],
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  }
 }

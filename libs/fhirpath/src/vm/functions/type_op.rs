@@ -40,7 +40,10 @@ pub fn is_type(
         }
     };
 
-    validate_type_specifier(type_spec.as_ref(), fhir_context)?;
+    // Per FHIRPath spec, is() with an unknown type returns false (not an error).
+    if validate_type_specifier(type_spec.as_ref(), fhir_context).is_err() {
+        return Ok(Collection::singleton(Value::boolean(false)));
+    }
 
     if collection.len() > 1 {
         return Err(Error::TypeError(

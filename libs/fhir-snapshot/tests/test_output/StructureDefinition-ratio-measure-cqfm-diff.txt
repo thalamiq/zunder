@@ -1,94 +1,94 @@
 Element count: generated 96 vs expected 143
-Missing element: Measure.group.population:numeratorExclusion.id
-Missing element: Measure.group.population:numeratorExclusion.description
-Missing element: Measure.group.population:measureObservation.modifierExtension
-Missing element: Measure.group.population:initialPopulation.extension
-Missing element: Measure.group.population:initialPopulation.criteria
-Missing element: Measure.meta.security
-Missing element: Measure.meta.tag
-Missing element: Measure.group.population:numerator.criteria
-Missing element: Measure.group.population.code
-Missing element: Measure.group.population:initialPopulation.extension:populationBasis
-Missing element: Measure.group.population:numerator.id
-Missing element: Measure.group.population:denominatorExclusion.criteria
 Missing element: Measure.group.population.criteria
-Missing element: Measure.group.population:denominatorExclusion.extension
-Missing element: Measure.group.population:numeratorExclusion.code
-Missing element: Measure.meta.lastUpdated
-Missing element: Measure.group.population:measureObservation.id
-Missing element: Measure.group.population:initialPopulation.id
-Missing element: Measure.group.population:numerator.extension
-Missing element: Measure.group.population:initialPopulation.modifierExtension
-Missing element: Measure.group.population:denominator.code
-Missing element: Measure.group.population.description
-Missing element: Measure.group.population:denominatorExclusion.description
-Missing element: Measure.group.population:denominator.extension:criteriaReference
 Missing element: Measure.group.population:initialPopulation.description
-Missing element: Measure.group.population:numeratorExclusion.criteria
-Missing element: Measure.group.population:numerator.modifierExtension
-Missing element: Measure.group.population:numeratorExclusion.extension:criteriaReference
-Missing element: Measure.group.population:denominatorExclusion.extension:criteriaReference
-Missing element: Measure.group.population:measureObservation.description
-Missing element: Measure.group.population:numerator.description
-Missing element: Measure.group.population:denominatorExclusion.id
-Missing element: Measure.group.population:measureObservation.extension
-Missing element: Measure.group.population:denominatorExclusion.code
-Missing element: Measure.group.population:measureObservation.criteria
-Missing element: Measure.group.population:numeratorExclusion.modifierExtension
-Missing element: Measure.group.population:initialPopulation.code
-Missing element: Measure.group.population:denominatorExclusion.modifierExtension
-Missing element: Measure.meta.extension
-Missing element: Measure.meta.id
-Missing element: Measure.meta.versionId
-Missing element: Measure.group.population.modifierExtension
-Missing element: Measure.group.population:denominator.criteria
-Missing element: Measure.group.population:measureObservation.extension:aggregateMethod
-Missing element: Measure.group.population:denominator.description
 Missing element: Measure.group.population.id
-Missing element: Measure.group.population:numerator.extension:criteriaReference
-Missing element: Measure.group.population:numeratorExclusion.extension
-Missing element: Measure.meta.source
-Missing element: Measure.group.population.extension
-Missing element: Measure.group.population:denominator.id
-Missing element: Measure.group.population:denominator.extension
-Missing element: Measure.group.population:numerator.code
+Missing element: Measure.group.population:denominator.description
+Missing element: Measure.group.population:numerator.id
+Missing element: Measure.meta.tag
+Missing element: Measure.group.population:measureObservation.extension
+Missing element: Measure.meta.lastUpdated
+Missing element: Measure.group.population:denominator.code
+Missing element: Measure.group.population:denominatorExclusion.criteria
+Missing element: Measure.group.population:measureObservation.id
 Missing element: Measure.group.population:denominator.modifierExtension
+Missing element: Measure.group.population:initialPopulation.modifierExtension
+Missing element: Measure.group.population:numeratorExclusion.id
+Missing element: Measure.meta.source
+Missing element: Measure.group.population:denominatorExclusion.extension
+Missing element: Measure.group.population.code
+Missing element: Measure.group.population:numerator.criteria
+Missing element: Measure.group.population:numeratorExclusion.code
+Missing element: Measure.meta.extension
+Missing element: Measure.group.population:numerator.extension:criteriaReference
+Missing element: Measure.group.population.extension
+Missing element: Measure.group.population:denominatorExclusion.id
+Missing element: Measure.group.population:initialPopulation.code
+Missing element: Measure.group.population:numeratorExclusion.criteria
+Missing element: Measure.group.population.modifierExtension
+Missing element: Measure.group.population:initialPopulation.id
+Missing element: Measure.group.population:numerator.description
+Missing element: Measure.group.population:numeratorExclusion.modifierExtension
+Missing element: Measure.group.population:numeratorExclusion.extension:criteriaReference
+Missing element: Measure.meta.versionId
+Missing element: Measure.group.population:initialPopulation.extension
+Missing element: Measure.group.population:denominator.criteria
+Missing element: Measure.group.population:denominatorExclusion.extension:criteriaReference
+Missing element: Measure.group.population:numeratorExclusion.extension
+Missing element: Measure.group.population:measureObservation.extension:aggregateMethod
+Missing element: Measure.group.population:numerator.code
+Missing element: Measure.group.population:initialPopulation.criteria
+Missing element: Measure.group.population:numerator.modifierExtension
+Missing element: Measure.group.population:measureObservation.modifierExtension
+Missing element: Measure.group.population:denominatorExclusion.modifierExtension
+Missing element: Measure.group.population:numerator.extension
+Missing element: Measure.meta.id
+Missing element: Measure.group.population:denominatorExclusion.description
+Missing element: Measure.group.population:measureObservation.description
+Missing element: Measure.group.population.description
+Missing element: Measure.meta.security
+Missing element: Measure.group.population:measureObservation.criteria
 Missing element: Measure.group.population:measureObservation.extension:criteriaReference
-Extra element: Measure.group.population.extension:criteriaReference
-Extra element: Measure.group.population.id:measureObservation
-Extra element: Measure.group.population.description:measureObservation
-Extra element: Measure.group.population.extension:measureObservation
-Extra element: Measure.group.population.criteria:measureObservation
-Extra element: Measure.group.population.extension:aggregateMethod
-Extra element: Measure.group.population.modifierExtension:measureObservation
+Missing element: Measure.group.population:denominatorExclusion.code
+Missing element: Measure.group.population:numeratorExclusion.description
+Missing element: Measure.group.population:denominator.id
+Missing element: Measure.group.population:initialPopulation.extension:populationBasis
+Missing element: Measure.group.population:denominator.extension:criteriaReference
+Missing element: Measure.group.population:denominator.extension
 Extra element: Measure.group.population.extension:populationBasis
-Element Measure.subject[x].binding: generated={"strength":"extensible","description":"The possible types of subjects for a measure (E.g. Patient, Practitioner, Organization, Location, etc.).","valueSet":"http://hl7.org/fhir/ValueSet/subject-type"}, expected={"strength":"extensible","description":"The possible types of subjects for a measure (E.g. Patient, Practitioner, Organization, Location, etc.).","valueSet":"http://hl7.org/fhir/ValueSet/subject-type|4.0.1"}
-Element Measure.compositeScoring.binding: generated={"strength":"extensible","description":"The composite scoring method of the measure.","valueSet":"http://hl7.org/fhir/ValueSet/composite-measure-scoring"}, expected={"strength":"extensible","description":"The composite scoring method of the measure.","valueSet":"http://hl7.org/fhir/ValueSet/composite-measure-scoring|4.0.1"}
-Element Measure.extension:comment.short: generated="Additional content defined by implementations", expected="Extension"
-Element Measure.extension:comment.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
-Element Measure.extension:comment.base: generated={"path":"Measure.extension","min":0,"max":"*"}, expected={"path":"DomainResource.extension","min":0,"max":"*"}
-Element Measure.supplementalData.extension:includeInReportType.short: generated="Additional content defined by implementations", expected="Extension"
-Element Measure.supplementalData.extension:includeInReportType.definition: generated="May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
-Element Measure.supplementalData.extension:includeInReportType.base: generated={"path":"Measure.supplementalData.extension","min":0,"max":"*"}, expected={"path":"Element.extension","min":0,"max":"*"}
+Extra element: Measure.group.population.id:measureObservation
+Extra element: Measure.group.population.extension:measureObservation
+Extra element: Measure.group.population.description:measureObservation
+Extra element: Measure.group.population.extension:criteriaReference
+Extra element: Measure.group.population.modifierExtension:measureObservation
+Extra element: Measure.group.population.extension:aggregateMethod
+Extra element: Measure.group.population.criteria:measureObservation
 Element Measure.extension.short: generated="Additional content defined by implementations", expected="Extension"
 Element Measure.extension.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
 Element Measure.extension.slicing: generated={"discriminator":[{"type":"value","path":"url"}],"description":"Slicing detected from slice instances","ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"url"}],"ordered":false,"rules":"open"}
-Element Measure.group.population.slicing: generated={"discriminator":[{"type":"value","path":"code"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"code"}],"rules":"open"}
-Element Measure.supplementalData.usage.binding: generated={"strength":"extensible","description":"The intended usage for supplemental data elements in the measure.","valueSet":"http://terminology.hl7.org/ValueSet/measure-data-usage"}, expected={"strength":"preferred","valueSet":"http://terminology.hl7.org/ValueSet/measure-data-usage"}
-Element Measure.topic.binding: generated={"strength":"example","description":"High-level categorization of the definition, used for searching, sorting, and filtering.","valueSet":"http://hl7.org/fhir/ValueSet/definition-topic"}, expected={"strength":"example","description":"High-level categorization of the definition, used for searching, sorting, and filtering.","valueSet":"http://hl7.org/fhir/ValueSet/definition-topic|4.0.1"}
-Element Measure.extension:softwaresystem.short: generated="Additional content defined by implementations", expected="Extension"
-Element Measure.extension:softwaresystem.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
-Element Measure.extension:softwaresystem.base: generated={"path":"Measure.extension","min":0,"max":"*"}, expected={"path":"DomainResource.extension","min":0,"max":"*"}
+Element Measure.supplementalData.extension:includeInReportType.short: generated="Additional content defined by implementations", expected="Extension"
+Element Measure.supplementalData.extension:includeInReportType.definition: generated="May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
+Element Measure.supplementalData.extension:includeInReportType.base: generated={"path":"Measure.supplementalData.extension","min":0,"max":"*"}, expected={"path":"Element.extension","min":0,"max":"*"}
 Element Measure.supplementalData.extension.short: generated="Additional content defined by implementations", expected="Extension"
 Element Measure.supplementalData.extension.definition: generated="May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
 Element Measure.supplementalData.extension.slicing: generated={"discriminator":[{"type":"value","path":"url"}],"description":"Slicing detected from slice instances","ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"url"}],"ordered":false,"rules":"open"}
-Element Measure.jurisdiction.binding: generated={"strength":"extensible","description":"Countries and regions within which this artifact is targeted for use.","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction"}, expected={"strength":"extensible","description":"Countries and regions within which this artifact is targeted for use.","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"}
+Element Measure.subject[x].binding: generated={"strength":"extensible","description":"The possible types of subjects for a measure (E.g. Patient, Practitioner, Organization, Location, etc.).","valueSet":"http://hl7.org/fhir/ValueSet/subject-type"}, expected={"strength":"extensible","description":"The possible types of subjects for a measure (E.g. Patient, Practitioner, Organization, Location, etc.).","valueSet":"http://hl7.org/fhir/ValueSet/subject-type|4.0.1"}
+Element Measure.extension:softwaresystem.short: generated="Additional content defined by implementations", expected="Extension"
+Element Measure.extension:softwaresystem.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
+Element Measure.extension:softwaresystem.base: generated={"path":"Measure.extension","min":0,"max":"*"}, expected={"path":"DomainResource.extension","min":0,"max":"*"}
+Element Measure.group.id.condition: missing in generated (expected=["cqm-3"])
+Element Measure.group.population.slicing: generated={"discriminator":[{"type":"value","path":"code"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"code"}],"rules":"open"}
+Element Measure.supplementalData.usage.binding: generated={"strength":"extensible","description":"The intended usage for supplemental data elements in the measure.","valueSet":"http://terminology.hl7.org/ValueSet/measure-data-usage"}, expected={"strength":"preferred","valueSet":"http://terminology.hl7.org/ValueSet/measure-data-usage"}
+Element Measure.compositeScoring.binding: generated={"strength":"extensible","description":"The composite scoring method of the measure.","valueSet":"http://hl7.org/fhir/ValueSet/composite-measure-scoring"}, expected={"strength":"extensible","description":"The composite scoring method of the measure.","valueSet":"http://hl7.org/fhir/ValueSet/composite-measure-scoring|4.0.1"}
+Element Measure.language.binding: generated={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages"}, expected={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"}
+Element Measure.meta.profile.definition: generated="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](structuredefinition-definitions.html#StructureDefinition.url).", expected="A list of profiles (references to [StructureDefinition](http://hl7.org/fhir/R4/structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](http://hl7.org/fhir/R4/structuredefinition-definitions.html#StructureDefinition.url)."
+Element Measure.extension:comment.short: generated="Additional content defined by implementations", expected="Extension"
+Element Measure.extension:comment.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
+Element Measure.extension:comment.base: generated={"path":"Measure.extension","min":0,"max":"*"}, expected={"path":"DomainResource.extension","min":0,"max":"*"}
 Element Measure.scoring.patternCodeableConcept: generated={"coding":[{"system":"http://terminology.hl7.org/CodeSystem/measure-scoring","code":"ratio"}]}, expected={"coding":{"system":"http://terminology.hl7.org/CodeSystem/measure-scoring","code":"ratio"}}
 Element Measure.scoring.binding: generated={"strength":"extensible","description":"The scoring type of the measure.","valueSet":"http://hl7.org/fhir/ValueSet/measure-scoring"}, expected={"strength":"extensible","description":"The scoring type of the measure.","valueSet":"http://hl7.org/fhir/ValueSet/measure-scoring|4.0.1"}
-Element Measure.group.id.condition: missing in generated (expected=["cqm-3"])
+Element Measure.topic.binding: generated={"strength":"example","description":"High-level categorization of the definition, used for searching, sorting, and filtering.","valueSet":"http://hl7.org/fhir/ValueSet/definition-topic"}, expected={"strength":"example","description":"High-level categorization of the definition, used for searching, sorting, and filtering.","valueSet":"http://hl7.org/fhir/ValueSet/definition-topic|4.0.1"}
+Element Measure.type.binding: generated={"strength":"extensible","description":"The type of measure (includes codes from 2.16.840.1.113883.1.11.20368).","valueSet":"http://terminology.hl7.org/ValueSet/measure-type"}, expected={"strength":"extensible","valueSet":"http://terminology.hl7.org/ValueSet/measure-type"}
+Element Measure.jurisdiction.binding: generated={"strength":"extensible","description":"Countries and regions within which this artifact is targeted for use.","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction"}, expected={"strength":"extensible","description":"Countries and regions within which this artifact is targeted for use.","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"}
 Element Measure.group.population:measureObservation.code.patternCodeableConcept: generated={"coding":[{"system":"http://terminology.hl7.org/CodeSystem/measure-population","code":"measure-observation"}]}, expected={"coding":{"system":"http://terminology.hl7.org/CodeSystem/measure-population","code":"measure-observation"}}
 Element Measure.group.population:measureObservation.code.binding: generated={"strength":"extensible","description":"The type of population.","valueSet":"http://terminology.hl7.org/ValueSet/measure-population"}, expected={"strength":"extensible","valueSet":"http://terminology.hl7.org/ValueSet/measure-population"}
-Element Measure.meta.profile.definition: generated="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](structuredefinition-definitions.html#StructureDefinition.url).", expected="A list of profiles (references to [StructureDefinition](http://hl7.org/fhir/R4/structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](http://hl7.org/fhir/R4/structuredefinition-definitions.html#StructureDefinition.url)."
 Element Measure.library.condition: missing in generated (expected=["cqm-2"])
-Element Measure.language.binding: generated={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages"}, expected={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"}
-Element Measure.type.binding: generated={"strength":"extensible","description":"The type of measure (includes codes from 2.16.840.1.113883.1.11.20368).","valueSet":"http://terminology.hl7.org/ValueSet/measure-type"}, expected={"strength":"extensible","valueSet":"http://terminology.hl7.org/ValueSet/measure-type"}

@@ -1,51 +1,51 @@
 Element count: generated 64 vs expected 72
-Missing element: Observation.value[x]:valueQuantity.value
-Missing element: Observation.value[x]:valueQuantity.unit
 Missing element: Observation.value[x]:valueQuantity.system
-Missing element: Observation.note.id
-Missing element: Observation.effective[x]:effectivePeriod
 Missing element: Observation.effective[x]:effectivePeriod.start
-Missing element: Observation.value[x]:valueQuantity.extension
-Missing element: Observation.value[x]:valueQuantity
-Missing element: Observation.value[x]:valueCodeableConcept
-Missing element: Observation.effective[x]:effectivePeriod.extension
-Missing element: Observation.value[x]:valueQuantity.id
 Missing element: Observation.effective[x]:effectivePeriod.id
-Missing element: Observation.note.extension
-Missing element: Observation.value[x]:valueQuantity.comparator
-Missing element: Observation.effective[x]:effectivePeriod.end
-Missing element: Observation.value[x]:valueQuantity.code
+Missing element: Observation.value[x]:valueQuantity
+Missing element: Observation.effective[x]:effectivePeriod
 Missing element: Observation.effective[x]:effectiveDateTime
-Extra element: Observation.valueQuantity.system
-Extra element: Observation.effectivePeriod.end
-Extra element: Observation.effectivePeriod.start
+Missing element: Observation.note.id
+Missing element: Observation.value[x]:valueQuantity.code
+Missing element: Observation.value[x]:valueQuantity.extension
+Missing element: Observation.value[x]:valueQuantity.unit
+Missing element: Observation.value[x]:valueQuantity.value
+Missing element: Observation.value[x]:valueCodeableConcept
+Missing element: Observation.note.extension
+Missing element: Observation.effective[x]:effectivePeriod.end
+Missing element: Observation.value[x]:valueQuantity.id
+Missing element: Observation.effective[x]:effectivePeriod.extension
+Missing element: Observation.value[x]:valueQuantity.comparator
 Extra element: Observation.valueQuantity.value
-Extra element: Observation.valueQuantity.code
+Extra element: Observation.effectiveDateTime
 Extra element: Observation.effectivePeriod
 Extra element: Observation.valueQuantity
-Extra element: Observation.effectiveDateTime
 Extra element: Observation.valueCodeableConcept
-Element Observation.referenceRange.high.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
-Element Observation.interpretation.binding: generated={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation"}, expected={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation|4.0.1"}
-Element Observation.component.interpretation.binding: generated={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation"}, expected={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation|4.0.1"}
-Element Observation.code.binding: generated={"strength":"preferred","description":"Codes identifying names of simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes"}, expected={"strength":"preferred","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes"}
-Element Observation.effective[x].slicing: generated={"discriminator":[{"type":"type","path":"$this"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"type","path":"$this"}],"ordered":false,"rules":"closed"}
-Element Observation.component.code.binding: generated={"strength":"example","description":"Codes identifying names of simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes"}, expected={"strength":"example","description":"Codes identifying names of simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes|4.0.1"}
-Element Observation.method.binding: generated={"strength":"example","description":"Methods for simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-methods"}, expected={"strength":"example","description":"Methods for simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-methods|4.0.1"}
-Element Observation.referenceRange.type.binding: generated={"strength":"preferred","description":"Code for the meaning of a reference range.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-meaning"}, expected={"strength":"preferred","description":"Code for the meaning of a reference range.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-meaning|4.0.1"}
-Element Observation.referenceRange.appliesTo.binding: generated={"strength":"example","description":"Codes identifying the population the reference range applies to.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-appliesto"}, expected={"strength":"example","description":"Codes identifying the population the reference range applies to.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-appliesto|4.0.1"}
-Element Observation.language.binding: generated={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages"}, expected={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"}
-Element Observation.category.binding: generated={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category"}, expected={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category|4.0.1"}
-Element Observation.category.slicing: generated={"discriminator":[{"type":"pattern","path":"$this"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"pattern","path":"$this"}],"rules":"open"}
-Element Observation.category:PhysicalActivity.patternCodeableConcept: generated={"coding":[{"system":"http://hl7.org/fhir/us/physical-activity/CodeSystem/pa-temporary-codes","code":"PhysicalActivity"}]}, expected={"coding":{"system":"http://hl7.org/fhir/us/physical-activity/CodeSystem/pa-temporary-codes","code":"PhysicalActivity"}}
-Element Observation.category:PhysicalActivity.binding: generated={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category"}, expected={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category|4.0.1"}
-Element Observation.status.binding: generated={"strength":"required","description":"Codes providing the status of an observation.","valueSet":"http://hl7.org/fhir/ValueSet/observation-status"}, expected={"strength":"required","valueSet":"http://hl7.org/fhir/ValueSet/observation-status"}
+Extra element: Observation.effectivePeriod.start
+Extra element: Observation.valueQuantity.system
+Extra element: Observation.effectivePeriod.end
+Extra element: Observation.valueQuantity.code
 Element Observation.value[x].slicing: generated={"discriminator":[{"type":"type","path":"$this"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"type","path":"$this"}],"ordered":false,"rules":"closed"}
-Element Observation.referenceRange.low.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
-Element Observation.dataAbsentReason.binding: generated={"strength":"extensible","description":"Codes specifying why the result (`Observation.value[x]`) is missing.","valueSet":"http://hl7.org/fhir/ValueSet/data-absent-reason"}, expected={"strength":"extensible","description":"Codes specifying why the result (`Observation.value[x]`) is missing.","valueSet":"http://hl7.org/fhir/ValueSet/data-absent-reason|4.0.1"}
-Element Observation.bodySite.binding: generated={"strength":"example","description":"Codes describing anatomical locations. May include laterality.","valueSet":"http://hl7.org/fhir/ValueSet/body-site"}, expected={"strength":"example","description":"Codes describing anatomical locations. May include laterality.","valueSet":"http://hl7.org/fhir/ValueSet/body-site|4.0.1"}
-Element Observation.modifierExtension.short: generated="Extensions that cannot be ignored", expected="Extension"
-Element Observation.modifierExtension.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).", expected="An Extension"
+Element Observation.referenceRange.type.binding: generated={"strength":"preferred","description":"Code for the meaning of a reference range.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-meaning"}, expected={"strength":"preferred","description":"Code for the meaning of a reference range.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-meaning|4.0.1"}
+Element Observation.component.interpretation.binding: generated={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation"}, expected={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation|4.0.1"}
 Element Observation.category:SocialHistory.patternCodeableConcept: generated={"coding":[{"system":"http://terminology.hl7.org/CodeSystem/observation-category","code":"social-history"}]}, expected={"coding":{"system":"http://terminology.hl7.org/CodeSystem/observation-category","code":"social-history"}}
 Element Observation.category:SocialHistory.binding: generated={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category"}, expected={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category|4.0.1"}
+Element Observation.method.binding: generated={"strength":"example","description":"Methods for simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-methods"}, expected={"strength":"example","description":"Methods for simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-methods|4.0.1"}
+Element Observation.category.binding: generated={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category"}, expected={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category|4.0.1"}
+Element Observation.category.slicing: generated={"discriminator":[{"type":"pattern","path":"$this"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"pattern","path":"$this"}],"rules":"open"}
+Element Observation.status.binding: generated={"strength":"required","description":"Codes providing the status of an observation.","valueSet":"http://hl7.org/fhir/ValueSet/observation-status"}, expected={"strength":"required","valueSet":"http://hl7.org/fhir/ValueSet/observation-status"}
 Element Observation.component.dataAbsentReason.binding: generated={"strength":"extensible","description":"Codes specifying why the result (`Observation.value[x]`) is missing.","valueSet":"http://hl7.org/fhir/ValueSet/data-absent-reason"}, expected={"strength":"extensible","description":"Codes specifying why the result (`Observation.value[x]`) is missing.","valueSet":"http://hl7.org/fhir/ValueSet/data-absent-reason|4.0.1"}
+Element Observation.referenceRange.appliesTo.binding: generated={"strength":"example","description":"Codes identifying the population the reference range applies to.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-appliesto"}, expected={"strength":"example","description":"Codes identifying the population the reference range applies to.","valueSet":"http://hl7.org/fhir/ValueSet/referencerange-appliesto|4.0.1"}
+Element Observation.modifierExtension.short: generated="Extensions that cannot be ignored", expected="Extension"
+Element Observation.modifierExtension.definition: generated="May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).", expected="An Extension"
+Element Observation.code.binding: generated={"strength":"preferred","description":"Codes identifying names of simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes"}, expected={"strength":"preferred","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes"}
+Element Observation.category:PhysicalActivity.patternCodeableConcept: generated={"coding":[{"system":"http://hl7.org/fhir/us/physical-activity/CodeSystem/pa-temporary-codes","code":"PhysicalActivity"}]}, expected={"coding":{"system":"http://hl7.org/fhir/us/physical-activity/CodeSystem/pa-temporary-codes","code":"PhysicalActivity"}}
+Element Observation.category:PhysicalActivity.binding: generated={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category"}, expected={"strength":"preferred","description":"Codes for high level observation categories.","valueSet":"http://hl7.org/fhir/ValueSet/observation-category|4.0.1"}
+Element Observation.referenceRange.high.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
+Element Observation.referenceRange.low.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
+Element Observation.interpretation.binding: generated={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation"}, expected={"strength":"extensible","description":"Codes identifying interpretations of observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-interpretation|4.0.1"}
+Element Observation.bodySite.binding: generated={"strength":"example","description":"Codes describing anatomical locations. May include laterality.","valueSet":"http://hl7.org/fhir/ValueSet/body-site"}, expected={"strength":"example","description":"Codes describing anatomical locations. May include laterality.","valueSet":"http://hl7.org/fhir/ValueSet/body-site|4.0.1"}
+Element Observation.language.binding: generated={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages"}, expected={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"}
+Element Observation.component.code.binding: generated={"strength":"example","description":"Codes identifying names of simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes"}, expected={"strength":"example","description":"Codes identifying names of simple observations.","valueSet":"http://hl7.org/fhir/ValueSet/observation-codes|4.0.1"}
+Element Observation.effective[x].slicing: generated={"discriminator":[{"type":"type","path":"$this"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"type","path":"$this"}],"ordered":false,"rules":"closed"}
+Element Observation.dataAbsentReason.binding: generated={"strength":"extensible","description":"Codes specifying why the result (`Observation.value[x]`) is missing.","valueSet":"http://hl7.org/fhir/ValueSet/data-absent-reason"}, expected={"strength":"extensible","description":"Codes specifying why the result (`Observation.value[x]`) is missing.","valueSet":"http://hl7.org/fhir/ValueSet/data-absent-reason|4.0.1"}

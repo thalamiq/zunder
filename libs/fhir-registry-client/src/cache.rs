@@ -103,6 +103,11 @@ impl PackageCache for FileSystemCache {
         let package_dir = self.get_package_directory(name, version);
         let package_path = package_dir.join("package");
 
+        // Remove any existing incomplete cache before writing
+        if package_path.exists() {
+            fs::remove_dir_all(&package_path)?;
+        }
+
         // Create directory structure
         fs::create_dir_all(&package_path)?;
 
@@ -129,8 +134,10 @@ impl PackageCache for FileSystemCache {
                 .get("id")
                 .and_then(|v| v.as_str())
                 .unwrap_or(&default_id);
-            let filename = format!("{}-{}.json", resource_type, id);
-            let resource_path = package_path.join(filename);
+            // Sanitize id to remove path separators that would break fs::write
+            let safe_id: String = id.chars().map(|c| if c == '/' || c == '\\' { '_' } else { c }).collect();
+            let filename = format!("{}-{}.json", resource_type, safe_id);
+            let resource_path = package_path.join(&filename);
             let resource_json = serde_json::to_string_pretty(resource)?;
             fs::write(resource_path, resource_json)?;
         }

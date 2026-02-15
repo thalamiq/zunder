@@ -18,8 +18,6 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
-    ports:
-      - "${BIND_ADDRESS:-127.0.0.1}:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fhir}"]
       interval: 10s
@@ -29,6 +27,7 @@ services:
       - fhir-network
 
   fhir-server:
+    pull_policy: never
     build:
       context: ..
       dockerfile: apps/server/Dockerfile
@@ -76,7 +75,7 @@ services:
   #     DATABASE_URL: postgresql://${POSTGRES_USER:-fhir}:${POSTGRES_PASSWORD:-fhir}@db:5432/${POSTGRES_DB:-fhir}
   #     RUST_LOG: ${RUST_LOG:-info}
   #   volumes:
-  #     - ../dist/config.yaml:/app/config.yaml:ro
+  #     - ../quickstart/config.yaml:/app/config.yaml:ro
   #   depends_on:
   #     db:
   #       condition: service_healthy
@@ -86,8 +85,9 @@ services:
   #     - fhir-network
 
   ui:
+    pull_policy: never
     build:
-      context: ../apps/ui
+      context: ../apps/admin-ui
       dockerfile: Dockerfile
     image: ferrum-ui:local
     restart: unless-stopped

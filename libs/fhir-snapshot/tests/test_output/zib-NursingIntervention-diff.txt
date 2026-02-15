@@ -1,92 +1,46 @@
 Element count: generated 80 vs expected 115
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.offset
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.durationMax
-Missing element: CarePlan.note.author[x]
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.durationUnit
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.modifierExtension
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod
-Missing element: CarePlan.contributor:requester.identifier
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.dayOfWeek
-Missing element: CarePlan.note.id
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.id
-Missing element: CarePlan.contributor:requester.extension:contributorIsRequester
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.extension
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.extension
 Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.countMax
-Missing element: CarePlan.contributor:requester.type
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.modifierExtension
 Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.when
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.id
-Missing element: CarePlan.activity.detail.extension:medicalDevice.id
-Missing element: CarePlan.period.id
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.count
-Missing element: CarePlan.period.extension
-Missing element: CarePlan.contributor:requester.id
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.extension
-Missing element: CarePlan.note.time
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.duration
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.event
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequencyMax
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.timeOfDay
-Missing element: CarePlan.contributor:requester.display
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodMax
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.code
-Missing element: CarePlan.note.extension
-Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.id
-Missing element: CarePlan.activity.detail.extension:medicalDevice.extension
-Missing element: CarePlan.activity.detail.extension:medicalDevice.url
 Missing element: CarePlan.contributor:requester.reference
-Extra element: CarePlan.activity.detail.scheduled[x].repeat.bounds[x]:boundsPeriod
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod
+Missing element: CarePlan.contributor:requester.type
+Missing element: CarePlan.contributor:requester.identifier
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.extension
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodMax
+Missing element: CarePlan.contributor:requester.id
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.timeOfDay
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.extension
+Missing element: CarePlan.activity.detail.extension:medicalDevice.id
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat
+Missing element: CarePlan.note.id
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.event
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.code
+Missing element: CarePlan.period.extension
+Missing element: CarePlan.note.time
+Missing element: CarePlan.contributor:requester.extension:contributorIsRequester
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.durationMax
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.count
+Missing element: CarePlan.period.id
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.extension
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.id
+Missing element: CarePlan.activity.detail.extension:medicalDevice.extension
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.offset
+Missing element: CarePlan.contributor:requester.display
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequencyMax
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.id
+Missing element: CarePlan.activity.detail.extension:medicalDevice.url
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.id
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.durationUnit
+Missing element: CarePlan.note.author[x]
+Missing element: CarePlan.note.extension
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.duration
+Missing element: CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.dayOfWeek
 Extra element: CarePlan.contributor.extension:contributorIsRequester
-Element CarePlan.activity.detail.performer.slicing: generated={"discriminator":[{"type":"profile","path":"resolve()"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"profile","path":"resolve()"}],"rules":"open"}
-Element CarePlan.activity.detail.quantity.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
+Extra element: CarePlan.activity.detail.scheduled[x].repeat.bounds[x]:boundsPeriod
 Element CarePlan.activity.detail.extension.short: generated="Additional content defined by implementations", expected="Extension"
 Element CarePlan.activity.detail.extension.definition: generated="May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
 Element CarePlan.activity.detail.extension.slicing: generated={"discriminator":[{"type":"value","path":"url"}],"description":"Slicing detected from slice instances","ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"url"}],"ordered":false,"rules":"open"}
-Element CarePlan.activity.detail.product[x].binding: generated={"strength":"example","description":"A product supplied or administered as part of a care plan activity.","valueSet":"http://hl7.org/fhir/ValueSet/medication-codes"}, expected={"strength":"example","description":"A product supplied or administered as part of a care plan activity.","valueSet":"http://hl7.org/fhir/ValueSet/medication-codes|4.0.1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.min: missing in generated (expected=0)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.max: missing in generated (expected="1")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.period","min":0,"max":"*"}, expected={"path":"Timing.repeat.period","min":0,"max":"1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.type: missing in generated (expected=[{"code":"decimal"}])
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.isModifier: missing in generated (expected=false)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.isSummary: missing in generated (expected=true)
-Element CarePlan.activity.outcomeCodeableConcept.binding: generated={"strength":"example","description":"Identifies the results of the activity.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-activity-outcome"}, expected={"strength":"example","description":"Identifies the results of the activity.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-activity-outcome|4.0.1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.min: missing in generated (expected=0)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.max: missing in generated (expected="1")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.bounds[x].start","min":0,"max":"*"}, expected={"path":"Period.start","min":0,"max":"1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.type: missing in generated (expected=[{"code":"dateTime"}])
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.condition: missing in generated (expected=["per-1"])
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.isModifier: missing in generated (expected=false)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.isSummary: missing in generated (expected=true)
-Element CarePlan.category:nursingInterventionCode.patternCodeableConcept: generated={"coding":{"system":"http://snomed.info/sct","code":9632001}}, expected={"coding":[{"system":"http://snomed.info/sct","code":"9632001"}]}
-Element CarePlan.category:nursingInterventionCode.binding: generated={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category"}, expected={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category|4.0.1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].short: missing in generated (expected="Length/Range of lengths, or (Start and/or end) limits")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].definition: missing in generated (expected="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].min: missing in generated (expected=0)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].max: missing in generated (expected="1")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.bounds[x]","min":0,"max":"*"}, expected={"path":"Timing.repeat.bounds[x]","min":0,"max":"1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].type: missing in generated (expected=[{"code":"Duration"},{"code":"Range"},{"code":"Period"}])
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].isModifier: missing in generated (expected=false)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].isSummary: missing in generated (expected=true)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.min: missing in generated (expected=0)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.max: missing in generated (expected="1")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.periodUnit","min":0,"max":"*"}, expected={"path":"Timing.repeat.periodUnit","min":0,"max":"1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.type: missing in generated (expected=[{"code":"code"}])
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.isModifier: missing in generated (expected=false)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.isSummary: missing in generated (expected=true)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.binding: missing in generated (expected={"strength":"required","description":"A unit of time (units from UCUM).","valueSet":"http://hl7.org/fhir/ValueSet/units-of-time|4.0.1"})
-Element CarePlan.activity.detail.reasonCode.binding: generated={"strength":"example","description":"Identifies why a care plan activity is needed.  Can include any health condition codes as well as such concepts as \"general wellness\", prophylaxis, surgical preparation, etc.","valueSet":"http://hl7.org/fhir/ValueSet/clinical-findings"}, expected={"strength":"example","description":"Identifies why a care plan activity is needed.  Can include any health condition codes as well as such concepts as \"general wellness\", prophylaxis, surgical preparation, etc.","valueSet":"http://hl7.org/fhir/ValueSet/clinical-findings|4.0.1"}
-Element CarePlan.activity.detail.code.binding: generated={"strength":"required","description":"Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.","valueSet":"http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.121.11.18--20200901000000"}, expected={"strength":"required","valueSet":"http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.121.11.18--20200901000000"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.min: missing in generated (expected=0)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.max: missing in generated (expected="1")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.frequency","min":0,"max":"*"}, expected={"path":"Timing.repeat.frequency","min":0,"max":"1"}
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.type: missing in generated (expected=[{"code":"positiveInt"}])
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.meaningWhenMissing: missing in generated (expected="If no frequency is stated, the assumption is that the event occurs once per period, but systems SHOULD always be specific about this")
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.isModifier: missing in generated (expected=false)
-Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.isSummary: missing in generated (expected=true)
-Element CarePlan.category.binding: generated={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category"}, expected={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category|4.0.1"}
-Element CarePlan.category.slicing: generated={"discriminator":[{"type":"value","path":"coding"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"coding"}],"rules":"open"}
-Element CarePlan.contributor.slicing: generated={"discriminator":[{"type":"exists","path":"extension(url='http://nictiz.nl/fhir/StructureDefinition/ext-NursingIntervention-ContributorIsRequester')"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"exists","path":"extension(url='http://nictiz.nl/fhir/StructureDefinition/ext-NursingIntervention-ContributorIsRequester')"}],"rules":"open"}
 Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end.min: missing in generated (expected=0)
 Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end.max: missing in generated (expected="1")
 Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.bounds[x].end","min":0,"max":"*"}, expected={"path":"Period.end","min":0,"max":"1"}
@@ -95,12 +49,58 @@ Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:b
 Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end.condition: missing in generated (expected=["per-1"])
 Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end.isModifier: missing in generated (expected=false)
 Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end.isSummary: missing in generated (expected=true)
+Element CarePlan.activity.detail.product[x].binding: generated={"strength":"example","description":"A product supplied or administered as part of a care plan activity.","valueSet":"http://hl7.org/fhir/ValueSet/medication-codes"}, expected={"strength":"example","description":"A product supplied or administered as part of a care plan activity.","valueSet":"http://hl7.org/fhir/ValueSet/medication-codes|4.0.1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.min: missing in generated (expected=0)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.max: missing in generated (expected="1")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.frequency","min":0,"max":"*"}, expected={"path":"Timing.repeat.frequency","min":0,"max":"1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.type: missing in generated (expected=[{"code":"positiveInt"}])
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.meaningWhenMissing: missing in generated (expected="If no frequency is stated, the assumption is that the event occurs once per period, but systems SHOULD always be specific about this")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.isModifier: missing in generated (expected=false)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.frequency.isSummary: missing in generated (expected=true)
+Element CarePlan.contributor.slicing: generated={"discriminator":[{"type":"exists","path":"extension(url='http://nictiz.nl/fhir/StructureDefinition/ext-NursingIntervention-ContributorIsRequester')"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"exists","path":"extension(url='http://nictiz.nl/fhir/StructureDefinition/ext-NursingIntervention-ContributorIsRequester')"}],"rules":"open"}
+Element CarePlan.activity.detail.code.binding: generated={"strength":"required","description":"Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.","valueSet":"http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.121.11.18--20200901000000"}, expected={"strength":"required","valueSet":"http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.121.11.18--20200901000000"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].short: missing in generated (expected="Length/Range of lengths, or (Start and/or end) limits")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].definition: missing in generated (expected="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].min: missing in generated (expected=0)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].max: missing in generated (expected="1")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.bounds[x]","min":0,"max":"*"}, expected={"path":"Timing.repeat.bounds[x]","min":0,"max":"1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].type: missing in generated (expected=[{"code":"Duration"},{"code":"Range"},{"code":"Period"}])
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].isModifier: missing in generated (expected=false)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x].isSummary: missing in generated (expected=true)
 Element CarePlan.contributor:requester.extension.short: generated="Additional content defined by implementations", expected="Extension"
 Element CarePlan.contributor:requester.extension.definition: generated="May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
 Element CarePlan.contributor:requester.extension.base: generated={"path":"Reference.extension","min":0,"max":"*"}, expected={"path":"Element.extension","min":0,"max":"*"}
 Element CarePlan.contributor:requester.extension.slicing: generated={"discriminator":[{"type":"value","path":"url"}],"description":"Extensions are always sliced by (at least) url","ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"url"}],"description":"Extensions are always sliced by (at least) url","rules":"open"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.min: missing in generated (expected=0)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.max: missing in generated (expected="1")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.bounds[x].start","min":0,"max":"*"}, expected={"path":"Period.start","min":0,"max":"1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.type: missing in generated (expected=[{"code":"dateTime"}])
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.condition: missing in generated (expected=["per-1"])
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.isModifier: missing in generated (expected=false)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start.isSummary: missing in generated (expected=true)
 Element CarePlan.activity.detail.dailyAmount.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
+Element CarePlan.activity.detail.reasonCode.binding: generated={"strength":"example","description":"Identifies why a care plan activity is needed.  Can include any health condition codes as well as such concepts as \"general wellness\", prophylaxis, surgical preparation, etc.","valueSet":"http://hl7.org/fhir/ValueSet/clinical-findings"}, expected={"strength":"example","description":"Identifies why a care plan activity is needed.  Can include any health condition codes as well as such concepts as \"general wellness\", prophylaxis, surgical preparation, etc.","valueSet":"http://hl7.org/fhir/ValueSet/clinical-findings|4.0.1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.min: missing in generated (expected=0)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.max: missing in generated (expected="1")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.period","min":0,"max":"*"}, expected={"path":"Timing.repeat.period","min":0,"max":"1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.type: missing in generated (expected=[{"code":"decimal"}])
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.isModifier: missing in generated (expected=false)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.period.isSummary: missing in generated (expected=true)
+Element CarePlan.category.binding: generated={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category"}, expected={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category|4.0.1"}
+Element CarePlan.category.slicing: generated={"discriminator":[{"type":"value","path":"coding"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"value","path":"coding"}],"rules":"open"}
+Element CarePlan.activity.detail.quantity.type: generated=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]}], expected=[{"code":"Quantity","profile":["http://hl7.org/fhir/StructureDefinition/SimpleQuantity|4.0.1"]}]
+Element CarePlan.category:nursingInterventionCode.patternCodeableConcept: generated={"coding":{"system":"http://snomed.info/sct","code":9632001}}, expected={"coding":[{"system":"http://snomed.info/sct","code":"9632001"}]}
+Element CarePlan.category:nursingInterventionCode.binding: generated={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category"}, expected={"strength":"example","description":"Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", etc.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-category|4.0.1"}
 Element CarePlan.activity.detail.extension:medicalDevice.short: generated="Additional content defined by implementations", expected="Extension"
 Element CarePlan.activity.detail.extension:medicalDevice.definition: generated="May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", expected="An Extension"
 Element CarePlan.activity.detail.extension:medicalDevice.base: generated={"path":"CarePlan.activity.detail.extension","min":0,"max":"*"}, expected={"path":"Element.extension","min":0,"max":"*"}
+Element CarePlan.activity.detail.performer.slicing: generated={"discriminator":[{"type":"profile","path":"resolve()"}],"ordered":false,"rules":"open"}, expected={"discriminator":[{"type":"profile","path":"resolve()"}],"rules":"open"}
 Element CarePlan.language.binding: generated={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages"}, expected={"strength":"preferred","description":"A human language.","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"}
+Element CarePlan.activity.outcomeCodeableConcept.binding: generated={"strength":"example","description":"Identifies the results of the activity.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-activity-outcome"}, expected={"strength":"example","description":"Identifies the results of the activity.","valueSet":"http://hl7.org/fhir/ValueSet/care-plan-activity-outcome|4.0.1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.min: missing in generated (expected=0)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.max: missing in generated (expected="1")
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.base: generated={"path":"CarePlan.activity.detail.scheduled[x].repeat.periodUnit","min":0,"max":"*"}, expected={"path":"Timing.repeat.periodUnit","min":0,"max":"1"}
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.type: missing in generated (expected=[{"code":"code"}])
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.isModifier: missing in generated (expected=false)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.isSummary: missing in generated (expected=true)
+Element CarePlan.activity.detail.scheduled[x]:scheduledTiming.repeat.periodUnit.binding: missing in generated (expected={"strength":"required","description":"A unit of time (units from UCUM).","valueSet":"http://hl7.org/fhir/ValueSet/units-of-time|4.0.1"})
