@@ -85,7 +85,7 @@ export function ConnectionGuard({ children }: ConnectionGuardProps) {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Endpoint:</span>
-                <span className="font-mono">/api/health</span>
+                <span className="font-mono">/health</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Last Check:</span>

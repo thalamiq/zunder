@@ -57,12 +57,12 @@ export default function AppSidebar() {
   // State
   const [isResourcesOpen, setIsResourcesOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(() =>
-    pathname.startsWith("/ui/search"),
+    pathname.startsWith("/search"),
   );
 
   // Auto-open search menu when on a search page
   React.useEffect(() => {
-    if (pathname.startsWith("/ui/search")) {
+    if (pathname.startsWith("/search")) {
       setIsSearchOpen(true);
     }
   }, [pathname]);
@@ -72,7 +72,7 @@ export default function AppSidebar() {
     navigate({ to: "/login" });
   };
 
-  const isActive = (path: string) => pathname.startsWith(`/ui${path}`);
+  const isActive = (path: string) => pathname.startsWith(path);
 
   // Fetch resource types
   const resourcesQuery = useQuery({
@@ -88,7 +88,7 @@ export default function AppSidebar() {
   }, [resourceTypes]);
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="icon">
       <SidebarContent className="gap-0">
         <SidebarHeader>
           <SidebarMenu>
@@ -106,7 +106,7 @@ export default function AppSidebar() {
                   </Button>
                   <Link
                     to="/"
-                    className="text-sm font-medium truncate flex-1 min-w-0 hover:text-primary transition-colors"
+                    className="text-sm font-bold truncate flex-1 min-w-0 hover:text-primary transition-colors"
                   >
                     {metadataQuery.data?.title}
                   </Link>
@@ -200,7 +200,10 @@ export default function AppSidebar() {
                                           endpoint: resource.resourceType,
                                         }}
                                       >
-                                        <span>{resource.resourceType}</span>
+                                        <span className="flex-1 truncate">{resource.resourceType}</span>
+                                        <span className="text-xs text-muted-foreground ml-auto bg-muted rounded-md px-2 py-1">
+                                          {resource.currentTotal}
+                                        </span>
                                       </Link>
                                     </SidebarMenuSubButton>
                                   </SidebarMenuSubItem>
@@ -308,8 +311,8 @@ export default function AppSidebar() {
                   className="overflow-hidden shrink-0"
                   src="/ui/logos/ferrum.svg"
                   alt="Ferrum"
-                  width={80}
-                  height={80}
+                  width={64}
+                  height={64}
                 />
               </a>
               <div className="flex items-center gap-2 ml-auto">
@@ -397,6 +400,6 @@ export default function AppSidebar() {
           </div>
         )}
       </SidebarFooter>
-    </Sidebar>
+    </Sidebar >
   );
 }

@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 
 function RootComponent() {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/ui/login";
+  const isLoginPage = location.pathname === "/login";
 
   if (isLoginPage) {
     return (
@@ -27,14 +27,12 @@ function RootComponent() {
     <AuthGuard>
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
-        <SidebarInset className="flex flex-col overflow-hidden">
-          <main className="flex-1 min-h-0 overflow-y-auto">
-            <ConnectionGuard>
-              <Outlet />
-            </ConnectionGuard>
-          </main>
-          <Toaster />
-        </SidebarInset>
+        <main className="flex-1 min-h-0 overflow-y-auto bg-background">
+          <ConnectionGuard>
+            <Outlet />
+          </ConnectionGuard>
+        </main>
+        <Toaster />
       </SidebarProvider>
     </AuthGuard>
   );

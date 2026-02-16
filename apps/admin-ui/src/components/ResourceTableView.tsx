@@ -122,7 +122,7 @@ const ActionCell = ({
   onDeleted: () => void;
 }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const resourceUrl = `/api/fhir/${resource.resourceType}/${resource.id}`;
+  const resourceUrl = `/fhir/${resource.resourceType}/${resource.id}`;
 
   const deleteMutation = useMutation({
     mutationFn: () =>

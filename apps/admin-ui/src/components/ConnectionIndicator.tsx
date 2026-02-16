@@ -148,7 +148,7 @@ export function ConnectionIndicator() {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Endpoint:</span>
               <span className="text-sm text-muted-foreground font-mono">
-                /api/fhir/metadata
+                /fhir/metadata
               </span>
             </div>
             <div className="flex items-center justify-between">

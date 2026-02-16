@@ -843,7 +843,7 @@ impl Default for OidcAuthConfig {
 #[derive(Debug, Clone, Deserialize)]
 pub struct UiConfig {
     /// Enable admin UI
-    #[serde(default = "default_true")]
+    #[serde(default = "default_false")]
     pub enabled: bool,
 
     /// Admin UI title
@@ -883,7 +883,7 @@ pub struct UiConfig {
 impl Default for UiConfig {
     fn default() -> Self {
         Self {
-            enabled: true,
+            enabled: false,
             title: default_ui_title(),
             password: None,
             session_secret: None,

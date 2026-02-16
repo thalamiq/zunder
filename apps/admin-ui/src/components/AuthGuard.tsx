@@ -21,12 +21,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         const sessionOk = config.requires_auth ? await hasSession() : true;
         setIsAuthed(sessionOk);
 
-        if (config.requires_auth && !sessionOk && pathname !== "/ui/login") {
+        if (config.requires_auth && !sessionOk && pathname !== "/login") {
           navigate({ to: "/login" });
           return;
         }
 
-        if (sessionOk && pathname === "/ui/login") {
+        if (sessionOk && pathname === "/login") {
           navigate({ to: "/dashboard" });
           return;
         }
@@ -44,7 +44,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return <LoadingArea />;
   }
 
-  if (pathname === "/ui/login" || !requiresAuth || isAuthed) {
+  if (pathname === "/login" || !requiresAuth || isAuthed) {
     return <>{children}</>;
   }
 

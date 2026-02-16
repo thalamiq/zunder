@@ -184,7 +184,7 @@ export default function ApiDisplay() {
       }
 
       // Use endpointToUse which has fallback to URL params
-      const res = await fetch(`/api/fhir/${endpointToUse}`, options);
+      const res = await fetch(`/fhir/${endpointToUse}`, options);
       const contentType = res.headers.get("content-type");
 
       let data = null;
@@ -385,7 +385,7 @@ export default function ApiDisplay() {
       try {
         // Extract the path from the bundle link URL
         // URLs are like: http://localhost:8080/fhir/CodeSystem?_cursor=...
-        // or: /api/fhir/CodeSystem?_cursor=...
+        // or: /fhir/CodeSystem?_cursor=...
         let path = url;
 
         // Remove protocol and host if present
@@ -396,10 +396,8 @@ export default function ApiDisplay() {
           // If URL parsing fails, assume it's already a path
         }
 
-        // Remove /api/fhir prefix if present (since we add it in fetch)
-        if (path.startsWith("/api/fhir/")) {
-          path = path.substring("/api/fhir/".length);
-        } else if (path.startsWith("/fhir/")) {
+        // Remove /fhir prefix if present (since we add it in fetch)
+        if (path.startsWith("/fhir/")) {
           path = path.substring("/fhir/".length);
         } else if (path.startsWith("/")) {
           path = path.substring(1);

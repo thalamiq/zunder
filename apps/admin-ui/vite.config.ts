@@ -13,9 +13,19 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/admin": "http://localhost:8080",
-      "/fhir": "http://localhost:8080",
-      "/health": "http://localhost:8080",
+      "/admin": {
+        target: "http://127.0.0.1:8080",
+        changeOrigin: true,
+        cookieDomainRewrite: "",
+      },
+      "/fhir": {
+        target: "http://127.0.0.1:8080",
+        changeOrigin: true,
+      },
+      "/health": {
+        target: "http://127.0.0.1:8080",
+        changeOrigin: true,
+      },
     },
   },
 });

@@ -223,8 +223,7 @@ fn extract_cookie_value(headers: &HeaderMap, name: &str) -> Option<String> {
 
 fn build_set_cookie(name: &str, value: &str, max_age_seconds: usize, is_https: bool) -> String {
     let mut cookie = format!(
-        // Cookie is scoped to the Next.js proxy path (browser never talks to `/admin/*` directly).
-        "{}={}; HttpOnly; SameSite=Lax; Path=/api/admin; Max-Age={}",
+        "{}={}; HttpOnly; SameSite=Lax; Path=/admin; Max-Age={}",
         name, value, max_age_seconds
     );
     if is_https {
@@ -234,7 +233,7 @@ fn build_set_cookie(name: &str, value: &str, max_age_seconds: usize, is_https: b
 }
 
 fn build_clear_cookie(name: &str, is_https: bool) -> String {
-    let mut cookie = format!("{name}=; HttpOnly; SameSite=Lax; Path=/api/admin; Max-Age=0");
+    let mut cookie = format!("{name}=; HttpOnly; SameSite=Lax; Path=/admin; Max-Age=0");
     if is_https {
         cookie.push_str("; Secure");
     }

@@ -338,9 +338,6 @@ const DashboardDisplay = () => {
                   axisLine={false}
                   tickMargin={4}
                   interval={0}
-                  angle={-35}
-                  textAnchor="end"
-                  height={70}
                   className="text-xs"
                   tickFormatter={(value: string) =>
                     value.length > 10 ? value.slice(0, 9) + "\u2026" : value
