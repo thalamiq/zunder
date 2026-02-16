@@ -19,6 +19,8 @@ pub async fn security_headers_middleware(req: Request, next: Next) -> Response {
             .map(|s| s.eq_ignore_ascii_case("https"))
             .unwrap_or(false);
 
+    let is_ui = req.uri().path().starts_with("/ui");
+
     let mut response = next.run(req).await;
     let headers = response.headers_mut();
 
@@ -27,15 +29,28 @@ pub async fn security_headers_middleware(req: Request, next: Next) -> Response {
         "x-content-type-options",
         HeaderValue::from_static("nosniff"),
     );
-    // Prevent clickjacking.
-    headers.insert("x-frame-options", HeaderValue::from_static("DENY"));
     // Avoid leaking referrers.
     headers.insert("referrer-policy", HeaderValue::from_static("no-referrer"));
-    // Tight default CSP for an API surface.
-    headers.insert(
-        "content-security-policy",
-        HeaderValue::from_static("default-src 'none'"),
-    );
+
+    if is_ui {
+        // Permissive CSP for the admin SPA: allow same-origin assets + Google Fonts.
+        headers.insert(
+            "content-security-policy",
+            HeaderValue::from_static(
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'"
+            ),
+        );
+        // Allow framing the UI from same origin (e.g. for embedded dashboards).
+        headers.insert("x-frame-options", HeaderValue::from_static("SAMEORIGIN"));
+    } else {
+        // Prevent clickjacking on API endpoints.
+        headers.insert("x-frame-options", HeaderValue::from_static("DENY"));
+        // Tight default CSP for an API surface.
+        headers.insert(
+            "content-security-policy",
+            HeaderValue::from_static("default-src 'none'"),
+        );
+    }
 
     // Cross-origin isolation defaults (API-safe).
     headers.insert(
