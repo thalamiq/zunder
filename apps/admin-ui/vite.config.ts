@@ -3,6 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
+const fhirServerUrl =
+  process.env.VITE_FHIR_SERVER_URL ?? "http://127.0.0.1:8081";
+
 export default defineConfig({
   base: "/ui/",
   plugins: [react(), tailwindcss()],
@@ -14,16 +17,16 @@ export default defineConfig({
   server: {
     proxy: {
       "/admin": {
-        target: "http://127.0.0.1:8080",
+        target: fhirServerUrl,
         changeOrigin: true,
         cookieDomainRewrite: "",
       },
       "/fhir": {
-        target: "http://127.0.0.1:8080",
+        target: fhirServerUrl,
         changeOrigin: true,
       },
       "/health": {
-        target: "http://127.0.0.1:8080",
+        target: fhirServerUrl,
         changeOrigin: true,
       },
     },

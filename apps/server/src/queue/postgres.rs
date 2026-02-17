@@ -269,23 +269,30 @@ impl JobQueue for PostgresJobQueue {
     ) -> Result<()> {
         let now = chrono::Utc::now();
 
-        sqlx::query(
+        // If cancel was requested while running, mark as cancelled instead of completed
+        let result = sqlx::query(
             r#"
             UPDATE jobs
-            SET status = 'completed',
+            SET status = CASE WHEN cancel_requested THEN 'cancelled' ELSE 'completed' END,
                 completed_at = $1,
                 progress = COALESCE($2, progress)
             WHERE id = $3
+            RETURNING status
             "#,
         )
         .bind(now)
         .bind(final_results)
         .bind(job_id)
-        .execute(&self.pool)
+        .fetch_one(&self.pool)
         .await
         .map_err(crate::Error::Database)?;
 
-        tracing::info!("Job {} completed", job_id);
+        let final_status: String = result.get("status");
+        if final_status == "cancelled" {
+            tracing::info!("Job {} marked as cancelled (cancel was requested during execution)", job_id);
+        } else {
+            tracing::info!("Job {} completed", job_id);
+        }
         Ok(())
     }
 
@@ -353,11 +360,35 @@ impl JobQueue for PostgresJobQueue {
     }
 
     async fn cancel_job(&self, job_id: Uuid) -> Result<bool> {
+        let now = chrono::Utc::now();
+
+        // Immediately cancel pending jobs (they haven't started)
+        let result = sqlx::query(
+            r#"
+            UPDATE jobs
+            SET status = 'cancelled',
+                cancel_requested = TRUE,
+                completed_at = $1
+            WHERE id = $2 AND status = 'pending'
+            "#,
+        )
+        .bind(now)
+        .bind(job_id)
+        .execute(&self.pool)
+        .await
+        .map_err(crate::Error::Database)?;
+
+        if result.rows_affected() > 0 {
+            tracing::info!("Job {} cancelled (was pending)", job_id);
+            return Ok(true);
+        }
+
+        // For running jobs, set the flag so the worker can check and stop
         let result = sqlx::query(
             r#"
             UPDATE jobs
             SET cancel_requested = TRUE
-            WHERE id = $1 AND status IN ('pending', 'running')
+            WHERE id = $1 AND status = 'running'
             "#,
         )
         .bind(job_id)
@@ -367,9 +398,9 @@ impl JobQueue for PostgresJobQueue {
 
         let cancelled = result.rows_affected() > 0;
         if cancelled {
-            tracing::info!("Cancellation requested for job {}", job_id);
+            tracing::info!("Cancellation requested for running job {}", job_id);
         } else {
-            tracing::warn!("Job {} not found or already completed", job_id);
+            tracing::warn!("Job {} not found or already in terminal state", job_id);
         }
 
         Ok(cancelled)
@@ -384,6 +415,30 @@ impl JobQueue for PostgresJobQueue {
                 .map_err(crate::Error::Database)?;
 
         Ok(result.unwrap_or(false))
+    }
+
+    async fn delete_job(&self, job_id: Uuid) -> Result<bool> {
+        // Allow deleting terminal jobs, or running/pending jobs where cancel was already requested
+        let result = sqlx::query(
+            r#"
+            DELETE FROM jobs
+            WHERE id = $1
+              AND (
+                status IN ('completed', 'failed', 'cancelled')
+                OR (cancel_requested = TRUE AND status IN ('running', 'pending'))
+              )
+            "#,
+        )
+        .bind(job_id)
+        .execute(&self.pool)
+        .await
+        .map_err(crate::Error::Database)?;
+
+        let deleted = result.rows_affected() > 0;
+        if deleted {
+            tracing::info!("Job {} deleted", job_id);
+        }
+        Ok(deleted)
     }
 
     async fn health_check(&self) -> Result<serde_json::Value> {

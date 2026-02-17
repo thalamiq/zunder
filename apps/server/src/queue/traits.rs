@@ -53,6 +53,9 @@ pub trait JobQueue: Send + Sync {
     /// Check if job was cancelled
     async fn is_cancelled(&self, job_id: Uuid) -> Result<bool>;
 
+    /// Delete a single job (must be in a terminal state)
+    async fn delete_job(&self, job_id: Uuid) -> Result<bool>;
+
     /// Health check
     async fn health_check(&self) -> Result<serde_json::Value>;
 

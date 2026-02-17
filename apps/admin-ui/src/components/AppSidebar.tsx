@@ -303,7 +303,7 @@ export default function AppSidebar() {
           <div className="flex flex-col gap-3 py-3 px-2 overflow-hidden">
             <div className="flex items-center justify-center gap-2 overflow-hidden">
               <a
-                href="https://thalamiq.io"
+                href="https://docs.ferrum.thalamiq.io"
                 target="_blank"
                 className="opacity-80 hover:opacity-100 transition-opacity overflow-hidden shrink-0"
               >

@@ -180,7 +180,12 @@ impl JobQueue for InlineJobQueue {
     ) -> Result<()> {
         let now = Utc::now();
         self.update_job(job_id, |job| {
-            job.status = JobStatus::Completed;
+            // Respect cancel_requested: mark as cancelled instead of completed
+            job.status = if job.cancel_requested {
+                JobStatus::Cancelled
+            } else {
+                JobStatus::Completed
+            };
             job.completed_at = Some(now);
             if final_results.is_some() {
                 job.progress = final_results;
@@ -199,8 +204,18 @@ impl JobQueue for InlineJobQueue {
     }
 
     async fn cancel_job(&self, job_id: Uuid) -> Result<bool> {
-        self.update_job(job_id, |job| job.cancel_requested = true)?;
-        Ok(true)
+        let mut jobs = self.jobs.lock().unwrap();
+        if let Some(job) = jobs.get_mut(&job_id) {
+            job.cancel_requested = true;
+            // Immediately cancel pending jobs
+            if job.status == JobStatus::Pending {
+                job.status = JobStatus::Cancelled;
+                job.completed_at = Some(chrono::Utc::now());
+            }
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     async fn is_cancelled(&self, job_id: Uuid) -> Result<bool> {
@@ -209,6 +224,22 @@ impl JobQueue for InlineJobQueue {
             .get(&job_id)
             .map(|j| j.cancel_requested)
             .unwrap_or(false))
+    }
+
+    async fn delete_job(&self, job_id: Uuid) -> Result<bool> {
+        let mut jobs = self.jobs.lock().unwrap();
+        if let Some(job) = jobs.get(&job_id) {
+            let deletable = matches!(
+                job.status,
+                JobStatus::Completed | JobStatus::Failed | JobStatus::Cancelled
+            ) || (job.cancel_requested
+                && matches!(job.status, JobStatus::Running | JobStatus::Pending));
+            if deletable {
+                jobs.remove(&job_id);
+                return Ok(true);
+            }
+        }
+        Ok(false)
     }
 
     async fn health_check(&self) -> Result<serde_json::Value> {

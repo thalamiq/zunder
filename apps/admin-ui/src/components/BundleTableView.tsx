@@ -1,5 +1,5 @@
 import { Bundle, Resource } from "fhir/r4";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -14,7 +14,6 @@ import {
   TableBody,
   TableCell,
 } from "@thalamiq/ui/components/table";
-import { cn } from "@thalamiq/ui/utils";
 import { highlightJson, highlightPrimitiveValue } from "@/lib/json";
 
 const BundleTableView = ({ bundle }: { bundle: Bundle | Resource }) => {
@@ -69,20 +68,6 @@ type ResourceTypeTableProps = {
 };
 
 const ResourceTypeTable = ({ resources }: ResourceTypeTableProps) => {
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-
-  const toggleRow = (index: number) => {
-    setExpandedRows((prev) => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
-    });
-  };
-
   // Get all unique root-level keys from all resources of this type
   const columns = useMemo<ColumnDef<Resource>[]>(() => {
     const allKeys = new Set<string>();
@@ -90,47 +75,38 @@ const ResourceTypeTable = ({ resources }: ResourceTypeTableProps) => {
       Object.keys(resource).forEach((key) => allKeys.add(key));
     });
 
-    return [
-      ...Array.from(allKeys).map((key) => ({
-        accessorKey: key,
-        header: key,
-        cell: ({ row }: { row: { original: Resource; index: number } }) => {
-          const value = row.original[key as keyof Resource];
-          const isExpanded = expandedRows.has(row.index);
+    return Array.from(allKeys).map((key) => ({
+      accessorKey: key,
+      header: key,
+      cell: ({ row }: { row: { original: Resource } }) => {
+        const value = row.original[key as keyof Resource];
 
-          if (value === null || value === undefined) {
-            return <span className="text-muted-foreground text-xs">-</span>;
-          }
+        if (value === null || value === undefined) {
+          return <span className="text-muted-foreground text-xs">-</span>;
+        }
 
-          if (typeof value === "object") {
-            const jsonString = JSON.stringify(value, null, 2);
-            const highlighted = highlightJson(jsonString);
+        if (typeof value === "object") {
+          const jsonString = JSON.stringify(value, null, 2);
+          const highlighted = highlightJson(jsonString);
 
-            return (
-              <pre
-                className={cn(
-                  "text-xs font-mono max-w-96 whitespace-pre-wrap wrap-break-word leading-tight",
-                  !isExpanded && "max-h-80 overflow-hidden"
-                )}
-                dangerouslySetInnerHTML={{ __html: highlighted }}
-              />
-            );
-          }
-
-          const highlighted = highlightPrimitiveValue(value);
           return (
-            <div
-              className={cn(
-                "text-xs max-w-96 whitespace-normal wrap-break-word leading-tight",
-                !isExpanded && "max-h-80 overflow-hidden"
-              )}
+            <pre
+              className="text-xs font-mono whitespace-pre-wrap wrap-break-word leading-tight max-h-80 overflow-auto"
               dangerouslySetInnerHTML={{ __html: highlighted }}
             />
           );
-        },
-      })),
-    ];
-  }, [resources, expandedRows]);
+        }
+
+        const highlighted = highlightPrimitiveValue(value);
+        return (
+          <div
+            className="text-xs max-w-96 whitespace-normal wrap-break-word leading-tight max-h-80 overflow-auto"
+            dangerouslySetInnerHTML={{ __html: highlighted }}
+          />
+        );
+      },
+    }));
+  }, [resources]);
 
   const table = useReactTable({
     data: resources,
@@ -165,7 +141,7 @@ const ResourceTypeTable = ({ resources }: ResourceTypeTableProps) => {
         <TableBody>
           {rows.length > 0 ? (
             rows.map((row) => (
-              <TableRow key={row.id} onClick={() => toggleRow(row.index)} className="cursor-pointer hover:bg-muted">
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="py-2 align-top">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

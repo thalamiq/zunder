@@ -138,6 +138,29 @@ pub async fn cancel_job(
     }
 }
 
+/// Delete a single job (must be in a terminal state)
+pub async fn delete_job(
+    State(state): State<AppState>,
+    Path(job_id): Path<Uuid>,
+) -> Result<Response> {
+    let deleted = state.job_queue.delete_job(job_id).await?;
+
+    if deleted {
+        Ok((
+            StatusCode::OK,
+            Json(json!({
+                "deleted": true,
+                "jobId": job_id
+            })),
+        )
+            .into_response())
+    } else {
+        Err(crate::Error::Validation(
+            "Job not found or still running/pending".to_string(),
+        ))
+    }
+}
+
 /// Get queue health and statistics
 pub async fn get_queue_health(State(state): State<AppState>) -> Result<Response> {
     let health = state.job_queue.health_check().await?;

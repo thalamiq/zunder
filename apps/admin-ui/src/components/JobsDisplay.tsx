@@ -56,6 +56,7 @@ import JsonViewer from "@/components/JsonViewer";
 import {
   cancelJob,
   cleanupOldJobs,
+  deleteJob,
   getJob,
   getQueueHealth,
   listJobs,
@@ -219,6 +220,19 @@ const JobsDisplay = () => {
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : "Failed to cancel job");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (jobId: string) => deleteJob(jobId),
+    onSuccess: (_data, jobId) => {
+      toast.success("Job deleted");
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queueHealth });
+      if (detailsJobId === jobId) setDetailsJobId(null);
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Failed to delete job");
     },
   });
 
@@ -622,6 +636,19 @@ const JobsDisplay = () => {
                                 <XCircle className="mr-2 h-4 w-4" />
                                 Cancel
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                disabled={
+                                  deleteMutation.isPending ||
+                                  !(isTerminalStatus(job.status) || job.cancelRequested)
+                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteMutation.mutate(job.id);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -707,224 +734,236 @@ const JobsDisplay = () => {
         open={!!detailsJobId}
         onOpenChange={(open) => (!open ? setDetailsJobId(null) : null)}
       >
-        <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Job details</DialogTitle>
-            <DialogDescription className="font-mono text-xs break-all">
-              {detailsJobId ?? ""}
-            </DialogDescription>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="space-y-1">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <DialogTitle>Job details</DialogTitle>
+                <DialogDescription className="font-mono text-xs break-all mt-1">
+                  {detailsJobId ?? ""}
+                </DialogDescription>
+              </div>
+              {jobDetailsQuery.data && (
+                <div className="flex items-center gap-2 shrink-0">
+                  {getStatusBadge(jobDetailsQuery.data.status)}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <MoreVertical className="w-4 h-4 mr-2" />
+                        Actions
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          queryClient.invalidateQueries({
+                            queryKey: queryKeys.job(jobDetailsQuery.data!.id),
+                          })
+                        }
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={
+                          isTerminalStatus(jobDetailsQuery.data.status) ||
+                          jobDetailsQuery.data.cancelRequested
+                        }
+                        onClick={() =>
+                          cancelMutation.mutate(jobDetailsQuery.data!.id)
+                        }
+                      >
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Cancel job
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={
+                          deleteMutation.isPending ||
+                          !(
+                            isTerminalStatus(jobDetailsQuery.data.status) ||
+                            jobDetailsQuery.data.cancelRequested
+                          )
+                        }
+                        onClick={() =>
+                          deleteMutation.mutate(jobDetailsQuery.data!.id)
+                        }
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete job
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
           </DialogHeader>
 
-          {jobDetailsQuery.isPending ? (
-            <div className="py-8">
-              <LoadingArea />
-            </div>
-          ) : jobDetailsQuery.isError ? (
-            <ErrorArea error={jobDetailsQuery.error} />
-          ) : jobDetailsQuery.data ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg">
-                          {jobDetailsQuery.data.jobType}
-                        </CardTitle>
-                        <div className="text-xs text-muted-foreground">
-                          Priority:{" "}
-                          <span className="font-mono">
-                            {jobDetailsQuery.data.priority}
-                          </span>{" "}
-                          • Retries:{" "}
-                          <span className="font-mono">
-                            {jobDetailsQuery.data.retryCount}
-                          </span>
-                        </div>
-                      </div>
-                      {getStatusBadge(jobDetailsQuery.data.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                      <div>
-                        <div className="text-muted-foreground">Created</div>
-                        <div
-                          title={formatDateTimeFull(
-                            jobDetailsQuery.data.createdAt
-                          )}
-                        >
-                          {formatDateTime(jobDetailsQuery.data.createdAt)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground">Scheduled</div>
-                        <div
-                          title={formatDateTimeFull(
-                            jobDetailsQuery.data.scheduledAt
-                          )}
-                        >
-                          {formatDateTime(jobDetailsQuery.data.scheduledAt)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground">Started</div>
-                        <div
-                          title={formatDateTimeFull(
-                            jobDetailsQuery.data.startedAt
-                          )}
-                        >
-                          {formatDateTime(jobDetailsQuery.data.startedAt)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground">Completed</div>
-                        <div
-                          title={formatDateTimeFull(
-                            jobDetailsQuery.data.completedAt
-                          )}
-                        >
-                          {formatDateTime(jobDetailsQuery.data.completedAt)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {typeof progressPercent(jobDetailsQuery.data) ===
-                      "number" && (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>
-                            {jobDetailsQuery.data.processedItems}
-                            {jobDetailsQuery.data.totalItems
-                              ? ` / ${jobDetailsQuery.data.totalItems}`
-                              : ""}
-                          </span>
-                          <span className="font-mono">
-                            {progressPercent(jobDetailsQuery.data)!.toFixed(1)}%
-                          </span>
-                        </div>
-                        <ProgressBar
-                          value={progressPercent(jobDetailsQuery.data)!}
-                        />
-                      </div>
-                    )}
-
+          <div className="flex-1 overflow-y-auto -mx-6 px-6">
+            {jobDetailsQuery.isPending ? (
+              <div className="py-8">
+                <LoadingArea />
+              </div>
+            ) : jobDetailsQuery.isError ? (
+              <ErrorArea error={jobDetailsQuery.error} />
+            ) : jobDetailsQuery.data ? (
+              <div className="space-y-6 pt-2">
+                <div className="rounded-md border p-4 space-y-4">
+                  <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-xs">
+                    <span>
+                      <span className="text-muted-foreground">Type</span>{" "}
+                      <span className="font-medium">
+                        {jobDetailsQuery.data.jobType}
+                      </span>
+                    </span>
+                    <span>
+                      <span className="text-muted-foreground">Priority</span>{" "}
+                      <span className="font-mono">
+                        {jobDetailsQuery.data.priority}
+                      </span>
+                    </span>
+                    <span>
+                      <span className="text-muted-foreground">Retries</span>{" "}
+                      <span className="font-mono">
+                        {jobDetailsQuery.data.retryCount}
+                      </span>
+                    </span>
                     {jobDetailsQuery.data.workerId && (
-                      <div className="text-xs">
+                      <span>
                         <span className="text-muted-foreground">Worker</span>{" "}
                         <span className="font-mono">
                           {jobDetailsQuery.data.workerId}
                         </span>
-                      </div>
+                      </span>
                     )}
+                  </div>
 
-                    {jobDetailsQuery.data.cancelRequested && (
-                      <div className="text-xs text-amber-600 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
-                        Cancel requested
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-xs">
+                    <div>
+                      <div className="text-muted-foreground uppercase tracking-wider">
+                        Created
                       </div>
-                    )}
-
-                    {jobDetailsQuery.data.errorMessage && (
-                      <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
-                        <div className="font-medium text-destructive">
-                          Error
-                        </div>
-                        <div
-                          className="text-xs text-muted-foreground mt-1"
-                          title={formatDateTimeFull(
-                            jobDetailsQuery.data.lastErrorAt
-                          )}
-                        >
-                          {formatDateTime(jobDetailsQuery.data.lastErrorAt)}
-                        </div>
-                        <div className="mt-2 whitespace-pre-wrap wrap-break-word">
-                          {jobDetailsQuery.data.errorMessage}
-                        </div>
+                      <div
+                        className="font-mono"
+                        title={formatDateTimeFull(
+                          jobDetailsQuery.data.createdAt
+                        )}
+                      >
+                        {formatDateTime(jobDetailsQuery.data.createdAt)}
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Actions</CardTitle>
-                    <CardDescription>
-                      Quick controls for this job
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                          <MoreVertical className="w-4 h-4 mr-2" />
-                          Actions
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem
-                          onClick={() =>
-                            queryClient.invalidateQueries({
-                              queryKey: queryKeys.job(jobDetailsQuery.data!.id),
-                            })
-                          }
-                        >
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                          Refresh details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          disabled={
-                            isTerminalStatus(jobDetailsQuery.data.status) ||
-                            jobDetailsQuery.data.cancelRequested
-                          }
-                          onClick={() =>
-                            cancelMutation.mutate(jobDetailsQuery.data!.id)
-                          }
-                        >
-                          <XCircle className="mr-2 h-4 w-4" />
-                          Cancel job
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <div className="text-xs text-muted-foreground pt-2">
-                      Cancelling sets{" "}
-                      <span className="font-mono">cancelRequested</span>;
-                      workers may stop at the next safe checkpoint.
                     </div>
-                  </CardContent>
-                </Card>
+                    <div>
+                      <div className="text-muted-foreground uppercase tracking-wider">
+                        Scheduled
+                      </div>
+                      <div
+                        className="font-mono"
+                        title={formatDateTimeFull(
+                          jobDetailsQuery.data.scheduledAt
+                        )}
+                      >
+                        {formatDateTime(jobDetailsQuery.data.scheduledAt)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground uppercase tracking-wider">
+                        Started
+                      </div>
+                      <div
+                        className="font-mono"
+                        title={formatDateTimeFull(
+                          jobDetailsQuery.data.startedAt
+                        )}
+                      >
+                        {formatDateTime(jobDetailsQuery.data.startedAt)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground uppercase tracking-wider">
+                        Completed
+                      </div>
+                      <div
+                        className="font-mono"
+                        title={formatDateTimeFull(
+                          jobDetailsQuery.data.completedAt
+                        )}
+                      >
+                        {formatDateTime(jobDetailsQuery.data.completedAt)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {typeof progressPercent(jobDetailsQuery.data) === "number" && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          {jobDetailsQuery.data.processedItems}
+                          {jobDetailsQuery.data.totalItems
+                            ? ` / ${jobDetailsQuery.data.totalItems}`
+                            : ""}
+                        </span>
+                        <span className="font-mono">
+                          {progressPercent(jobDetailsQuery.data)!.toFixed(1)}%
+                        </span>
+                      </div>
+                      <ProgressBar
+                        value={progressPercent(jobDetailsQuery.data)!}
+                      />
+                    </div>
+                  )}
+
+                  {jobDetailsQuery.data.cancelRequested && (
+                    <div className="text-xs text-warning flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Cancel requested
+                    </div>
+                  )}
+
+                  {jobDetailsQuery.data.errorMessage && (
+                    <div className="rounded border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                      <div className="font-medium text-destructive">Error</div>
+                      <div
+                        className="text-xs text-muted-foreground mt-1"
+                        title={formatDateTimeFull(
+                          jobDetailsQuery.data.lastErrorAt
+                        )}
+                      >
+                        {formatDateTime(jobDetailsQuery.data.lastErrorAt)}
+                      </div>
+                      <div className="mt-2 whitespace-pre-wrap wrap-break-word text-xs">
+                        {jobDetailsQuery.data.errorMessage}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                    Parameters
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="rounded-md border bg-muted/30 overflow-hidden">
+                      <div className="px-3 py-2 border-b text-xs font-medium text-muted-foreground">
+                        parameters
+                      </div>
+                      <JsonViewer
+                        data={jobDetailsQuery.data.parameters}
+                        className="rounded-none"
+                      />
+                    </div>
+                    <div className="rounded-md border bg-muted/30 overflow-hidden">
+                      <div className="px-3 py-2 border-b text-xs font-medium text-muted-foreground">
+                        retryPolicy
+                      </div>
+                      <JsonViewer
+                        data={jobDetailsQuery.data.retryPolicy}
+                        className="rounded-none"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Parameters</CardTitle>
-                  <CardDescription>
-                    Job payload and retry policy
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="rounded-md border bg-background">
-                    <div className="px-4 py-2 border-b text-sm font-medium">
-                      parameters
-                    </div>
-                    <JsonViewer
-                      data={jobDetailsQuery.data.parameters}
-                      className="rounded-md"
-                    />
-                  </div>
-                  <div className="rounded-md border bg-background">
-                    <div className="px-4 py-2 border-b text-sm font-medium">
-                      retryPolicy
-                    </div>
-                    <JsonViewer
-                      data={jobDetailsQuery.data.retryPolicy}
-                      className="rounded-md"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

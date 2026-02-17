@@ -4,123 +4,65 @@
 @source "../src/**/*.{js,jsx,ts,tsx}";
 @source "../node_modules/@thalamiq/ui/dist/**/*.{js,jsx,ts,tsx}";
 
-/* FHIR-aware JSON syntax highlighting */
+/* JSON viewer — sleek, enterprise palette */
 .json-key {
-  color: hsl(211 100% 43%);
-  font-weight: 600;
+  color: hsl(220 14% 48%);
+  font-weight: 500;
 }
 
 .json-date {
-  color: hsl(282 87% 51%);
-  font-weight: 500;
+  color: hsl(270 25% 52%);
 }
 
-.json-url {
-  color: hsl(188 97% 38%);
+.json-url,
+.json-reference {
+  color: hsl(200 55% 48%);
+  user-select: text;
+  cursor: text;
+}
+
+a.json-url,
+a.json-reference {
   text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-a.json-url {
+a.json-url:hover,
+a.json-reference:hover {
   text-decoration: underline;
   text-decoration-style: dotted;
-  text-underline-offset: 2px;
-}
-
-a.json-url:hover {
-  color: hsl(188 97% 28%);
-  text-decoration-style: solid;
-  background-color: hsla(188 97% 38% / 0.1);
-  border-radius: 2px;
-}
-
-a.json-reference {
-  color: hsl(166 76% 37%);
-  text-decoration: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  border-bottom: 1px dashed currentColor;
-}
-
-a.json-reference:hover {
-  color: hsl(166 76% 27%);
-  background-color: hsla(166 76% 37% / 0.1);
-  border-bottom-style: solid;
-  border-radius: 2px;
+  text-underline-offset: 1px;
 }
 
 .json-uuid {
-  color: hsl(215 14% 53%);
+  color: hsl(215 12% 55%);
   font-size: 0.95em;
   user-select: all;
   cursor: text;
 }
 
 .json-string {
-  color: hsl(134 61% 41%);
+  color: hsl(145 25% 42%);
 }
 
 .json-number {
-  color: hsl(31 100% 48%);
-  font-weight: 500;
+  color: hsl(32 55% 48%);
 }
 
 .json-boolean {
-  color: hsl(243 75% 59%);
-  font-weight: 600;
+  color: hsl(255 45% 55%);
 }
 
 .json-null {
-  color: hsl(215 14% 53%);
+  color: hsl(215 10% 58%);
   font-style: italic;
-  opacity: 0.8;
 }
 
-/* Dark mode adjustments */
-.dark .json-key {
-  color: hsl(211 100% 65%);
-}
-
-.dark .json-date {
-  color: hsl(282 87% 71%);
-}
-
-.dark .json-url {
-  color: hsl(188 97% 58%);
-}
-
-.dark a.json-url:hover {
-  color: hsl(188 97% 78%);
-  background-color: hsla(188 97% 58% / 0.15);
-}
-
-.dark a.json-reference {
-  color: hsl(166 76% 57%);
-}
-
-.dark a.json-reference:hover {
-  color: hsl(166 76% 77%);
-  background-color: hsla(166 76% 57% / 0.15);
-}
-
-.dark .json-uuid {
-  color: hsl(215 14% 73%);
-}
-
-.dark .json-string {
-  color: hsl(134 61% 61%);
-}
-
-.dark .json-number {
-  color: hsl(31 100% 68%);
-}
-
-.dark .json-boolean {
-  color: hsl(243 75% 79%);
-}
-
-.dark .json-null {
-  color: hsl(215 14% 73%);
-}
+.dark .json-key { color: hsl(220 12% 62%); }
+.dark .json-date { color: hsl(270 25% 68%); }
+.dark .json-url,
+.dark .json-reference { color: hsl(200 55% 65%); }
+.dark .json-uuid { color: hsl(215 12% 68%); }
+.dark .json-string { color: hsl(145 25% 58%); }
+.dark .json-number { color: hsl(32 55% 62%); }
+.dark .json-boolean { color: hsl(255 45% 68%); }
+.dark .json-null { color: hsl(215 10% 62%); }

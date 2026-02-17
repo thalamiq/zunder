@@ -24,10 +24,19 @@ pub fn admin_routes() -> Router<AppState> {
         .route("/jobs", get(jobs::list_jobs))
         .route("/jobs/health", get(jobs::get_queue_health))
         .route("/jobs/cleanup", post(jobs::cleanup_old_jobs))
-        .route("/jobs/:id", get(jobs::get_job))
+        .route("/jobs/:id", get(jobs::get_job).delete(jobs::delete_job))
         .route("/jobs/:id/cancel", post(jobs::cancel_job))
         // Resource stats
         .route("/resources/stats", get(admin::get_resource_type_stats))
+        // Resource references (for graph visualization)
+        .route(
+            "/resources/:resource_type/:id/references",
+            get(admin::get_resource_references),
+        )
+        .route(
+            "/resources/references/batch",
+            post(admin::get_batch_references),
+        )
         // Search parameter indexing status
         .route(
             "/search-parameters/indexing-status",

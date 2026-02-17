@@ -1,11 +1,11 @@
 import {
+  ArrowRightLeftIcon,
   ClipboardListIcon,
   DatabaseIcon,
-  FileTextIcon,
   FilterIcon,
   InfoIcon,
   LayoutDashboardIcon,
-  SendIcon,
+  ScrollTextIcon,
   SettingsIcon,
 } from "lucide-react";
 import { Package2Icon } from "lucide-react";
@@ -70,7 +70,7 @@ export const config = {
     api: {
       path: "/requests",
       label: "API",
-      icon: SendIcon,
+      icon: ArrowRightLeftIcon,
     },
     resources: {
       path: "/resources",
@@ -113,7 +113,7 @@ export const config = {
     logs: {
       path: "/audit-logs",
       label: "Logs",
-      icon: FileTextIcon,
+      icon: ScrollTextIcon,
     },
     metadata: {
       path: "/metadata",

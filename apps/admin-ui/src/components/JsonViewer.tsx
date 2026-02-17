@@ -46,15 +46,9 @@ const JsonValue = memo(({ value }: { value: unknown }) => {
       );
     }
 
-    if (type === "url" && value.startsWith("http")) {
+    if (type === "url") {
       return (
-        <a
-          href={value}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="json-url"
-          title={value}
-        >
+        <span className="json-url">
           <span className="json-quote" style={{ userSelect: "none" }}>
             &quot;
           </span>
@@ -62,17 +56,13 @@ const JsonValue = memo(({ value }: { value: unknown }) => {
           <span className="json-quote" style={{ userSelect: "none" }}>
             &quot;
           </span>
-        </a>
+        </span>
       );
     }
 
     if (type === "reference") {
       return (
-        <a
-          href={`/requests?endpoint=${encodeURIComponent(value)}`}
-          className="json-reference"
-          title={`View ${value}`}
-        >
+        <span className="json-reference">
           <span className="json-quote" style={{ userSelect: "none" }}>
             &quot;
           </span>
@@ -80,7 +70,7 @@ const JsonValue = memo(({ value }: { value: unknown }) => {
           <span className="json-quote" style={{ userSelect: "none" }}>
             &quot;
           </span>
-        </a>
+        </span>
       );
     }
 
@@ -174,11 +164,11 @@ const JsonNode = memo(
               className="json-toggle"
               aria-label={isCollapsed ? "Expand" : "Collapse"}
             >
-              {isCollapsed ? (
-                <ChevronRight className="w-3 h-3" />
-              ) : (
-                <ChevronDown className="w-3 h-3" />
-              )}
+            {isCollapsed ? (
+              <ChevronRight className="w-2.5 h-2.5" />
+            ) : (
+              <ChevronDown className="w-2.5 h-2.5" />
+            )}
             </button>
           )}
           {keyName && (
@@ -297,17 +287,9 @@ const JsonViewer = ({
           if (patterns.date.test(stringValue)) {
             highlightedValue = `<span class="json-date"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></span>`;
           } else if (patterns.url.test(stringValue)) {
-            // Make URLs clickable
-            if (stringValue.startsWith("http")) {
-              highlightedValue = `<a href="${stringValue}" target="_blank" rel="noopener noreferrer" class="json-url" title="${stringValue}"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></a>`;
-            } else {
-              highlightedValue = `<span class="json-url" title="${stringValue}"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></span>`;
-            }
+            highlightedValue = `<span class="json-url"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></span>`;
           } else if (patterns.reference.test(stringValue)) {
-            // Make FHIR references clickable (navigate to result page with query)
-            highlightedValue = `<a href="/requests?endpoint=${encodeURIComponent(
-              stringValue
-            )}" class="json-reference" title="View ${stringValue}"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></a>`;
+            highlightedValue = `<span class="json-reference"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></span>`;
           } else if (patterns.uuid.test(stringValue)) {
             highlightedValue = `<span class="json-uuid"><span class="json-quote" style="user-select: none;">&quot;</span><span style="user-select: text;">${escapedStringValue}</span><span class="json-quote" style="user-select: none;">&quot;</span></span>`;
           } else {
@@ -334,20 +316,20 @@ const JsonViewer = ({
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center p-8 text-muted-foreground text-xs">
-        <div className="text-center">
-          <Braces className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>No data to display</p>
-        </div>
+      <div className="flex items-center justify-center py-6 text-muted-foreground text-[11px]">
+        <span className="flex items-center gap-1.5">
+          <Braces className="w-3.5 h-3.5 opacity-60" />
+          No data
+        </span>
       </div>
     );
   }
 
   return (
-    <div className={cn("bg-card max-w-full overflow-x-auto", className)}>
+    <div className={cn("max-w-full overflow-x-auto", className)}>
       {/* Content */}
       {!isTooLargeForTreeView ? (
-        <div className="p-4 text-xs font-mono text-foreground json-tree-view overflow-x-auto">
+        <div className="px-3 py-2 text-[11px] font-mono text-foreground json-tree-view overflow-x-auto">
           <JsonNode
             data={data}
             path="root"
@@ -358,13 +340,13 @@ const JsonViewer = ({
         </div>
       ) : isTooLargeForHighlighting ? (
         <div className="flex overflow-x-auto">
-          <pre className="flex-1 text-xs font-mono text-foreground p-4 whitespace-pre-wrap wrap-break-word leading-5 max-w-full">
+          <pre className="flex-1 text-[11px] font-mono text-foreground px-3 py-2 whitespace-pre-wrap wrap-break-word leading-[1.35] max-w-full">
             <code className="json-syntax wrap-break-word">{jsonString}</code>
           </pre>
         </div>
       ) : (
         <div className="flex overflow-x-auto">
-          <pre className="flex-1 text-xs font-mono text-foreground p-4 whitespace-pre-wrap wrap-break-word leading-5 max-w-full">
+          <pre className="flex-1 text-[11px] font-mono text-foreground px-3 py-2 whitespace-pre-wrap wrap-break-word leading-[1.35] max-w-full">
             <code
               dangerouslySetInnerHTML={{ __html: highlightedJson }}
               className="json-syntax wrap-break-word"
@@ -373,11 +355,10 @@ const JsonViewer = ({
         </div>
       )}
 
-      {/* Inline styles for FHIR-aware syntax highlighting */}
+      {/* Inline styles — subtle, enterprise palette */}
       <style>{`
-        /* Tree view styles */
         .json-tree-view {
-          line-height: 1.6;
+          line-height: 1.35;
           overflow-wrap: break-word;
           word-break: break-word;
           max-width: 100%;
@@ -393,8 +374,8 @@ const JsonViewer = ({
           display: flex;
           align-items: flex-start;
           flex-wrap: wrap;
-          min-height: 1.6em;
-          gap: 0.25rem;
+          min-height: 1.35em;
+          gap: 0.125rem;
         }
 
         .json-value-wrapper {
@@ -414,9 +395,9 @@ const JsonViewer = ({
         }
 
         .json-children {
-          padding-left: 1.5rem;
-          border-left: 1px solid hsl(var(--border));
-          margin-left: 0.5rem;
+          padding-left: 1rem;
+          border-left: 1px solid hsl(var(--border) / 0.6);
+          margin-left: 0.375rem;
           max-width: 100%;
           overflow-wrap: break-word;
         }
@@ -430,36 +411,22 @@ const JsonViewer = ({
           background: none;
           border: none;
           cursor: pointer;
-          color: hsl(var(--muted-foreground));
-          transition: color 0.15s ease;
+          color: hsl(var(--muted-foreground) / 0.8);
           flex-shrink: 0;
         }
 
         .json-toggle:hover {
-          color: hsl(var(--foreground));
+          color: hsl(var(--muted-foreground));
         }
 
         .json-collapsed {
-          color: hsl(var(--muted-foreground));
+          color: hsl(var(--muted-foreground) / 0.9);
           font-style: italic;
-          font-size: 0.95em;
+          font-size: 0.9em;
         }
 
-        /* Property keys - Soft blue */
-        .json-key {
-          color: hsl(211 100% 43%);
-          font-weight: 600;
-        }
-
-        /* Prevent whitespace issues when copying */
-        .json-date,
-        .json-string,
-        .json-url,
-        .json-reference,
-        .json-uuid,
-        .json-number,
-        .json-boolean,
-        .json-null {
+        .json-date, .json-string, .json-url, .json-reference, .json-uuid,
+        .json-number, .json-boolean, .json-null {
           white-space: normal;
           display: inline-block;
           word-break: break-word;
@@ -467,17 +434,13 @@ const JsonViewer = ({
           max-width: 100%;
         }
 
-        .json-date > span,
-        .json-string > span,
-        .json-url > span,
-        .json-reference > span,
-        .json-uuid > span {
+        .json-date > span, .json-string > span, .json-url > span,
+        .json-reference > span, .json-uuid > span {
           display: inline;
           word-break: break-word;
           overflow-wrap: break-word;
         }
 
-        /* Ensure value text doesn't include leading/trailing whitespace */
         .json-date > span[style*="user-select: text"],
         .json-string > span[style*="user-select: text"],
         .json-url > span[style*="user-select: text"],
@@ -486,131 +449,6 @@ const JsonViewer = ({
           white-space: pre-wrap;
           word-break: break-word;
           overflow-wrap: break-word;
-        }
-
-        /* Dates and timestamps - Purple/Magenta */
-        .json-date {
-          color: hsl(282 87% 51%);
-          font-weight: 500;
-        }
-
-        /* URLs and URIs - Clickable links with cyan color */
-        .json-url {
-          color: hsl(188 97% 38%);
-          text-decoration: none;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-
-        a.json-url {
-          text-decoration: underline;
-          text-decoration-style: dotted;
-          text-underline-offset: 2px;
-        }
-
-        a.json-url:hover {
-          color: hsl(188 97% 28%);
-          text-decoration-style: solid;
-          background-color: hsla(188 97% 38% / 0.1);
-          border-radius: 2px;
-        }
-
-        /* FHIR references - Teal, clickable */
-        a.json-reference {
-          color: hsl(166 76% 37%);
-          text-decoration: none;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          border-bottom: 1px dashed currentColor;
-        }
-
-        a.json-reference:hover {
-          color: hsl(166 76% 27%);
-          background-color: hsla(166 76% 37% / 0.1);
-          border-bottom-style: solid;
-          border-radius: 2px;
-        }
-
-        /* UUIDs - Muted gray */
-        .json-uuid {
-          color: hsl(215 14% 53%);
-          font-size: 0.95em;
-          user-select: all;
-          cursor: text;
-        }
-
-        /* Regular strings - Green */
-        .json-string {
-          color: hsl(134 61% 41%);
-        }
-
-        /* Numbers - Orange */
-        .json-number {
-          color: hsl(31 100% 48%);
-          font-weight: 500;
-        }
-
-        /* Booleans - Indigo */
-        .json-boolean {
-          color: hsl(243 75% 59%);
-          font-weight: 600;
-        }
-
-        /* Null values - Gray italic */
-        .json-null {
-          color: hsl(215 14% 53%);
-          font-style: italic;
-          opacity: 0.8;
-        }
-
-        /* Dark mode adjustments */
-        .dark .json-key {
-          color: hsl(211 100% 65%);
-        }
-
-        .dark .json-date {
-          color: hsl(282 87% 71%);
-        }
-
-        .dark .json-url {
-          color: hsl(188 97% 58%);
-        }
-
-        .dark a.json-url:hover {
-          color: hsl(188 97% 78%);
-          background-color: hsla(188 97% 58% / 0.15);
-        }
-
-        .dark a.json-reference {
-          color: hsl(166 76% 57%);
-        }
-
-        .dark a.json-reference:hover {
-          color: hsl(166 76% 77%);
-          background-color: hsla(166 76% 57% / 0.15);
-        }
-
-        .dark .json-uuid {
-          color: hsl(215 14% 73%);
-          user-select: all;
-          cursor: text;
-        }
-
-        .dark .json-string {
-          color: hsl(134 61% 61%);
-        }
-
-        .dark .json-number {
-          color: hsl(31 100% 68%);
-        }
-
-        .dark .json-boolean {
-          color: hsl(243 75% 79%);
-        }
-
-        .dark .json-null {
-          color: hsl(215 14% 73%);
         }
       `}</style>
     </div>

@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher } from "./client";
+import { deleteFetcher, getFetcher, postFetcher } from "./client";
 
 export interface JobRecord {
   id: string;
@@ -95,6 +95,10 @@ export const cleanupOldJobs = async ({
   const query = params.toString();
   const url = query ? `/admin/jobs/cleanup?${query}` : "/admin/jobs/cleanup";
   return postFetcher<CleanupJobsResponse>(url, {});
+};
+
+export const deleteJob = async (id: string): Promise<void> => {
+  return deleteFetcher(`/admin/jobs/${id}`);
 };
 
 export const getQueueHealth = async (): Promise<QueueHealthResponse> => {

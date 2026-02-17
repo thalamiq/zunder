@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, RefObject, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CustomTabsList, CustomTabsTrigger } from "@/components/CustomTabs";
 import JsonViewer from "@/components/JsonViewer";
 import BundleTableView from "./BundleTableView";
@@ -9,12 +9,14 @@ import { useFullscreen, useToggle } from "react-use";
 import { FhirResponse } from "@/api/fhir";
 import { Bundle, Resource } from "fhir/r4";
 
+const ReferenceGraph = lazy(() => import("./ReferenceGraph"));
+
 interface ResultTabsProps {
   data: FhirResponse;
   onNavigate?: (url: string) => void;
 }
 
-type TabValue = "json" | "table" | "json-rows";
+type TabValue = "json" | "table" | "json-rows" | "graph";
 
 const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -24,7 +26,6 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
     onClose: () => toggle(false),
   });
 
-  // Check if data is a FHIR resource (has resourceType)
   const isFhirResource = useMemo(() => {
     return (
       typeof data === "object" &&
@@ -34,7 +35,28 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
     );
   }, [data]);
 
-  // Extract bundle links if data is a Bundle
+  const isBundle = useMemo(
+    () => isFhirResource && (data as Resource).resourceType === "Bundle",
+    [data, isFhirResource],
+  );
+
+  const resourceMeta = useMemo(() => {
+    if (
+      isFhirResource &&
+      !isBundle &&
+      "id" in data &&
+      typeof (data as Resource).id === "string"
+    ) {
+      return {
+        resourceType: (data as Resource).resourceType!,
+        resourceId: (data as Resource).id!,
+      };
+    }
+    return null;
+  }, [data, isFhirResource, isBundle]);
+
+  const showGraphTab = !!resourceMeta || isBundle;
+
   const bundleLinks = useMemo(() => {
     if (
       isFhirResource &&
@@ -47,15 +69,10 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
     return [];
   }, [data, isFhirResource]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape to exit fullscreen
-      if (e.key === "Escape" && isFullscreen) {
-        toggle();
-      }
+      if (e.key === "Escape" && isFullscreen) toggle();
     };
-
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen, toggle]);
@@ -68,7 +85,6 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
         isFullscreen && "fixed inset-0 z-50 bg-card shadow-2xl"
       )}
     >
-      {/* Header with Tabs and Toolbar */}
       <JsonToolbar
         data={data}
         isFullscreen={isFullscreen}
@@ -100,13 +116,21 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
                 >
                   JSON Rows
                 </CustomTabsTrigger>
+                {showGraphTab && (
+                  <CustomTabsTrigger
+                    value="graph"
+                    active={activeTab === "graph"}
+                    onClick={() => setActiveTab("graph")}
+                  >
+                    Graph
+                  </CustomTabsTrigger>
+                )}
               </>
             )}
           </CustomTabsList>
         }
       />
 
-      {/* Tab Content */}
       <div className="flex-1 overflow-auto">
         {activeTab === "json" && <JsonViewer data={data} />}
         {activeTab === "json-rows" && isFhirResource && (
@@ -114,6 +138,28 @@ const ResultTabs = ({ data, onNavigate }: ResultTabsProps) => {
         )}
         {activeTab === "table" && isFhirResource && (
           <ResourceTableView data={data} />
+        )}
+        {activeTab === "graph" && showGraphTab && (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
+                Loading graph&hellip;
+              </div>
+            }
+          >
+            {isBundle ? (
+              <ReferenceGraph
+                bundle={data as unknown as Record<string, unknown>}
+                onNavigate={onNavigate}
+              />
+            ) : resourceMeta ? (
+              <ReferenceGraph
+                resourceType={resourceMeta.resourceType}
+                resourceId={resourceMeta.resourceId}
+                onNavigate={onNavigate}
+              />
+            ) : null}
+          </Suspense>
         )}
       </div>
     </div>

@@ -428,6 +428,137 @@ impl AdminRepository {
         row.ok_or_else(|| crate::Error::NotFound(format!("Audit event {} not found", id)))
     }
 
+    pub async fn fetch_outgoing_references(
+        &self,
+        resource_type: &str,
+        id: &str,
+    ) -> Result<Vec<ReferenceEdge>> {
+        let rows = sqlx::query_as::<_, ReferenceEdge>(
+            r#"
+            SELECT
+                sr.resource_type AS source_type,
+                sr.resource_id AS source_id,
+                sr.parameter_name,
+                sr.target_type,
+                sr.target_id,
+                sr.display
+            FROM search_reference sr
+            JOIN resources r
+                ON r.resource_type = sr.resource_type
+                AND r.id = sr.resource_id
+                AND r.version_id = sr.version_id
+                AND r.is_current = true
+            WHERE sr.resource_type = $1
+              AND sr.resource_id = $2
+            LIMIT 200
+            "#,
+        )
+        .bind(resource_type)
+        .bind(id)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(crate::Error::Database)?;
+
+        Ok(rows)
+    }
+
+    pub async fn fetch_incoming_references(
+        &self,
+        resource_type: &str,
+        id: &str,
+    ) -> Result<Vec<ReferenceEdge>> {
+        let rows = sqlx::query_as::<_, ReferenceEdge>(
+            r#"
+            SELECT
+                sr.resource_type AS source_type,
+                sr.resource_id AS source_id,
+                sr.parameter_name,
+                sr.target_type,
+                sr.target_id,
+                sr.display
+            FROM search_reference sr
+            JOIN resources r
+                ON r.resource_type = sr.resource_type
+                AND r.id = sr.resource_id
+                AND r.version_id = sr.version_id
+                AND r.is_current = true
+            WHERE sr.target_type = $1
+              AND sr.target_id = $2
+            LIMIT 200
+            "#,
+        )
+        .bind(resource_type)
+        .bind(id)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(crate::Error::Database)?;
+
+        Ok(rows)
+    }
+
+    /// Fetch references between a set of resources (both source and target must be in the set).
+    /// Used for bundle graph visualization.
+    pub async fn fetch_batch_references(
+        &self,
+        keys: &[(String, String)], // (resource_type, resource_id)
+    ) -> Result<Vec<ReferenceEdge>> {
+        if keys.is_empty() {
+            return Ok(vec![]);
+        }
+
+        // Build (resource_type, resource_id) tuples as a VALUES list for a CTE
+        let mut values_parts = Vec::with_capacity(keys.len());
+        let mut params: Vec<String> = Vec::with_capacity(keys.len() * 2);
+        for (i, (rt, rid)) in keys.iter().enumerate() {
+            let p1 = i * 2 + 1;
+            let p2 = i * 2 + 2;
+            values_parts.push(format!("(${}, ${})", p1, p2));
+            params.push(rt.clone());
+            params.push(rid.clone());
+        }
+
+        let query = format!(
+            r#"
+            WITH resource_set(resource_type, resource_id) AS (
+                VALUES {}
+            )
+            SELECT
+                sr.resource_type AS source_type,
+                sr.resource_id AS source_id,
+                sr.parameter_name,
+                sr.target_type,
+                sr.target_id,
+                sr.display
+            FROM search_reference sr
+            JOIN resources r
+                ON r.resource_type = sr.resource_type
+                AND r.id = sr.resource_id
+                AND r.version_id = sr.version_id
+                AND r.is_current = true
+            JOIN resource_set src
+                ON src.resource_type = sr.resource_type
+                AND src.resource_id = sr.resource_id
+            JOIN resource_set tgt
+                ON tgt.resource_type = sr.target_type
+                AND tgt.resource_id = sr.target_id
+            LIMIT 1000
+            "#,
+            values_parts.join(", ")
+        );
+
+        let mut q = sqlx::query_as::<_, ReferenceEdge>(&query);
+        for p in &params {
+            q = q.bind(p);
+        }
+
+        let rows = q
+            .fetch_all(&self.pool)
+            .await
+            .map_err(crate::Error::Database)?;
+
+        Ok(rows)
+    }
+
     pub async fn fetch_compartment_memberships(&self) -> Result<Vec<CompartmentMembershipRecord>> {
         let rows = sqlx::query_as::<_, CompartmentMembershipRecord>(
             r#"
@@ -459,4 +590,15 @@ pub struct CompartmentMembershipRecord {
     pub start_param: Option<String>,
     pub end_param: Option<String>,
     pub loaded_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ReferenceEdge {
+    pub source_type: String,
+    pub source_id: String,
+    pub parameter_name: String,
+    pub target_type: String,
+    pub target_id: String,
+    pub display: Option<String>,
 }

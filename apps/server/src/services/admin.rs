@@ -1,7 +1,7 @@
 //! Admin service - server statistics and diagnostics.
 
 use crate::{
-    db::admin::{AdminRepository, CompartmentMembershipRecord, ResourceTypeStats},
+    db::admin::{AdminRepository, CompartmentMembershipRecord, ReferenceEdge, ResourceTypeStats},
     Result,
 };
 use chrono::{DateTime, Utc};
@@ -174,9 +174,43 @@ pub struct SearchParameterIndexingStatus {
     pub newest_indexed_at: Option<DateTime<Utc>>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResourceReferencesResponse {
+    pub resource_type: String,
+    pub resource_id: String,
+    pub outgoing: Vec<ReferenceEdge>,
+    pub incoming: Vec<ReferenceEdge>,
+}
+
 impl AdminService {
     pub fn new(repo: AdminRepository) -> Self {
         Self { repo }
+    }
+
+    pub async fn get_resource_references(
+        &self,
+        resource_type: &str,
+        id: &str,
+    ) -> Result<ResourceReferencesResponse> {
+        let (outgoing, incoming) = tokio::try_join!(
+            self.repo.fetch_outgoing_references(resource_type, id),
+            self.repo.fetch_incoming_references(resource_type, id),
+        )?;
+
+        Ok(ResourceReferencesResponse {
+            resource_type: resource_type.to_string(),
+            resource_id: id.to_string(),
+            outgoing,
+            incoming,
+        })
+    }
+
+    pub async fn get_batch_references(
+        &self,
+        keys: Vec<(String, String)>,
+    ) -> Result<Vec<ReferenceEdge>> {
+        self.repo.fetch_batch_references(&keys).await
     }
 
     pub async fn list_audit_events(

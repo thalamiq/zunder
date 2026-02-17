@@ -91,6 +91,33 @@ pub async fn get_audit_event(
     Ok((StatusCode::OK, Json(result)).into_response())
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchReferencesRequest {
+    pub resources: Vec<ResourceKey>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResourceKey {
+    pub resource_type: String,
+    pub resource_id: String,
+}
+
+pub async fn get_batch_references(
+    State(state): State<AppState>,
+    Json(req): Json<BatchReferencesRequest>,
+) -> Result<Response> {
+    let keys: Vec<(String, String)> = req
+        .resources
+        .into_iter()
+        .take(200) // cap input size
+        .map(|k| (k.resource_type, k.resource_id))
+        .collect();
+    let edges = state.admin_service.get_batch_references(keys).await?;
+    Ok((StatusCode::OK, Json(edges)).into_response())
+}
+
 /// Public UI configuration (excludes password)
 #[derive(Debug, Serialize)]
 pub struct UiConfigResponse {
@@ -230,6 +257,17 @@ pub async fn logout(State(state): State<AppState>, headers: HeaderMap) -> Result
         state.admin_auth.clear_session_cookie(is_https),
     );
     Ok(response)
+}
+
+pub async fn get_resource_references(
+    State(state): State<AppState>,
+    Path((resource_type, id)): Path<(String, String)>,
+) -> Result<Response> {
+    let result = state
+        .admin_service
+        .get_resource_references(&resource_type, &id)
+        .await?;
+    Ok((StatusCode::OK, Json(result)).into_response())
 }
 
 pub async fn get_compartment_memberships(State(state): State<AppState>) -> Result<Response> {

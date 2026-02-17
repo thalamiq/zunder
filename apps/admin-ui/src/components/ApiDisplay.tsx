@@ -28,7 +28,7 @@ import {
 import { Input } from "@thalamiq/ui/components/input";
 import { Label } from "@thalamiq/ui/components/label";
 import { Badge } from "@thalamiq/ui/components/badge";
-import { Code, ChevronDown, X, Settings2, Send } from "lucide-react";
+import { Code, X, Settings2, Send } from "lucide-react";
 import { fetchMetadata } from "@/api/metadata";
 import { queryKeys } from "@/api/query-keys";
 import { FhirResponse } from "@/api/fhir";
@@ -157,7 +157,7 @@ export default function ApiDisplay() {
       }
       params.set("method", methodToUse);
       const newUrl = params.toString() ? `${pathname}?${params}` : pathname;
-      navigate({ to: newUrl, replace: true });
+      navigate({ to: newUrl });
     }
 
     setLoading(true);
@@ -362,7 +362,7 @@ export default function ApiDisplay() {
       params.set("endpoint", endpoint);
     }
     const newUrl = params.toString() ? `${pathname}?${params}` : pathname;
-    navigate({ to: newUrl, replace: true });
+    navigate({ to: newUrl });
   };
 
   const handleFormatJson = () => {
@@ -411,7 +411,7 @@ export default function ApiDisplay() {
         params.set("endpoint", path);
         params.set("method", "GET");
         const newUrl = params.toString() ? `${pathname}?${params}` : pathname;
-        navigate({ to: newUrl, replace: true });
+        navigate({ to: newUrl });
 
         // Trigger request
         setTimeout(() => {

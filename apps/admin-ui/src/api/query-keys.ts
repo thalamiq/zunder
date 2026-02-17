@@ -84,4 +84,9 @@ import { ConfigCategory } from "@/api/config";
   runtimeConfig: (category: ConfigCategory) => ["runtimeConfig", category],
   runtimeConfigAudit: (key?: string, limit?: number, offset?: number) => ["runtimeConfigAudit", key, limit, offset],
   compartmentMemberships: ["compartmentMemberships"],
+  resourceReferences: (resourceType: string, id: string) => [
+    "resourceReferences",
+    resourceType,
+    id,
+  ],
 };
