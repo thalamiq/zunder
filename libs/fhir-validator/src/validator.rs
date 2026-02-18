@@ -1,15 +1,17 @@
-use crate::{ConfigError, ValidationPlan};
+use crate::terminology::{InMemoryTerminologyProvider, TerminologyProvider};
+use crate::{ConfigError, TerminologyMode, ValidationPlan};
+use ferrum_context::FhirContext;
+use ferrum_fhirpath::Engine as FhirPathEngine;
+use ferrum_snapshot::ExpandedFhirContext;
 use serde_json::Value;
 use std::sync::Arc;
-use ferrum_context::FhirContext;
-use ferrum_snapshot::ExpandedFhirContext;
-use ferrum_fhirpath::Engine as FhirPathEngine;
 
-/// Reusable validator - owns plan, context, and FHIRPath engine
+/// Reusable validator - owns plan, context, FHIRPath engine, and optional terminology provider
 pub struct Validator<C: FhirContext> {
     plan: ValidationPlan,
     context: Arc<C>,
     fhirpath_engine: Arc<FhirPathEngine>,
+    terminology: Option<Arc<dyn TerminologyProvider>>,
 }
 
 impl<C: FhirContext + 'static> Validator<C> {
@@ -22,10 +24,14 @@ impl<C: FhirContext + 'static> Validator<C> {
             None,
         ));
 
+        // Create terminology provider based on plan
+        let terminology = Self::create_terminology_provider(&plan, &context);
+
         Self {
             plan,
             context,
             fhirpath_engine,
+            terminology,
         }
     }
 
@@ -53,15 +59,29 @@ impl<C: FhirContext + 'static> Validator<C> {
             None,
         ));
 
+        // Create terminology provider for expanded context
+        let terminology = Validator::<ExpandedFhirContext<C>>::create_terminology_provider_from_plan_and_context(
+            &self.plan,
+            &expanded_arc,
+        );
+
         Validator {
             plan: self.plan,
             context: expanded_arc,
             fhirpath_engine,
+            terminology,
         }
     }
 
     pub fn validate(&self, resource: &Value) -> ValidationOutcome {
-        ValidationRun::new(&self.plan, &self.context, &self.fhirpath_engine, resource).execute()
+        ValidationRun::new(
+            &self.plan,
+            &self.context,
+            &self.fhirpath_engine,
+            self.terminology.as_deref(),
+            resource,
+        )
+        .execute()
     }
 
     pub fn validate_batch(&self, resources: &[Value]) -> Vec<ValidationOutcome> {
@@ -75,6 +95,30 @@ impl<C: FhirContext + 'static> Validator<C> {
     pub fn context(&self) -> &Arc<C> {
         &self.context
     }
+
+    fn create_terminology_provider(
+        plan: &ValidationPlan,
+        context: &Arc<C>,
+    ) -> Option<Arc<dyn TerminologyProvider>> {
+        Self::create_terminology_provider_from_plan_and_context(plan, context)
+    }
+
+    fn create_terminology_provider_from_plan_and_context(
+        plan: &ValidationPlan,
+        context: &Arc<C>,
+    ) -> Option<Arc<dyn TerminologyProvider>> {
+        // Check if any step requires terminology
+        let has_terminology_step = plan.steps.iter().any(|s| {
+            matches!(s, crate::Step::Terminology(t) if t.mode != TerminologyMode::Off)
+        });
+
+        if !has_terminology_step {
+            return None;
+        }
+
+        // For Local mode, create an InMemoryTerminologyProvider
+        Some(Arc::new(InMemoryTerminologyProvider::new(context.clone())))
+    }
 }
 
 /// Short-lived validation execution
@@ -82,6 +126,7 @@ struct ValidationRun<'a, C: FhirContext> {
     plan: &'a ValidationPlan,
     context: &'a Arc<C>,
     fhirpath_engine: &'a Arc<FhirPathEngine>,
+    terminology: Option<&'a dyn TerminologyProvider>,
     resource: &'a Value,
     issues: Vec<ValidationIssue>,
 }
@@ -91,12 +136,14 @@ impl<'a, C: FhirContext> ValidationRun<'a, C> {
         plan: &'a ValidationPlan,
         context: &'a Arc<C>,
         fhirpath_engine: &'a Arc<FhirPathEngine>,
+        terminology: Option<&'a dyn TerminologyProvider>,
         resource: &'a Value,
     ) -> Self {
         Self {
             plan,
             context,
             fhirpath_engine,
+            terminology,
             resource,
             issues: Vec::new(),
         }
@@ -164,8 +211,16 @@ impl<'a, C: FhirContext> ValidationRun<'a, C> {
         );
     }
 
-    fn validate_terminology(&mut self, _plan: &crate::TerminologyPlan) {
-        // TODO: Implement terminology validation
+    fn validate_terminology(&mut self, plan: &crate::TerminologyPlan) {
+        if let Some(terminology) = self.terminology {
+            crate::steps::terminology::validate_terminology(
+                self.resource,
+                plan,
+                self.context.as_ref(),
+                terminology,
+                &mut self.issues,
+            );
+        }
     }
 
     fn validate_references(&mut self, _plan: &crate::ReferencesPlan) {

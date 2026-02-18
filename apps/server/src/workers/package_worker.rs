@@ -5,7 +5,7 @@ use crate::{
     db::packages::PackageRepository,
     hooks::{
         compartment_definition::CompartmentDefinitionHook, search_parameter::SearchParameterHook,
-        ResourceHook,
+        terminology::TerminologyHook, ResourceHook,
     },
     queue::{Job, JobQueue},
     services::{CrudService, IndexingService, PackageService},
@@ -188,6 +188,7 @@ impl Worker for PackageWorker {
                 search_engine.clone(),
                 self.search_parameter_active_statuses.clone(),
             )),
+            Arc::new(TerminologyHook::new(self.indexing_service.pool().clone())),
             Arc::new(CompartmentDefinitionHook::new(
                 self.indexing_service.pool().clone(),
             )),

@@ -1,10 +1,12 @@
 #![allow(dead_code)]
 
+use ferrum_context::FhirContext;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use tokio::runtime::Runtime;
 
 // ---------------------------------------------------------------------------
@@ -225,4 +227,63 @@ pub fn load_test_resource(file: &str) -> Option<Value> {
     }
     let content = fs::read_to_string(&path).ok()?;
     serde_json::from_str(&content).ok()
+}
+
+// ---------------------------------------------------------------------------
+// Overlay context for supporting resources
+// ---------------------------------------------------------------------------
+
+/// A FhirContext that layers test fixture resources over a base context.
+/// Resources loaded from test fixtures take precedence over the base context.
+pub struct OverlayFhirContext<C: FhirContext> {
+    base: Arc<C>,
+    overrides: HashMap<String, Arc<Value>>,
+}
+
+impl<C: FhirContext> OverlayFhirContext<C> {
+    pub fn new(base: Arc<C>) -> Self {
+        Self {
+            base,
+            overrides: HashMap::new(),
+        }
+    }
+
+    /// Add a resource to the overlay, indexed by its canonical URL.
+    pub fn add_resource(&mut self, url: String, resource: Value) {
+        self.overrides.insert(url, Arc::new(resource));
+    }
+}
+
+impl<C: FhirContext> FhirContext for OverlayFhirContext<C> {
+    fn get_resource_by_url(
+        &self,
+        canonical_url: &str,
+        version: Option<&str>,
+    ) -> ferrum_context::Result<Option<Arc<Value>>> {
+        // Check overrides first (version-unaware — test fixtures typically don't version)
+        if let Some(resource) = self.overrides.get(canonical_url) {
+            return Ok(Some(resource.clone()));
+        }
+        self.base.get_resource_by_url(canonical_url, version)
+    }
+}
+
+/// Load supporting files into an overlay context.
+/// Each file is read from the validator test directory, its canonical URL extracted,
+/// and added to the overlay.
+pub fn load_supporting_resources<C: FhirContext>(
+    base: Arc<C>,
+    files: &[String],
+) -> OverlayFhirContext<C> {
+    let mut overlay = OverlayFhirContext::new(base);
+    for file in files {
+        let Some(resource) = load_test_resource(file) else {
+            continue;
+        };
+        // Extract canonical URL from the resource
+        if let Some(url) = resource.get("url").and_then(|v| v.as_str()) {
+            overlay.add_resource(url.to_string(), resource);
+        }
+    }
+    overlay
 }

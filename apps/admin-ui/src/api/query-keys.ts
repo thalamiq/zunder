@@ -90,6 +90,8 @@ import { ConfigCategory } from "@/api/config";
     offset?: number
   ) => ["transactions", bundleType, status, limit, offset],
   transaction: (id: string) => ["transaction", id],
+  operations: ["operations"],
+  terminology: ["terminology"],
   compartmentMemberships: ["compartmentMemberships"],
   resourceReferences: (resourceType: string, id: string) => [
     "resourceReferences",

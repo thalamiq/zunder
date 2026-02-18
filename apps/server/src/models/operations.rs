@@ -40,7 +40,7 @@ pub struct OperationParameter {
 }
 
 /// Parsed operation definition metadata
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct OperationMetadata {
     pub name: String,
     pub code: String,

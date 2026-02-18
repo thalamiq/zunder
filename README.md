@@ -2,7 +2,7 @@
 
 # Ferrum
 
-**A fast FHIR R4/R5 server built in Rust.**
+**A fast FHIR server built in Rust.**
 
 [Documentation](https://docs.ferrum.thalamiq.io) | [Live Demo](https://ferrum.thalamiq.io) | [Test API](https://api.ferrum.thalamiq.io/fhir/metadata)
 
@@ -24,16 +24,16 @@ This starts the FHIR server, database, and admin UI. Access the API at `localhos
 
 ## Features
 
-| | |
-|---|---|
-| **FHIR R4/R5 REST API** | CRUD, conditional operations, search, batch/transaction bundles |
-| **Advanced Search** | Chaining, `_include`/`_revinclude`, full-text search, compartments |
+|                          |                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| **FHIR R4/R5 REST API**  | CRUD, conditional operations, search, batch/transaction bundles               |
+| **Advanced Search**      | Chaining, `_include`/`_revinclude`, full-text search, compartments            |
 | **Terminology Services** | `$expand`, `$lookup`, `$validate-code`, `$subsumes`, `$translate`, `$closure` |
-| **FHIRPath Engine** | Full expression evaluator for querying and transforming resources |
-| **Validation** | Resource validation against profiles and constraints |
-| **Snapshot Generation** | StructureDefinition snapshots from differentials |
-| **SMART on FHIR** | OIDC based authentication and authorization |
-| **Admin UI** | Web dashboard for resource browsing, monitoring, and administration |
+| **FHIRPath Engine**      | Full expression evaluator for querying and transforming resources             |
+| **Validation**           | Resource validation against profiles and constraints                          |
+| **Snapshot Generation**  | StructureDefinition snapshots from differentials                              |
+| **SMART on FHIR**        | OIDC based authentication and authorization                                   |
+| **Admin UI**             | Web dashboard for resource browsing, monitoring, and administration           |
 
 ## Architecture
 

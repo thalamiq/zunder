@@ -157,6 +157,7 @@ struct ElementIndex<'a> {
     by_path: HashMap<&'a str, &'a ElementDefinition>,
     children_by_parent: HashMap<&'a str, Vec<&'a ElementDefinition>>,
     choice_bases_by_parent: HashMap<&'a str, Vec<ChoiceBase<'a>>>,
+    root_path: String,
 }
 
 impl<'a> ElementIndex<'a> {
@@ -187,11 +188,22 @@ impl<'a> ElementIndex<'a> {
             }
         }
 
+        // Root path is the first element's path (e.g., "Patient", "Bundle")
+        let root_path = elements
+            .first()
+            .map(|e| e.path.clone())
+            .unwrap_or_default();
+
         Self {
             by_path,
             children_by_parent,
             choice_bases_by_parent,
+            root_path,
         }
+    }
+
+    fn root_path(&self) -> &str {
+        &self.root_path
     }
 
     fn has_path(&self, path: &str) -> bool {
@@ -367,28 +379,51 @@ fn validate_object(
 
     // Unknown element check.
     if !plan.allow_unknown_elements {
-        for key in obj.keys() {
-            if is_special_element_key(key) {
-                continue;
-            }
+        // Skip unknown element checking for Extension objects — their children (url, value[x],
+        // extension, id) are defined in the Extension SD, not the parent resource's snapshot.
+        // We detect extension objects by checking if the parent path ends with ".extension"
+        // or ".modifierExtension" and the object has a "url" key.
+        let is_extension_object = (path.ends_with(".extension") || path.ends_with(".modifierExtension"))
+            && obj.contains_key("url");
 
-            if let Some(stripped) = key.strip_prefix('_') {
-                let candidate = format!("{}.{}", path, stripped);
+        // Skip unknown element checking for nested resources (contained, Bundle.entry.resource,
+        // Parameters.parameter.resource). These have their own resourceType and should be
+        // validated against their own StructureDefinition, not the parent's.
+        let is_nested_resource = obj.contains_key("resourceType")
+            && path != index.root_path();
+
+        if !is_extension_object && !is_nested_resource {
+            for key in obj.keys() {
+                if is_special_element_key(key) {
+                    continue;
+                }
+
+                if let Some(stripped) = key.strip_prefix('_') {
+                    let candidate = format!("{}.{}", path, stripped);
+                    if index.has_path(&candidate) {
+                        continue;
+                    }
+                }
+
+                let candidate = format!("{}.{}", path, key);
                 if index.has_path(&candidate) {
                     continue;
                 }
-            }
 
-            let candidate = format!("{}.{}", path, key);
-            if index.has_path(&candidate) {
-                continue;
-            }
+                // Check if this is a choice type variant (e.g., "boundsPeriod" for "bounds[x]")
+                if index.is_choice_variant_name(path, key) {
+                    continue;
+                }
 
-            issues.push(
-                ValidationIssue::error(IssueCode::Structure, format!("Unknown element '{}'", key))
+                issues.push(
+                    ValidationIssue::error(
+                        IssueCode::Structure,
+                        format!("Unknown element '{}'", key),
+                    )
                     .with_location(candidate.clone())
                     .with_expression(vec![candidate]),
-            );
+                );
+            }
         }
     }
 
@@ -400,7 +435,7 @@ fn validate_object(
 fn is_special_element_key(key: &str) -> bool {
     matches!(
         key,
-        "resourceType" | "id" | "meta" | "extension" | "modifierExtension"
+        "resourceType" | "id" | "meta" | "extension" | "modifierExtension" | "fhir_comments"
     )
 }
 

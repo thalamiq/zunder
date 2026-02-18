@@ -26,7 +26,7 @@ use libtest_mimic::{Arguments, Failed, Trial};
 
 use test_support::{
     block_on, fhir_version_label, is_eligible, load_manifest, load_test_resource,
-    resolve_expected_errors, skip_reason, TestCase,
+    load_supporting_resources, resolve_expected_errors, skip_reason, TestCase,
 };
 
 /// Stack size for threads that load/validate FHIR resources.
@@ -82,6 +82,16 @@ fn validators() -> &'static Validators {
 // Test generation
 // ---------------------------------------------------------------------------
 
+/// Collected info needed to run a single test, cloneable for thread transfer.
+#[derive(Clone)]
+struct TestInfo {
+    file: String,
+    version: Option<String>,
+    java: test_support::JavaExpectation,
+    supporting: Option<Vec<String>>,
+    profile_source: Option<String>,
+}
+
 fn make_trial(tc: &TestCase) -> Trial {
     let version_label = fhir_version_label(tc.version.as_deref());
     let module = tc.module.as_deref().unwrap_or("base");
@@ -93,35 +103,83 @@ fn make_trial(tc: &TestCase) -> Trial {
         return Trial::test(test_name, move || Err(reason.into())).with_ignored_flag(true);
     }
 
-    let java = tc.java.clone().unwrap();
-    let file = tc.file.clone();
-    let version = tc.version.clone();
+    // Determine which java expectations to use: profile-level or top-level
+    let (java, profile_source, extra_supporting) = if let Some(ref profile) = tc.profile {
+        let pjava = profile.java.clone().unwrap_or_else(|| tc.java.clone().unwrap());
+        let psource = profile.source.clone();
+        let psupporting = profile.supporting.clone();
+        (pjava, psource, psupporting)
+    } else {
+        (tc.java.clone().unwrap(), None, None)
+    };
 
-    Trial::test(test_name, move || run_single_test(&file, &version, &java))
+    // Merge supporting files: top-level + profile-level
+    let mut all_supporting: Vec<String> = tc.supporting.clone().unwrap_or_default();
+    if let Some(extra) = extra_supporting {
+        all_supporting.extend(extra);
+    }
+    let supporting = if all_supporting.is_empty() {
+        None
+    } else {
+        Some(all_supporting)
+    };
+
+    let info = TestInfo {
+        file: tc.file.clone(),
+        version: tc.version.clone(),
+        java,
+        supporting,
+        profile_source,
+    };
+
+    Trial::test(test_name, move || run_single_test(&info))
 }
 
-fn run_single_test(
-    file: &str,
-    version: &Option<String>,
-    java: &test_support::JavaExpectation,
-) -> Result<(), Failed> {
-    let expected = resolve_expected_errors(java)
+fn run_single_test(info: &TestInfo) -> Result<(), Failed> {
+    let expected = resolve_expected_errors(&info.java)
         .ok_or_else(|| Failed::from("could not resolve expected error count (missing outcome file?)"))?;
 
-    let file = file.to_string();
-    let label = fhir_version_label(version.as_deref()).to_string();
+    let info = info.clone();
 
     // Run loading + validation on a large-stack thread.
     let handle = std::thread::Builder::new()
         .stack_size(STACK_SIZE)
         .spawn(move || -> Result<ValidationOutcome, Failed> {
-            let resource = load_test_resource(&file)
-                .ok_or_else(|| Failed::from(format!("could not load resource: {file}")))?;
+            let resource = load_test_resource(&info.file)
+                .ok_or_else(|| Failed::from(format!("could not load resource: {}", info.file)))?;
             let v = validators();
-            Ok(match label.as_str() {
-                "R4" => v.r4.validate(&resource),
-                _ => v.r5.validate(&resource),
-            })
+            let label = fhir_version_label(info.version.as_deref());
+
+            // If there are supporting resources or a profile source, create a per-test validator
+            if info.supporting.is_some() || info.profile_source.is_some() {
+                let base_ctx = match label {
+                    "R4" => v.r4.context(),
+                    _ => v.r5.context(),
+                };
+
+                let overlay = load_supporting_resources(
+                    base_ctx.clone(),
+                    info.supporting.as_deref().unwrap_or(&[]),
+                );
+
+                // Build config with explicit profile if specified
+                let mut config = ValidatorConfig::preset(Preset::Authoring);
+                if let Some(ref profile_url) = info.profile_source {
+                    config.profiles.explicit_profiles = Some(vec![profile_url.clone()]);
+                }
+
+                let validator =
+                    Validator::from_config(&config, overlay).map_err(|e| {
+                        Failed::from(format!("failed to create overlay validator: {e}"))
+                    })?;
+
+                Ok(validator.validate(&resource))
+            } else {
+                Ok(match label {
+                    "R4" => v.r4.validate(&resource),
+                    _ => v.r5.validate(&resource),
+                })
+            }
         })
         .map_err(|e| Failed::from(format!("failed to spawn thread: {e}")))?;
 

@@ -16,6 +16,20 @@ members = [
     "libs/fhir-registry-client",
     "libs/ucum",
 ]
+# Exclude validator from default `cargo test` — run explicitly with `cargo test -p ferrum-validator`
+default-members = [
+    "apps/server",
+    "apps/cli",
+    "libs/fhir-codegen",
+    "libs/fhir-context",
+    "libs/fhir-format",
+    "libs/fhir-models",
+    "libs/fhir-package",
+    "libs/fhir-snapshot",
+    "libs/fhirpath",
+    "libs/fhir-registry-client",
+    "libs/ucum",
+]
 resolver = "2"
 
 [workspace.package]

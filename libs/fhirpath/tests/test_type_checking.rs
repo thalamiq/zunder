@@ -194,7 +194,7 @@ fn test_structural_detection_quantity() {
     let ctx = Context::new(quantity);
 
     let result = engine
-        .evaluate_expr("quantity.is(Quantity)", &ctx, None)
+        .evaluate_expr("is(Quantity)", &ctx, None)
         .unwrap();
     assert!(
         result.as_boolean().unwrap(),
@@ -215,7 +215,7 @@ fn test_structural_detection_period() {
     let ctx = Context::new(period);
 
     let result = engine
-        .evaluate_expr("period.is(Period)", &ctx, None)
+        .evaluate_expr("is(Period)", &ctx, None)
         .unwrap();
     assert!(
         result.as_boolean().unwrap(),
@@ -237,7 +237,7 @@ fn test_structural_detection_coding() {
     let ctx = Context::new(coding);
 
     let result = engine
-        .evaluate_expr("coding.is(Coding)", &ctx, None)
+        .evaluate_expr("is(Coding)", &ctx, None)
         .unwrap();
     assert!(
         result.as_boolean().unwrap(),
@@ -258,7 +258,7 @@ fn test_structural_detection_identifier_vs_coding() {
     let ctx = Context::new(identifier);
 
     let result = engine
-        .evaluate_expr("identifier.is(Identifier)", &ctx, None)
+        .evaluate_expr("is(Identifier)", &ctx, None)
         .unwrap();
     assert!(
         result.as_boolean().unwrap(),

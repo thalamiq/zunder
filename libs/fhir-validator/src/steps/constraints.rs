@@ -238,8 +238,61 @@ fn evaluate_constraint(
         return;
     }
 
-    // Convert serde_json::Value to FHIRPath Value
-    let fhirpath_value = FhirPathValue::from_json(context_node.clone());
+    // Build the path segments for sub-path navigation (skip resource type prefix)
+    let path_parts: Vec<&str> = context_path.split('.').collect();
+    let sub_keys: Vec<&str> = if path_parts.len() > 1 {
+        path_parts[1..].to_vec()
+    } else {
+        Vec::new()
+    };
+
+    // Share the resource root across all evaluations
+    let root = Arc::new(resource.clone());
+
+    // If context node is an array, evaluate the constraint on each item individually.
+    // FHIR constraints are defined per-element, so for repeating elements like Patient.name
+    // the constraint must be evaluated on each name entry separately.
+    if let Some(arr) = context_node.as_array() {
+        for (i, _item) in arr.iter().enumerate() {
+            let fhirpath_value =
+                FhirPathValue::from_json_at(root.clone(), &sub_keys, Some(i));
+            let location = format!("{}[{}]", context_path, i);
+            evaluate_constraint_on_node(
+                fhirpath_value,
+                expression,
+                constraint,
+                fhirpath_engine,
+                &location,
+                issues,
+            );
+        }
+    } else {
+        // Scalar element — evaluate directly
+        let fhirpath_value = if sub_keys.is_empty() {
+            FhirPathValue::from_json_root(root)
+        } else {
+            FhirPathValue::from_json_at(root, &sub_keys, None)
+        };
+        evaluate_constraint_on_node(
+            fhirpath_value,
+            expression,
+            constraint,
+            fhirpath_engine,
+            context_path,
+            issues,
+        );
+    }
+}
+
+/// Evaluate a FHIRPath constraint expression on a single context node.
+fn evaluate_constraint_on_node(
+    fhirpath_value: FhirPathValue,
+    expression: &str,
+    constraint: &ConstraintToEvaluate,
+    fhirpath_engine: &Arc<FhirPathEngine>,
+    location: &str,
+    issues: &mut Vec<ValidationIssue>,
+) {
     let ctx = FhirPathContext::new(fhirpath_value);
 
     // Evaluate FHIRPath expression
@@ -255,7 +308,7 @@ fn evaluate_constraint(
                         constraint.key, e
                     ),
                 )
-                .with_location(context_path.to_string()),
+                .with_location(location.to_string()),
             );
             return;
         }
@@ -284,8 +337,8 @@ fn evaluate_constraint(
 
         // Add location and expression
         issue = issue
-            .with_location(context_path.to_string())
-            .with_expression(vec![context_path.to_string()]);
+            .with_location(location.to_string())
+            .with_expression(vec![constraint.element_path.to_string()]);
 
         issues.push(issue);
     }

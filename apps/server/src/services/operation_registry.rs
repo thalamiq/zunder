@@ -57,6 +57,11 @@ impl OperationRegistry {
         Ok(())
     }
 
+    pub async fn list_all(&self) -> Vec<OperationMetadata> {
+        let cache = self.cache.read().await;
+        cache.values().flatten().cloned().collect()
+    }
+
     pub async fn find_operation(
         &self,
         code: &str,

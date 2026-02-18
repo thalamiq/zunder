@@ -17,6 +17,8 @@ import { searchParametersRoute } from "./search/search-parameters";
 import { compartmentsRoute } from "./search/compartments";
 import { searchCoverageRoute } from "./search/search-coverage";
 import { indexTablesRoute } from "./search/index-tables";
+import { operationsRoute } from "./operations";
+import { terminologyRoute } from "./terminology";
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -31,6 +33,8 @@ const routeTree = rootRoute.addChildren([
   transactionsRoute,
   packagesRoute,
   packageDetailRoute,
+  operationsRoute,
+  terminologyRoute,
   searchRoute,
   searchParametersRoute,
   compartmentsRoute,

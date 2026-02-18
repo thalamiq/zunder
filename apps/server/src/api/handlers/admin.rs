@@ -259,6 +259,11 @@ pub async fn logout(State(state): State<AppState>, headers: HeaderMap) -> Result
     Ok(response)
 }
 
+pub async fn list_operations(State(state): State<AppState>) -> Result<Response> {
+    let operations = state.operation_registry.list_all().await;
+    Ok((StatusCode::OK, Json(operations)).into_response())
+}
+
 pub async fn get_resource_references(
     State(state): State<AppState>,
     Path((resource_type, id)): Path<(String, String)>,
@@ -268,6 +273,11 @@ pub async fn get_resource_references(
         .get_resource_references(&resource_type, &id)
         .await?;
     Ok((StatusCode::OK, Json(result)).into_response())
+}
+
+pub async fn get_terminology_summary(State(state): State<AppState>) -> Result<Response> {
+    let summary = state.admin_service.terminology_summary().await?;
+    Ok((StatusCode::OK, Json(summary)).into_response())
 }
 
 pub async fn get_compartment_memberships(State(state): State<AppState>) -> Result<Response> {

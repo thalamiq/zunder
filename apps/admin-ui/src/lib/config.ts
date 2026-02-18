@@ -1,5 +1,7 @@
+import React from "react";
 import {
   ArrowRightLeftIcon,
+  BookOpenIcon,
   ClipboardListIcon,
   DatabaseIcon,
   FilterIcon,
@@ -8,6 +10,7 @@ import {
   LayoutDashboardIcon,
   ScrollTextIcon,
   SettingsIcon,
+  ZapIcon,
 } from "lucide-react";
 import { Package2Icon } from "lucide-react";
 
@@ -60,8 +63,23 @@ export function clearCachedConfig() {
   cachedConfig = null;
 }
 
+// Navigation types
+export type LucideIcon = React.ComponentType<{ className?: string }>;
+
+export interface NavSubItem {
+  path: string;
+  label: string;
+}
+
+export interface NavItem {
+  path: string;
+  label: string;
+  icon: LucideIcon;
+  subItems?: Record<string, NavSubItem>;
+}
+
 // Static navigation config
-export const config = {
+export const config: { nav: Record<string, NavItem> } = {
   nav: {
     dashboard: {
       path: "/dashboard",
@@ -105,6 +123,16 @@ export const config = {
       path: "/packages",
       label: "Packages",
       icon: Package2Icon,
+    },
+    operations: {
+      path: "/operations",
+      label: "Operations",
+      icon: ZapIcon,
+    },
+    terminology: {
+      path: "/terminology",
+      label: "Terminology",
+      icon: BookOpenIcon,
     },
     jobs: {
       path: "/jobs",

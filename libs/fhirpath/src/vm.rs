@@ -425,6 +425,10 @@ impl<'a> Vm<'a> {
                     // a type name (starts with uppercase).
                     let is_root_navigation = self.current_path.is_none();
 
+                    // Type name navigation only applies when the identifier starts with an
+                    // uppercase letter OR exactly matches the resource type (case-sensitive).
+                    // Field names like "extension" should NOT trigger type navigation even if
+                    // the inferred type name matches case-insensitively ("Extension").
                     let should_try_type_navigation = is_root_navigation
                         && (field_name
                             .as_ref()
@@ -434,7 +438,7 @@ impl<'a> Vm<'a> {
                             || self
                                 .resource_type_name
                                 .as_deref()
-                                .is_some_and(|rt| rt.eq_ignore_ascii_case(field_name.as_ref())));
+                                .is_some_and(|rt| rt == field_name.as_ref()));
 
                     if should_try_type_navigation {
                         // Check if type name matches resource type exactly or is a supertype

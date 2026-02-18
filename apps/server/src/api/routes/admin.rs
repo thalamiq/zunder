@@ -26,6 +26,10 @@ pub fn admin_routes() -> Router<AppState> {
         .route("/jobs/cleanup", post(jobs::cleanup_old_jobs))
         .route("/jobs/:id", get(jobs::get_job).delete(jobs::delete_job))
         .route("/jobs/:id/cancel", post(jobs::cancel_job))
+        // Operations
+        .route("/operations", get(admin::list_operations))
+        // Terminology
+        .route("/terminology", get(admin::get_terminology_summary))
         // Resource stats
         .route("/resources/stats", get(admin::get_resource_type_stats))
         // Resource references (for graph visualization)

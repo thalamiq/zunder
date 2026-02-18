@@ -45,6 +45,7 @@ use std::time::Duration;
 mod error;
 mod plan;
 mod steps;
+pub mod terminology;
 mod validator;
 
 pub use error::ConfigError;
@@ -52,6 +53,7 @@ pub use plan::{
     BundlePlan, ConstraintsPlan, ProfilesPlan, ReferencesPlan, SchemaPlan, Step, TerminologyPlan,
     ValidationPlan,
 };
+pub use terminology::{CodeValidationResult, TerminologyProvider};
 pub use validator::{IssueCode, IssueSeverity, ValidationIssue, ValidationOutcome, Validator};
 
 // ============================================================================

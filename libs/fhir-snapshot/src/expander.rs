@@ -607,7 +607,7 @@ impl SnapshotExpander {
             complex_elements.push(resolved_child.clone());
             seen.insert(new_id.clone());
 
-            // Recursively expand children
+            // Recursively expand complex type children
             if self.should_resolve_complex_element(&resolved_child, resolution_stack) {
                 let grandchildren = self.expand_complex_element(
                     &resolved_child,

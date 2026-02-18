@@ -7,7 +7,7 @@
 use crate::{
     config::{Config, ResourceTypeFilter},
     db::{packages::PackageRepository, PostgresResourceStore},
-    hooks::{search_parameter::SearchParameterHook, ResourceHook},
+    hooks::{search_parameter::SearchParameterHook, terminology::TerminologyHook, ResourceHook},
     queue::{JobQueue, PostgresJobQueue},
     services::{CrudService, PackageService},
     Result,
@@ -645,6 +645,7 @@ fn create_package_hooks(
             search_engine,
             search_parameter_active_statuses,
         )),
+        Arc::new(TerminologyHook::new(db_pool.clone())),
         Arc::new(
             crate::hooks::compartment_definition::CompartmentDefinitionHook::new(db_pool.clone()),
         ),

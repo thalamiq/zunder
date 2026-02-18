@@ -243,6 +243,46 @@ impl Value {
         Self::from_json_node(root.clone(), SmallVec::new(), root.as_ref())
     }
 
+    /// Create a Value pointing at a specific sub-path within a JSON root.
+    ///
+    /// `keys` navigates through object keys, `index` optionally selects an array element.
+    /// This is useful for creating FHIRPath context nodes pointing at specific elements
+    /// within a resource (e.g., Patient.name[0]).
+    pub fn from_json_at(root: Arc<JsonValue>, keys: &[&str], index: Option<usize>) -> Self {
+        let mut path: SmallVec<[JsonPathToken; 4]> = SmallVec::new();
+
+        // Build the path tokens and verify each segment exists
+        {
+            let mut current: &JsonValue = root.as_ref();
+
+            for key in keys {
+                match current.get(*key) {
+                    Some(child) => {
+                        path.push(JsonPathToken::Key(Arc::from(*key)));
+                        current = child;
+                    }
+                    None => return Self::empty(),
+                }
+            }
+
+            if let Some(idx) = index {
+                match current.as_array().and_then(|arr| arr.get(idx)) {
+                    Some(_) => {
+                        path.push(JsonPathToken::Index(idx));
+                    }
+                    None => return Self::empty(),
+                }
+            }
+        }
+
+        // Now resolve the node via the path (borrow of root is released)
+        let node_ref = resolve_json_at(root.as_ref(), &path);
+        match node_ref {
+            Some(node) => Self::from_json_node(root.clone(), path, node),
+            None => Self::empty(),
+        }
+    }
+
     pub fn boolean(b: bool) -> Self {
         Self(Arc::new(ValueData::Boolean(b)))
     }
@@ -648,3 +688,86 @@ impl Collection {
 }
 
 use crate::error::{Error, Result};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn is_lazy_json(v: &Value) -> bool {
+        matches!(v.data(), ValueData::LazyJson { .. })
+    }
+
+    #[test]
+    fn test_from_json_at_object_key() {
+        let resource = json!({
+            "resourceType": "Patient",
+            "active": true
+        });
+        let root = Arc::new(resource);
+        let val = Value::from_json_at(root, &["active"], None);
+        assert!(matches!(val.data(), ValueData::Boolean(true)));
+    }
+
+    #[test]
+    fn test_from_json_at_array_item() {
+        let resource = json!({
+            "resourceType": "Patient",
+            "name": [
+                {"family": "Smith", "given": ["John"]},
+                {"family": "Doe"}
+            ]
+        });
+        let root = Arc::new(resource);
+
+        // Access name[0] — should be a LazyJson object
+        let val = Value::from_json_at(root.clone(), &["name"], Some(0));
+        assert!(is_lazy_json(&val));
+
+        // Access name[1]
+        let val = Value::from_json_at(root.clone(), &["name"], Some(1));
+        assert!(is_lazy_json(&val));
+
+        // Access name[2] — out of bounds, should be empty
+        let val = Value::from_json_at(root, &["name"], Some(2));
+        assert!(matches!(val.data(), ValueData::Empty));
+    }
+
+    #[test]
+    fn test_from_json_at_missing_key() {
+        let resource = json!({"resourceType": "Patient"});
+        let root = Arc::new(resource);
+        let val = Value::from_json_at(root, &["nonexistent"], None);
+        assert!(matches!(val.data(), ValueData::Empty));
+    }
+
+    #[test]
+    fn test_from_json_at_nested_keys() {
+        let resource = json!({
+            "resourceType": "Patient",
+            "meta": {"versionId": "1"}
+        });
+        let root = Arc::new(resource);
+        let val = Value::from_json_at(root, &["meta", "versionId"], None);
+        assert_eq!(val.data().as_string().unwrap().as_ref(), "1");
+    }
+
+    #[test]
+    fn test_from_json_at_children_available() {
+        // Verify that from_json_at creates a proper LazyJson value
+        // that supports children() navigation (critical for ele-1 constraint)
+        let resource = json!({
+            "resourceType": "Patient",
+            "name": [
+                {"family": "Smith", "given": ["John"]}
+            ]
+        });
+        let root = Arc::new(resource);
+        let val = Value::from_json_at(root, &["name"], Some(0));
+        // Should be a LazyJson-backed object
+        assert!(is_lazy_json(&val));
+        // Materializing should produce an Object with fields
+        let materialized = val.materialize();
+        assert!(matches!(materialized.data(), ValueData::Object { .. }));
+    }
+}

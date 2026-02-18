@@ -61,11 +61,10 @@ pub fn as_type(
 
     validate_type_specifier(type_spec.as_ref(), fhir_context)?;
 
-    // Per FHIRPath spec, as() requires a singleton collection
+    // Per FHIRPath spec, as() operates on a single-item collection.
+    // If the collection has more than one item, return empty (not an error).
     if collection.len() > 1 {
-        return Err(Error::InvalidOperation(
-            "as() requires a singleton collection".into(),
-        ));
+        return Ok(Collection::empty());
     }
 
     let item = collection.iter().next().unwrap();

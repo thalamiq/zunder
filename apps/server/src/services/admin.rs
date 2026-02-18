@@ -1,7 +1,10 @@
 //! Admin service - server statistics and diagnostics.
 
 use crate::{
-    db::admin::{AdminRepository, CompartmentMembershipRecord, ReferenceEdge, ResourceTypeStats},
+    db::admin::{
+        AdminRepository, CompartmentMembershipRecord, ReferenceEdge, ResourceTypeStats,
+        TerminologySummary,
+    },
     Result,
 };
 use chrono::{DateTime, Utc};
@@ -405,6 +408,10 @@ impl AdminService {
 
     pub async fn toggle_search_parameter_active(&self, id: i32) -> Result<bool> {
         self.repo.toggle_search_parameter_active(id).await
+    }
+
+    pub async fn terminology_summary(&self) -> Result<TerminologySummary> {
+        self.repo.fetch_terminology_summary().await
     }
 
     pub async fn compartment_memberships(&self) -> Result<Vec<CompartmentMembershipRecord>> {

@@ -704,6 +704,103 @@ impl AdminRepository {
         })
     }
 
+    pub async fn fetch_terminology_summary(&self) -> Result<TerminologySummary> {
+        let (codesystems, total_concepts, expansion_counts, valueset_count, conceptmap_count, closure_tables) = tokio::try_join!(
+            // 1. CodeSystem stats
+            async {
+                let rows = sqlx::query(
+                    "SELECT system, COUNT(*)::BIGINT as concept_count FROM codesystem_concepts GROUP BY system ORDER BY COUNT(*) DESC"
+                )
+                .fetch_all(&self.pool)
+                .await?;
+                Ok::<_, crate::Error>(rows.into_iter().map(|row| CodeSystemSummary {
+                    url: row.get("system"),
+                    concept_count: row.get("concept_count"),
+                }).collect::<Vec<_>>())
+            },
+            // 2. Total concepts
+            async {
+                sqlx::query_scalar::<_, i64>("SELECT COUNT(*)::BIGINT FROM codesystem_concepts")
+                    .fetch_one(&self.pool)
+                    .await
+                    .map_err(crate::Error::Database)
+            },
+            // 3. Expansion cache (total + active)
+            async {
+                let row = sqlx::query(
+                    "SELECT COUNT(*)::BIGINT as total, COUNT(*) FILTER (WHERE expires_at IS NULL OR expires_at > NOW())::BIGINT as active FROM valueset_expansions"
+                )
+                .fetch_one(&self.pool)
+                .await?;
+                Ok::<_, crate::Error>((row.get::<i64, _>("total"), row.get::<i64, _>("active")))
+            },
+            // 4. ValueSet count
+            async {
+                sqlx::query_scalar::<_, i64>(
+                    "SELECT COUNT(*)::BIGINT FROM resources WHERE resource_type = 'ValueSet' AND is_current AND NOT deleted"
+                )
+                .fetch_one(&self.pool)
+                .await
+                .map_err(crate::Error::Database)
+            },
+            // 5. ConceptMap count
+            async {
+                sqlx::query_scalar::<_, i64>(
+                    "SELECT COUNT(DISTINCT conceptmap_url)::BIGINT FROM conceptmap_groups"
+                )
+                .fetch_one(&self.pool)
+                .await
+                .map_err(crate::Error::Database)
+            },
+            // 6. Closure tables
+            async {
+                let rows = sqlx::query(
+                    r#"
+                    SELECT
+                        ct.name,
+                        ct.current_version,
+                        ct.requires_reinit,
+                        COALESCE(cc.cnt, 0)::BIGINT as concept_count,
+                        COALESCE(cr.cnt, 0)::BIGINT as relation_count
+                    FROM terminology_closure_tables ct
+                    LEFT JOIN (
+                        SELECT closure_name, COUNT(*)::BIGINT as cnt
+                        FROM terminology_closure_concepts
+                        GROUP BY closure_name
+                    ) cc ON cc.closure_name = ct.name
+                    LEFT JOIN (
+                        SELECT closure_name, COUNT(*)::BIGINT as cnt
+                        FROM terminology_closure_relations
+                        GROUP BY closure_name
+                    ) cr ON cr.closure_name = ct.name
+                    ORDER BY ct.name
+                    "#
+                )
+                .fetch_all(&self.pool)
+                .await?;
+                Ok::<_, crate::Error>(rows.into_iter().map(|row| ClosureTableSummary {
+                    name: row.get("name"),
+                    current_version: row.get("current_version"),
+                    requires_reinit: row.get("requires_reinit"),
+                    concept_count: row.get("concept_count"),
+                    relation_count: row.get("relation_count"),
+                }).collect::<Vec<_>>())
+            },
+        )?;
+
+        let (cached_expansions, active_expansions) = expansion_counts;
+
+        Ok(TerminologySummary {
+            codesystems,
+            total_concepts,
+            cached_expansions,
+            active_expansions,
+            valueset_count,
+            conceptmap_count,
+            closure_tables,
+        })
+    }
+
     pub async fn fetch_compartment_memberships(&self) -> Result<Vec<CompartmentMembershipRecord>> {
         let rows = sqlx::query_as::<_, CompartmentMembershipRecord>(
             r#"
@@ -735,6 +832,39 @@ pub struct CompartmentMembershipRecord {
     pub start_param: Option<String>,
     pub end_param: Option<String>,
     pub loaded_at: DateTime<Utc>,
+}
+
+// =============================================================================
+// Terminology summary
+// =============================================================================
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TerminologySummary {
+    pub codesystems: Vec<CodeSystemSummary>,
+    pub total_concepts: i64,
+    pub cached_expansions: i64,
+    pub active_expansions: i64,
+    pub valueset_count: i64,
+    pub conceptmap_count: i64,
+    pub closure_tables: Vec<ClosureTableSummary>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeSystemSummary {
+    pub url: String,
+    pub concept_count: i64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClosureTableSummary {
+    pub name: String,
+    pub current_version: i32,
+    pub requires_reinit: bool,
+    pub concept_count: i64,
+    pub relation_count: i64,
 }
 
 // =============================================================================

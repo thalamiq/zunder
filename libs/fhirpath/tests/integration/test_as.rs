@@ -94,9 +94,14 @@ fn test_as_errors_on_multi_item_collection() {
     let resource = Value::from_json(obs);
     let ctx = Context::new(resource);
 
-    // as() on multi-item collection should error
-    let result = engine.evaluate_expr("Observation.component.value.as(Quantity)", &ctx, None);
-    assert!(result.is_err(), "as() should error on multi-item collection");
+    // as() on multi-item collection returns empty (per FHIRPath spec)
+    let result = engine
+        .evaluate_expr("Observation.component.value.as(Quantity)", &ctx, None)
+        .unwrap();
+    assert!(
+        result.is_empty(),
+        "as() on multi-item collection should return empty"
+    );
 
     // ofType() is the correct function for multi-item type filtering
     let result = engine
@@ -116,4 +121,51 @@ fn test_as_errors_on_multi_item_collection() {
         )
         .unwrap();
     assert_eq!(units.len(), 2, "Should get units from both quantities");
+}
+
+#[test]
+fn test_ext1_choice_type_navigation() {
+    use serde_json::json;
+    use ferrum_fhirpath::{Context, Value};
+    use std::sync::Arc;
+
+    // Simulate ext-1 constraint evaluation on an Extension object
+    // ext-1 expression: extension.exists() != value.exists()
+    let resource = json!({
+        "resourceType": "CodeSystem",
+        "extension": [
+            {"url": "http://example.com/ext", "valueCode": "trial-use"}
+        ]
+    });
+
+    let engine = test_support::engine_r5();
+
+    // Test 1: Navigate from root to extension[0].value via from_json_at (mimics constraint evaluator)
+    let root = Arc::new(resource);
+    let ext_value = Value::from_json_at(root.clone(), &["extension"], Some(0));
+    let ctx = Context::new(ext_value);
+
+    // "value.exists()" should find "valueCode" via choice type matching
+    let result = engine.evaluate_expr("value.exists()", &ctx, None).unwrap();
+    assert_eq!(
+        result.as_boolean().ok(),
+        Some(true),
+        "value.exists() should find valueCode via choice type"
+    );
+
+    // "extension.exists()" should be false (no nested extensions)
+    let result = engine.evaluate_expr("extension.exists()", &ctx, None).unwrap();
+    assert_eq!(
+        result.as_boolean().ok(),
+        Some(false),
+        "extension.exists() should be false"
+    );
+
+    // ext-1: extension.exists() != value.exists() → false != true → true (passes)
+    let result = engine.evaluate_expr("extension.exists() != value.exists()", &ctx, None).unwrap();
+    assert_eq!(
+        result.as_boolean().ok(),
+        Some(true),
+        "ext-1 should pass for extension with value"
+    );
 }
