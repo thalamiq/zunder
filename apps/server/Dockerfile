@@ -52,7 +52,10 @@ RUN mkdir -p apps/server/src apps/cli/src && \
                libs/fhir-snapshot libs/fhir-package libs/fhir-registry-client \
                libs/fhir-codegen libs/fhir-validator libs/ucum; do \
         mkdir -p "$lib/src" && echo "" > "$lib/src/lib.rs"; \
-    done
+    done && \
+    mkdir -p libs/fhirpath/benches && echo "fn main() {}" > libs/fhirpath/benches/benchmark.rs && \
+    mkdir -p libs/fhir-validator/tests && \
+    echo "fn main() {}" > libs/fhir-validator/tests/official_suite.rs
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -61,10 +64,9 @@ RUN cargo chef prepare --recipe-path recipe.json
 ############################
 FROM chef AS builder
 
+# Copy workspace from planner (has all stubs including custom test/bench targets)
+COPY --from=planner /build ./
 # Cook dependencies (cached layer — only rebuilds when Cargo.toml/lock change)
-COPY --from=planner /build/recipe.json recipe.json
-# Create bench stubs that cargo-chef doesn't generate
-RUN mkdir -p libs/fhirpath/benches && echo "fn main() {}" > libs/fhirpath/benches/benchmark.rs
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     cargo chef cook --release --recipe-path recipe.json
