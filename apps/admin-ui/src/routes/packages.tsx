@@ -18,6 +18,7 @@ import { Input } from "@thalamiq/ui/components/input";
 import { Label } from "@thalamiq/ui/components/label";
 import { Checkbox } from "@thalamiq/ui/components/checkbox";
 import { Download } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import { rootRoute } from "./root";
 
 function PackagesPage() {
@@ -84,7 +85,11 @@ function PackagesPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="flex-1 space-y-6 overflow-y-auto p-6">
+      <PageHeader
+        title="Packages"
+        description="Install and manage FHIR packages"
+      />
       <Card>
         <CardHeader>
           <CardTitle>Install FHIR Package</CardTitle>

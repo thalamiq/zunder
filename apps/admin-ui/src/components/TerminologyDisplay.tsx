@@ -17,6 +17,7 @@ import {
 } from "@thalamiq/ui/components/select";
 import SearchInput from "@/components/SearchInput";
 import { ArrowUpDown } from "lucide-react";
+import { PageHeader } from "./PageHeader";
 
 function StatCard({
   label,
@@ -235,6 +236,10 @@ export function TerminologyDisplay({
 }) {
   return (
     <div className="space-y-6">
+      <PageHeader
+        title="Terminology"
+        description="CodeSystems, ValueSets, and expansion cache"
+      />
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

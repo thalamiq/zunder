@@ -27,6 +27,7 @@ import {
 import { queryKeys } from "@/api/query-keys";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { PageHeader } from "../PageHeader";
 
 const SearchIndexTablesDisplay = () => {
   const indexTablesQuery = useQuery({
@@ -46,15 +47,13 @@ const SearchIndexTablesDisplay = () => {
   }, [indexTablesQuery.data]);
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Index Tables"
+        description="Storage footprint and basic health signals"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Search index tables</CardTitle>
-          <CardDescription>
-            Storage footprint and basic health signals
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           {indexTablesQuery.isPending ? (
             <LoadingArea />
           ) : indexTablesQuery.isError ? (

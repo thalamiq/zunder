@@ -15,6 +15,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { config } from "@/lib/config";
 import CustomChartTooltip from "./CustomChartTooltip";
 import { formatDate, formatNumber } from "@/lib/utils";
+import { PageHeader } from "./PageHeader";
 
 interface ResourcesDisplayProps {
   report: ResourceTypeStatsReport;
@@ -64,16 +65,13 @@ export const ResourcesDisplay = ({ report }: ResourcesDisplayProps) => {
   }, [filteredResources]);
 
   return (
-    <div className="space-y-4 p-6">
-      {/* Header Section */}
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Resources"
+        description="Overview of all resource types and their statistics"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Resource Statistics</CardTitle>
-          <CardDescription>
-            Overview of all resource types and their statistics
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground">

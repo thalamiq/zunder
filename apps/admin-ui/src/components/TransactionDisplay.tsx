@@ -45,6 +45,7 @@ import { listTransactions, getTransaction } from "@/api/transactions";
 import type { TransactionListItem } from "@/api/transactions";
 import { queryKeys } from "@/api/query-keys";
 import { formatDateTime, formatDateTimeFull, formatNumber } from "@/lib/utils";
+import { PageHeader } from "./PageHeader";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -205,17 +206,14 @@ const TransactionDisplay = () => {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Transactions"
+        description="View batch and transaction bundle operations"
+      />
       <Card>
         <CardHeader>
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
-              <CardTitle>Transactions</CardTitle>
-              <CardDescription>
-                View batch and transaction bundle operations
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -232,7 +230,6 @@ const TransactionDisplay = () => {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
               </Button>
-            </div>
           </div>
         </CardHeader>
         <CardContent>

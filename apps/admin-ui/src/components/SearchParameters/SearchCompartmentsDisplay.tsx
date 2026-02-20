@@ -37,6 +37,7 @@ import { ErrorArea } from "@/components/Error";
 import { LoadingArea } from "@/components/Loading";
 import JsonViewer from "@/components/JsonViewer";
 import { Combobox } from "@/components/Combobox";
+import { PageHeader } from "../PageHeader";
 
 const SearchCompartmentsDisplay = () => {
   const compartmentsQuery = useQuery({
@@ -126,15 +127,13 @@ const SearchCompartmentsDisplay = () => {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Compartments"
+        description="Compartment search enables access control by resource ownership"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Compartment Overview</CardTitle>
-          <CardDescription>
-            Compartment search enables access control by resource ownership
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">

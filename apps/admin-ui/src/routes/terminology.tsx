@@ -26,7 +26,7 @@ function TerminologyPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="flex-1 space-y-6 overflow-y-auto p-6">
       <TerminologyDisplay summary={query.data} />
     </div>
   );

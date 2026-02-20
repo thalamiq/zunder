@@ -36,6 +36,7 @@ import { formatDateTime } from "@/lib/utils";
 import { fetchMetadata } from "@/api/metadata";
 import FhirSearchInput from "@/components/FhirSearchInput";
 import ErrorComp from "./ErrorComp";
+import { PageHeader } from "./PageHeader";
 
 const formatNumber = (num: number): string => {
   return new Intl.NumberFormat().format(num);
@@ -169,7 +170,8 @@ const DashboardDisplay = () => {
   const packages = packagesQuery.data?.packages || [];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="flex-1 space-y-6 overflow-y-auto p-6">
+      <PageHeader title="Dashboard" />
       {/* API Request Input */}
       <Card>
         <CardHeader>

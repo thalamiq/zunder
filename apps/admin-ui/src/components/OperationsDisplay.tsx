@@ -13,6 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@thalamiq/ui/components/collapsible";
 import { ChevronRight, Zap, Eye } from "lucide-react";
+import { PageHeader } from "./PageHeader";
 
 function ParameterRow({
   param,
@@ -211,9 +212,10 @@ export function OperationsDisplay({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {sorted.length} operation{sorted.length !== 1 ? "s" : ""} available
-      </p>
+      <PageHeader
+        title="Operations"
+        description={`${sorted.length} operation${sorted.length !== 1 ? "s" : ""} available`}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
         {sorted.map((op) => (
           <OperationCard key={op.code} operation={op} />

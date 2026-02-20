@@ -47,6 +47,7 @@ import {
 } from "@/api/search";
 import JsonViewer from "@/components/JsonViewer";
 import { formatDate, formatNumber } from "@/lib/utils";
+import { PageHeader } from "../PageHeader";
 
 type SearchParameterRow = AdminSearchParameterListItem;
 
@@ -231,16 +232,13 @@ const SearchParameterTable = () => {
   );
 
   return (
-    <div className="p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Parameters"
+        description="Update SearchParameter.status via FHIR PATCH; this triggers the server hook which updates the search parameter tables"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>SearchParameter status</CardTitle>
-          <CardDescription>
-            Update SearchParameter.status via FHIR PATCH; this triggers the
-            server hook which updates the search parameter tables.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           {searchParametersQuery.isPending ? (
             <LoadingArea />
           ) : searchParametersQuery.isError ? (

@@ -15,6 +15,7 @@ import {
 } from "@thalamiq/ui/components/collapsible";
 import { ChevronDown } from "lucide-react";
 import SearchInput from "./SearchInput";
+import { PageHeader } from "./PageHeader";
 
 interface CapabilityStatementProps {
   capabilityStatement: CapabilityStatement;
@@ -52,17 +53,14 @@ export const CapabilityStatementDisplay = ({
   };
 
   return (
-    <div className="space-y-4 p-6">
-      {/* Header Section */}
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Metadata"
+        description={title || name || "Capability Statement"}
+      />
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle>{title || name || "Capability Statement"}</CardTitle>
-              {name && name !== title && (
-                <CardDescription className="mt-1">{name}</CardDescription>
-              )}
-            </div>
+          <div className="flex items-center justify-between">
             {status && (
               <Badge variant={status === "active" ? "default" : "secondary"}>
                 {status}

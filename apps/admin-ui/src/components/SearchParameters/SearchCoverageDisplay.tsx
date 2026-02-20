@@ -37,6 +37,7 @@ import {
 import { ErrorArea } from "@/components/Error";
 import { LoadingArea } from "@/components/Loading";
 import JsonViewer from "@/components/JsonViewer";
+import { PageHeader } from "../PageHeader";
 
 const percent = (p: number): number => Math.max(0, Math.min(100, p));
 
@@ -131,13 +132,13 @@ const SearchCoverageDisplay = () => {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Coverage"
+        description="Indexing coverage per resource type"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Overview</CardTitle>
-          <CardDescription>Indexing coverage per resource type</CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div>
               <div className="text-sm font-medium text-muted-foreground">

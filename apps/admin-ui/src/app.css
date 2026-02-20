@@ -6,17 +6,17 @@
 
 /* JSON viewer — sleek, enterprise palette */
 .json-key {
-  color: hsl(220 14% 48%);
+  color: hsl(220 50% 34%);
   font-weight: 500;
 }
 
 .json-date {
-  color: hsl(270 25% 52%);
+  color: hsl(270 65% 42%);
 }
 
 .json-url,
 .json-reference {
-  color: hsl(200 55% 48%);
+  color: hsl(200 85% 34%);
   user-select: text;
   cursor: text;
 }
@@ -34,35 +34,35 @@ a.json-reference:hover {
 }
 
 .json-uuid {
-  color: hsl(215 12% 55%);
+  color: hsl(215 45% 40%);
   font-size: 0.95em;
   user-select: all;
   cursor: text;
 }
 
 .json-string {
-  color: hsl(145 25% 42%);
+  color: hsl(145 60% 28%);
 }
 
 .json-number {
-  color: hsl(32 55% 48%);
+  color: hsl(32 85% 34%);
 }
 
 .json-boolean {
-  color: hsl(255 45% 55%);
+  color: hsl(255 75% 42%);
 }
 
 .json-null {
-  color: hsl(215 10% 58%);
+  color: hsl(215 38% 42%);
   font-style: italic;
 }
 
-.dark .json-key { color: hsl(220 12% 62%); }
-.dark .json-date { color: hsl(270 25% 68%); }
+.dark .json-key { color: hsl(220 45% 76%); }
+.dark .json-date { color: hsl(270 60% 80%); }
 .dark .json-url,
-.dark .json-reference { color: hsl(200 55% 65%); }
-.dark .json-uuid { color: hsl(215 12% 68%); }
-.dark .json-string { color: hsl(145 25% 58%); }
-.dark .json-number { color: hsl(32 55% 62%); }
-.dark .json-boolean { color: hsl(255 45% 68%); }
-.dark .json-null { color: hsl(215 10% 62%); }
+.dark .json-reference { color: hsl(200 80% 78%); }
+.dark .json-uuid { color: hsl(215 45% 80%); }
+.dark .json-string { color: hsl(145 60% 70%); }
+.dark .json-number { color: hsl(32 80% 76%); }
+.dark .json-boolean { color: hsl(255 65% 82%); }
+.dark .json-null { color: hsl(215 35% 76%); }

@@ -2,6 +2,7 @@ import React from "react";
 import {
   ArrowRightLeftIcon,
   BookOpenIcon,
+  BracesIcon,
   ClipboardListIcon,
   DatabaseIcon,
   FilterIcon,
@@ -133,6 +134,11 @@ export const config: { nav: Record<string, NavItem> } = {
       path: "/terminology",
       label: "Terminology",
       icon: BookOpenIcon,
+    },
+    fhirpath: {
+      path: "/fhirpath",
+      label: "FHIRPath",
+      icon: BracesIcon,
     },
     jobs: {
       path: "/jobs",

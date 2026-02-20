@@ -115,6 +115,6 @@ export function ConnectionGuard({ children }: ConnectionGuardProps) {
     );
   }
 
-  // Show children when connected
-  return <>{children}</>;
+  // Show children when connected (flex wrapper lets route content fill height)
+  return <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>;
 }

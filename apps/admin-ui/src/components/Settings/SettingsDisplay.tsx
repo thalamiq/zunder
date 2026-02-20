@@ -50,6 +50,7 @@ import {
 } from "@/api/config";
 import { queryKeys } from "@/api/query-keys";
 import { formatDateTime, formatDateTimeFull } from "@/lib/utils";
+import { PageHeader } from "@/components/PageHeader";
 
 interface SettingRowProps {
   entry: RuntimeConfigEntry;
@@ -315,18 +316,14 @@ const SettingsDisplay = () => {
   const isPending = updateMutation.isPending || resetMutation.isPending;
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title="Settings"
+        description="Runtime configuration settings that can be changed without restarting the server. Changes take effect immediately."
+      />
       <Card>
         <CardHeader>
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
-              <CardTitle>Server Settings</CardTitle>
-              <CardDescription>
-                Runtime configuration settings that can be changed without restarting the server.
-                Changes take effect immediately.
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => queryClient.invalidateQueries({ queryKey: ["runtimeConfig"] })}
@@ -338,7 +335,6 @@ const SettingsDisplay = () => {
                 <History className="w-4 h-4 mr-2" />
                 Audit Log
               </Button>
-            </div>
           </div>
         </CardHeader>
         <CardContent>

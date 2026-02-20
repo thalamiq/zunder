@@ -316,7 +316,7 @@ const JsonViewer = ({
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center py-6 text-muted-foreground text-[11px]">
+      <div className="flex items-center justify-center py-6 text-muted-foreground text-sm">
         <span className="flex items-center gap-1.5">
           <Braces className="w-3.5 h-3.5 opacity-60" />
           No data
@@ -329,7 +329,7 @@ const JsonViewer = ({
     <div className={cn("max-w-full overflow-x-auto", className)}>
       {/* Content */}
       {!isTooLargeForTreeView ? (
-        <div className="px-3 py-2 text-[11px] font-mono text-foreground json-tree-view overflow-x-auto">
+        <div className="px-3 py-2 text-sm font-mono text-foreground json-tree-view overflow-x-auto">
           <JsonNode
             data={data}
             path="root"
@@ -340,13 +340,13 @@ const JsonViewer = ({
         </div>
       ) : isTooLargeForHighlighting ? (
         <div className="flex overflow-x-auto">
-          <pre className="flex-1 text-[11px] font-mono text-foreground px-3 py-2 whitespace-pre-wrap wrap-break-word leading-[1.35] max-w-full">
+          <pre className="flex-1 text-base font-mono text-foreground px-3 py-2 whitespace-pre-wrap wrap-break-word leading-[1.35] max-w-full">
             <code className="json-syntax wrap-break-word">{jsonString}</code>
           </pre>
         </div>
       ) : (
         <div className="flex overflow-x-auto">
-          <pre className="flex-1 text-[11px] font-mono text-foreground px-3 py-2 whitespace-pre-wrap wrap-break-word leading-[1.35] max-w-full">
+          <pre className="flex-1 text-base font-mono text-foreground px-3 py-2 whitespace-pre-wrap wrap-break-word leading-[1.35] max-w-full">
             <code
               dangerouslySetInnerHTML={{ __html: highlightedJson }}
               className="json-syntax wrap-break-word"

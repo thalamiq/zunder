@@ -19,6 +19,7 @@ import { searchCoverageRoute } from "./search/search-coverage";
 import { indexTablesRoute } from "./search/index-tables";
 import { operationsRoute } from "./operations";
 import { terminologyRoute } from "./terminology";
+import { fhirpathRoute } from "./fhirpath";
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -35,6 +36,7 @@ const routeTree = rootRoute.addChildren([
   packageDetailRoute,
   operationsRoute,
   terminologyRoute,
+  fhirpathRoute,
   searchRoute,
   searchParametersRoute,
   compartmentsRoute,

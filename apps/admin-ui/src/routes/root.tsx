@@ -27,7 +27,7 @@ function RootComponent() {
     <AuthGuard>
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
-        <main className="flex-1 min-h-0 overflow-y-auto bg-background">
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
           <ConnectionGuard>
             <Outlet />
           </ConnectionGuard>

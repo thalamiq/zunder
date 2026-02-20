@@ -44,6 +44,7 @@ import {
   EmptyTitle,
 } from "@thalamiq/ui/components/empty";
 import { cn } from "@thalamiq/ui/utils";
+import { PageHeader } from "./PageHeader";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -456,6 +457,9 @@ export default function ApiDisplay() {
 
   return (
     <div className="flex flex-col h-full">
+      <div className="shrink-0 px-6 pt-6">
+        <PageHeader title="API" description="Make FHIR requests to any endpoint" />
+      </div>
       {/* Top Section: Method & Endpoint */}
       <div className="p-4 border-b bg-background shrink-0">
         <div className="flex gap-3 mb-3">

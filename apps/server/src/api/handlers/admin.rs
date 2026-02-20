@@ -300,3 +300,48 @@ pub async fn get_transaction(
     let result = state.admin_service.get_transaction(id).await?;
     Ok((StatusCode::OK, Json(result)).into_response())
 }
+
+#[derive(Debug, Deserialize)]
+pub struct EvaluateFhirPathRequest {
+    pub expression: String,
+    pub resource: serde_json::Value,
+}
+
+#[derive(Debug, Serialize)]
+pub struct EvaluateFhirPathResponse {
+    pub result: Vec<serde_json::Value>,
+    pub count: usize,
+    pub elapsed_ms: f64,
+}
+
+pub async fn evaluate_fhirpath(
+    State(state): State<AppState>,
+    Json(req): Json<EvaluateFhirPathRequest>,
+) -> Result<Response> {
+    use ferrum_fhirpath::ToJson;
+
+    let start = std::time::Instant::now();
+
+    let collection = state
+        .fhirpath_engine
+        .evaluate_json(&req.expression, req.resource, None)
+        .map_err(|e| crate::error::Error::InvalidResource(e.to_string()))?;
+
+    let result: Vec<serde_json::Value> = collection
+        .iter()
+        .filter_map(|v| v.to_json())
+        .collect();
+
+    let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let count = result.len();
+
+    Ok((
+        StatusCode::OK,
+        Json(EvaluateFhirPathResponse {
+            result,
+            count,
+            elapsed_ms,
+        }),
+    )
+        .into_response())
+}

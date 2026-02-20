@@ -28,7 +28,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Package,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -46,6 +45,7 @@ import {
 } from "@thalamiq/ui/components/dialog";
 import { highlightJson } from "@/lib/json";
 import { cn } from "@thalamiq/ui/utils";
+import { PageHeader } from "./PageHeader";
 
 interface PackageDetailDisplayProps {
   packageData: PackageRecord;
@@ -250,21 +250,15 @@ export const PackageDetailDisplay = ({
   };
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <PageHeader
+        title={packageData.name}
+        description={`Version: ${packageData.version}`}
+      />
       {/* Package Metadata Section */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <Package className="h-6 w-6 text-muted-foreground" />
-                <CardTitle className="text-2xl">{packageData.name}</CardTitle>
-              </div>
-              <CardDescription className="text-base">
-                Version: {packageData.version}
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
               {getStatusBadge(packageData.status)}
               {(() => {
                 const loadSummary =
@@ -385,7 +379,6 @@ export const PackageDetailDisplay = ({
                   </Dialog>
                 );
               })()}
-            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

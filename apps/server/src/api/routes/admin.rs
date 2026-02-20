@@ -73,6 +73,8 @@ pub fn admin_routes() -> Router<AppState> {
         // Transaction tracking
         .route("/transactions", get(admin::list_transactions))
         .route("/transactions/:id", get(admin::get_transaction))
+        // FHIRPath playground
+        .route("/fhirpath/evaluate", post(admin::evaluate_fhirpath))
         // Audit log (internal, read-only - audit logs are immutable)
         .route("/audit/events", get(admin::list_audit_events))
         .route("/audit/events/:id", get(admin::get_audit_event))
